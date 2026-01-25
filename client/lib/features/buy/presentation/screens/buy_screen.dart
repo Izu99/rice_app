@@ -1,0 +1,1357 @@
+// lib/features/buy/presentation/screens/buy_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/constants/enums.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/confirmation_dialog.dart';
+import '../../../../core/constants/paddy_constants.dart';
+import '../../../../data/models/customer_model.dart';
+import '../../../../data/models/transaction_model.dart';
+import '../../../../routes/route_names.dart';
+import '../cubit/buy_cubit.dart';
+import '../cubit/buy_state.dart';
+import '../../../stock/presentation/cubit/stock_cubit.dart'; // Add StockCubit import
+import '../widgets/customer_selector.dart';
+import '../widgets/temp_items_table.dart';
+import '../widgets/price_input_dialog.dart';
+
+class BuyScreen extends StatefulWidget {
+  const BuyScreen({super.key});
+
+  @override
+  State<BuyScreen> createState() => _BuyScreenState();
+}
+
+class _BuyScreenState extends State<BuyScreen> {
+  final TextEditingController _bagsController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+
+  @override
+  void dispose() {
+    _bagsController.dispose();
+    _weightController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BuyCubit, BuyState>(
+      listenWhen: (previous, current) =>
+          previous.status != current.status ||
+          previous.errorMessage != current.errorMessage ||
+          previous.editingItemIndex != current.editingItemIndex,
+      listener: (context, state) {
+        // Update controllers if they differ from state (e.g. changed via keypad)
+        final stateBags = state.currentBags.toString();
+        if (_bagsController.text != stateBags && state.currentBags > 0) {
+          _bagsController.text = stateBags;
+        } else if (state.currentBags == 0) {
+          _bagsController.clear();
+        }
+
+        final stateWeight = state.currentWeight.toStringAsFixed(2);
+        if (_weightController.text != stateWeight && state.currentWeight > 0) {
+          _weightController.text = stateWeight;
+        } else if (state.currentWeight == 0) {
+          _weightController.clear();
+        }
+
+        final statePrice = state.pricePerKg.toStringAsFixed(2);
+        if (_priceController.text != statePrice && state.pricePerKg > 0) {
+          _priceController.text = statePrice;
+        } else if (state.pricePerKg == 0) {
+          _priceController.clear();
+        }
+
+        // Handle errors
+        if (state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage!),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.fixed,
+            ),
+          );
+          context.read<BuyCubit>().clearError();
+        }
+
+        // Show price input dialog
+        if (state.editingItemIndex != null) {
+          _showPriceInputDialog(context, state);
+        }
+
+        // Handle success
+        if (state.status == BuyStatus.success) {
+          _showSuccessDialog(context, state);
+        }
+      },
+      builder: (context, state) {
+        return LoadingOverlay(
+          isLoading: state.isProcessing,
+          message: 'Processing transaction...',
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            appBar: _buildAppBar(state),
+            body: _buildBody(state),
+            bottomNavigationBar: state.status == BuyStatus.reviewing
+                ? _buildReviewBottomBar(state)
+                : null,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaddyDetailsSection(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Paddy Details',
+            style: AppTextStyles.titleSmall.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Modern Styled Dropdown
+          DropdownButtonFormField<String>(
+            initialValue: state.selectedVariety,
+            decoration: InputDecoration(
+              labelText: 'Paddy Variety',
+              prefixIcon: const Icon(Icons.grass, color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            ),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                color: AppColors.primary),
+            borderRadius: BorderRadius.circular(16),
+            items: PaddyConstants.paddyVarieties.map((String variety) {
+              return DropdownMenuItem<String>(
+                value: variety,
+                child: Text(variety,
+                    style: const TextStyle(fontWeight: FontWeight.w500)),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                context.read<BuyCubit>().updateVariety(value);
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Price per kg
+          TextFormField(
+            controller: _priceController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: AppColors.success),
+            decoration: InputDecoration(
+              labelText: 'Price per kg (Rs.)',
+              hintText: '0.00',
+              prefixIcon:
+                  const Icon(Icons.payments_outlined, color: AppColors.success),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            onChanged: (value) {
+              final price = double.tryParse(value) ?? 0.0;
+              context.read<BuyCubit>().setPricePerKg(price);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Number of Bags (Full Row)
+          TextFormField(
+            controller: _bagsController,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            decoration: InputDecoration(
+              labelText: 'Number of Bags',
+              hintText: '0',
+              prefixIcon: const Icon(Icons.shopping_bag_outlined,
+                  color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            onChanged: (value) {
+              final bags = int.tryParse(value) ?? 0;
+              context.read<BuyCubit>().updateBags(bags);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Total Weight (Full Row)
+          TextFormField(
+            controller: _weightController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: AppColors.primary),
+            decoration: InputDecoration(
+              labelText: 'Total Weight',
+              hintText: '0.00',
+              suffixText: 'kg',
+              prefixIcon:
+                  const Icon(Icons.scale_outlined, color: AppColors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            onChanged: (value) {
+              final weight = double.tryParse(value) ?? 0.0;
+              context.read<BuyCubit>().updateWeight(weight);
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Action Buttons
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  context.read<BuyCubit>().clearCurrentBatch();
+                  _bagsController.clear();
+                  _weightController.clear();
+                },
+                icon: const Icon(Icons.delete_sweep_outlined),
+                color: AppColors.error,
+                tooltip: 'Clear Current Batch',
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.error.withOpacity(0.1),
+                  padding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: (state.currentBags > 0 && state.currentWeight > 0)
+                      ? () {
+                          context.read<BuyCubit>().addToTempList();
+                          _bagsController.clear();
+                          _weightController.clear();
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
+                  child: const Text('+',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 32)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuyState state) {
+    String title;
+    String subtitle;
+
+    switch (state.status) {
+      case BuyStatus.reviewing:
+        title = 'Review Order';
+        subtitle = 'ඇණවුම සමාලෝචනය';
+        break;
+      case BuyStatus.success:
+        title = 'Order Complete';
+        subtitle = 'ඇණවුම සම්පූර්ණයි';
+        break;
+      default:
+        title = 'Buy / Purchase';
+        subtitle = 'මිලදී ගැනීම';
+    }
+
+    return AppBar(
+      backgroundColor: AppColors.primary,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: AppColors.white),
+        onPressed: () {
+          if (state.status == BuyStatus.reviewing) {
+            context.read<BuyCubit>().backToAddingItems();
+          } else if (state.hasItems) {
+            _showExitConfirmation(context);
+          } else {
+            if (GoRouter.of(context).canPop()) {
+              context.pop();
+            } else {
+              context.go(RouteNames.home);
+            }
+          }
+        },
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.titleMedium.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.white.withOpacity(0.8),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (state.hasItems && state.status != BuyStatus.reviewing)
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppColors.white),
+            onPressed: () => _showClearConfirmation(context),
+            tooltip: 'Clear all',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuyState state) {
+    if (state.status == BuyStatus.reviewing) {
+      return _buildReviewScreen(state);
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Customer Selector
+          CustomerSelector(
+            title: 'Seller',
+            subtitle: 'විකුණුම්කරු (ගොවියා)',
+            selectedCustomer: state.selectedCustomer,
+            onCustomerSelected: (customer) {
+              context.read<BuyCubit>().selectCustomer(customer);
+            },
+            onAddNewCustomer: () => context.pushNamed('customerAdd'),
+            onChangeCustomer: () async {
+              final selectedCustomer =
+                  await context.push<CustomerModel>('/buy');
+              if (selectedCustomer != null && mounted) {
+                context.read<BuyCubit>().selectCustomer(selectedCustomer);
+              }
+            },
+            showBalance: false, // Hide customer balance on the buy page
+          ),
+          const SizedBox(height: 20),
+
+          // Paddy Details Section
+          if (state.selectedCustomer != null) ...[
+            _buildPaddyDetailsSection(state),
+            const SizedBox(height: 24),
+          ],
+
+          // Batch Table (Table 1)
+          if (state.tempItems.isNotEmpty) ...[
+            _buildSectionHeader(
+                'Current Batches', '${state.totalBags} Bags Total'),
+            const SizedBox(height: 12),
+            TempItemsTable(
+              items: state.tempItems,
+              onRemove: (id) => context.read<BuyCubit>().removeTempItem(id),
+            ),
+            const SizedBox(height: 24),
+
+            // Total Summary Card
+            _buildBatchSummaryCard(state),
+            const SizedBox(height: 24),
+
+            // Add Batch Button (Saves to local database)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: state.canAddBatch
+                    ? () => context.read<BuyCubit>().addBatchToSession()
+                    : null,
+                icon: const Icon(Icons.add_task),
+                label: const Text('ADD BATCH TO SESSION'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+          ],
+
+          // Session Batches Table (Table 2)
+          if (state.sessionBatches.isNotEmpty) ...[
+            _buildSectionHeader('Current Session Batches', 'Unsaved Weights'),
+            const SizedBox(height: 12),
+            _buildRecentTransactionsSection(state),
+            const SizedBox(height: 24),
+
+            // Finalize Session Button (Saves to MongoDB)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: state.canConfirmStock
+                    ? () => context.read<BuyCubit>().finalizeSessionToStock()
+                    : null,
+                icon: const Icon(Icons.cloud_upload_outlined),
+                label: const Text('FINALIZE & SAVE TO STOCK'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 4,
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
+          ],
+
+          const SizedBox(height: 100), // Bottom padding for nav bar
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, String subtitle) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: AppTextStyles.titleMedium
+                    .copyWith(fontWeight: FontWeight.bold)),
+            Text(subtitle,
+                style: AppTextStyles.bodySmall
+                    .copyWith(color: AppColors.textSecondary)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentTransactionsList(
+      BuyState state, List<TransactionModel> customerTransactions) {
+    // List - Grouped by Variety
+    final Map<String, Map<String, dynamic>> groupedItems = {};
+    for (var txn in customerTransactions) {
+      for (var item in txn.items) {
+        final variety = item.variety;
+        if (!groupedItems.containsKey(variety)) {
+          groupedItems[variety] = {
+            'variety': variety,
+            'bags': 0,
+            'weight': 0.0,
+            'amount': 0.0,
+          };
+        }
+        groupedItems[variety]!['bags'] =
+            (groupedItems[variety]!['bags'] as int) + item.bags;
+        groupedItems[variety]!['weight'] =
+            (groupedItems[variety]!['weight'] as double) + item.quantity;
+        groupedItems[variety]!['amount'] =
+            (groupedItems[variety]!['amount'] as double) + item.totalAmount;
+      }
+    }
+
+    final displayGroupedItems = groupedItems.values.toList()
+      ..sort(
+          (a, b) => (a['variety'] as String).compareTo(b['variety'] as String));
+
+    if (displayGroupedItems.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Text(
+          state.selectedCustomer != null
+              ? 'No recent batches for ${state.selectedCustomer!.name}'
+              : 'No recent transactions today',
+          style:
+              AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: displayGroupedItems.length,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final item = displayGroupedItems[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(item['variety'] as String,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(fontWeight: FontWeight.w500)),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text('${item['bags']}',
+                    style: AppTextStyles.bodySmall,
+                    textAlign: TextAlign.center),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                    '${(item['weight'] as double).toStringAsFixed(2)} kg',
+                    style: AppTextStyles.bodySmall,
+                    textAlign: TextAlign.right),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                    'Rs. ${(item['amount'] as double).toStringAsFixed(2)}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.bold, color: AppColors.success),
+                    textAlign: TextAlign.right),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRecentTransactionsSection(BuyState state) {
+    // Show session batches (Table 2) in the middle table
+    final customerTransactions = state.sessionBatches;
+
+    // Calculate totals for the visible transactions
+    final totalSessionWeight =
+        customerTransactions.fold(0.0, (sum, t) => sum + t.totalWeight);
+    final totalSessionAmount =
+        customerTransactions.fold(0.0, (sum, t) => sum + t.totalAmount);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: const BoxDecoration(
+              color: AppColors.grey100,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                    flex: 3,
+                    child: Text('Type',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(fontWeight: FontWeight.bold))),
+                Expanded(
+                    flex: 2,
+                    child: Text('Bags',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center)),
+                Expanded(
+                    flex: 3,
+                    child: Text('Weight',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right)),
+                Expanded(
+                    flex: 3,
+                    child: Text('Amount',
+                        style: AppTextStyles.bodySmall
+                            .copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right)),
+              ],
+            ),
+          ),
+
+          _buildRecentTransactionsList(state, customerTransactions),
+
+          // Session Total Footer (Only if a customer is selected and has transactions)
+          if (state.selectedCustomer != null &&
+              customerTransactions.isNotEmpty) ...[
+            const Divider(height: 1, thickness: 2),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(16)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Text(
+                      'Total Payable to ${state.selectedCustomer!.name}',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      '${totalSessionWeight.toStringAsFixed(2)} kg',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Rs. ${totalSessionAmount.toStringAsFixed(2)}',
+                      style: AppTextStyles.titleSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBatchSummaryCard(BuyState state) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            AppColors.primaryDark,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Top Row: Secondary Metrics
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildMetricTile(
+                    'Total Bags',
+                    state.totalBags.toString(),
+                    Icons.shopping_bag_rounded,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 40,
+                  color: Colors.white.withOpacity(0.15),
+                ),
+                Expanded(
+                  child: _buildMetricTile(
+                    'Total Weight',
+                    '${state.totalPaddyWeight.toStringAsFixed(1)} kg',
+                    Icons.scale_rounded,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Divider
+          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
+
+          // Hero Section: Total Price
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius:
+                  const BorderRadius.vertical(bottom: Radius.circular(30)),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'TOTAL AMOUNT (මුළු එකතුව)',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Rs. ${state.totalAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricTile(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white70, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.5),
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewScreen(BuyState state) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Customer info card
+          _buildCustomerInfoCard(state),
+          const SizedBox(height: 16),
+
+          // Items summary
+          _buildItemsSummaryCard(state),
+          const SizedBox(height: 16),
+
+          // Payment details
+          _buildSummaryCard(state),
+          const SizedBox(height: 16),
+
+          // Additional info
+          _buildAdditionalInfoCard(state),
+
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomerInfoCard(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.person,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.selectedCustomer!.name,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  state.selectedCustomer!.formattedPhone,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (state.selectedCustomer!.address != null)
+                  Text(
+                    state.selectedCustomer!.address!,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textHint,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemsSummaryCard(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Items (${state.tempItems.length})',
+                style: AppTextStyles.titleMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '${state.totalBags} bags | ${state.totalWeight.toStringAsFixed(2)} kg',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 24),
+          ...state.tempItems.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: item.itemType == ItemType.paddy
+                            ? AppColors.warning.withOpacity(0.1)
+                            : AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        item.itemType == ItemType.paddy
+                            ? Icons.grass
+                            : Icons.rice_bowl,
+                        color: item.itemType == ItemType.paddy
+                            ? AppColors.warning
+                            : AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.displayName,
+                            style: AppTextStyles.titleSmall,
+                          ),
+                          Text(
+                            '${item.bagsCount} bags × ${item.formattedWeight} @ ${item.formattedPrice}',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      item.formattedTotal,
+                      style: AppTextStyles.titleSmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Subtotal',
+                style: AppTextStyles.titleMedium,
+              ),
+              Text(
+                state.formattedSubtotal,
+                style: AppTextStyles.titleMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Order Summary',
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildSummaryRow('Subtotal', state.formattedSubtotal),
+          _buildSummaryRow(
+            'Total',
+            state.formattedTotal,
+            isTotal: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isTotal = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: isTotal
+                ? AppTextStyles.titleMedium
+                    .copyWith(fontWeight: FontWeight.bold)
+                : AppTextStyles.bodyMedium,
+          ),
+          Text(
+            value,
+            style:
+                (isTotal ? AppTextStyles.titleLarge : AppTextStyles.titleSmall)
+                    .copyWith(
+              fontWeight: FontWeight.bold,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdditionalInfoCard(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Additional Information',
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Vehicle Number',
+              prefixIcon: Icon(Icons.local_shipping),
+              hintText: 'e.g., WP ABC-1234',
+            ),
+            onChanged: (value) {
+              // TODO: context.read<BuyCubit>().updateVehicleNumber(value);
+            },
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Notes',
+              prefixIcon: Icon(Icons.note),
+              hintText: 'Additional notes...',
+            ),
+            maxLines: 3,
+            onChanged: (value) {
+              // TODO: context.read<BuyCubit>().updateNotes(value);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewBottomBar(BuyState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Amount',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    state.formattedTotal,
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: state.isProcessing
+                    ? null
+                    : () {
+                        context.read<BuyCubit>().finalizeSessionToStock();
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.check_circle),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Complete',
+                      style: AppTextStyles.titleMedium.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPriceInputDialog(BuildContext context, BuyState state) {
+    if (state.editingItemIndex == null) return;
+    final item = state.tempItems[state.editingItemIndex!];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PriceInputDialog(
+        itemType: item.itemType,
+        variety: item.variety,
+        totalWeight: item.totalWeight,
+        bags: item.bagsCount,
+        initialPrice: item.pricePerKg,
+        // TODO: Add proper callbacks
+      ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context, BuyState state) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.success.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 64,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Stock Updated!',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.headlineSmall.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Successfully added to stock',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Refresh stock data before navigating
+                    context.read<StockCubit>().loadStock();
+                    Navigator.pop(context);
+                    context.push('/stock');
+                  },
+                  icon: const Icon(Icons.inventory_2_outlined),
+                  label: const Text('VIEW STOCK'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.warning,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.read<BuyCubit>().resetForNewTransaction();
+                    _bagsController.clear();
+                    _weightController.clear();
+                  },
+                  icon: const Icon(Icons.add_shopping_cart),
+                  label: const Text('NEW PURCHASE'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.go(RouteNames.home);
+                  },
+                  child: const Text('Back to Dashboard'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showExitConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Discard Transaction?',
+        message: 'You have unsaved items. Are you sure you want to go back?',
+        confirmLabel: 'Discard',
+        cancelLabel: 'Stay',
+        isDangerous: true,
+        onConfirm: () {
+          Navigator.pop(context);
+          context.read<BuyCubit>().resetForNewTransaction();
+          if (GoRouter.of(context).canPop()) {
+            context.pop();
+          } else {
+            context.go(RouteNames.home);
+          }
+        },
+      ),
+    );
+  }
+
+  void _showClearConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Clear All Items?',
+        message: 'This will remove all items from the current transaction.',
+        confirmLabel: 'Clear',
+        cancelLabel: 'Cancel',
+        isDangerous: true,
+        onConfirm: () {
+          Navigator.pop(context);
+          context.read<BuyCubit>().resetForNewTransaction();
+        },
+      ),
+    );
+  }
+}
+
