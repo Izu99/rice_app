@@ -1,4 +1,4 @@
-// lib/data/models/company_model.dart
+// lib/data/models/company_model.dart 
 
 import 'package:equatable/equatable.dart';
 
