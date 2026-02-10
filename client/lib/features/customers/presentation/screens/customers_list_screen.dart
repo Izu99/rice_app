@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart'; // Added import
 import '../../../../core/constants/enums.dart';
@@ -121,10 +122,11 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Text(
-                        'Total Customers',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.white.withOpacity(0.8),
+                      const Text(
+                        'මුළු ගනුදෙනුකරුවන්', // Total Customers
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -132,13 +134,13 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   Row(
                     children: [
                       _buildHeaderStat(
-                        'Receivable',
+                        'ලැබිය යුතු', // Receivable
                         'Rs.${_formatNumber(state.totalReceivables)}',
                         AppColors.success,
                       ),
                       const SizedBox(width: 16),
                       _buildHeaderStat(
-                        'Payable',
+                        'ගෙවිය යුතු', // Payable
                         'Rs.${_formatNumber(state.totalPayables)}',
                         AppColors.error,
                       ),
@@ -150,12 +152,12 @@ class _CustomersListScreenState extends State<CustomersListScreen>
           ),
         ),
       ),
-      title: const Text('Customers'),
+      title: Text(SiStrings.customers),
       actions: [
         IconButton(
           icon: const Icon(Icons.sort),
           onPressed: () => _showSortOptions(context),
-          tooltip: 'Sort',
+          tooltip: 'පිළිවෙල සකසන්න', // Sort
         ),
         IconButton(
           icon: Stack(
@@ -177,7 +179,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
             ],
           ),
           onPressed: () => _showFilterOptions(context, state),
-          tooltip: 'Filter',
+          tooltip: 'පෙරහන්', // Filter
         ),
       ],
     );
@@ -245,7 +247,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               fontWeight: FontWeight.w600,
             ),
             tabs: [
-              Tab(text: 'All (${state.filteredCustomers.length})'),
+              Tab(text: 'සියල්ල (${state.filteredCustomers.length})'), // All
             ],
             onTap: (index) {},
           ),
@@ -265,9 +267,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       return Center(
         child: EmptyStateWidget(
           icon: Icons.error_outline,
-          title: 'Error Loading Customers',
-          subtitle: state.errorMessage ?? 'Something went wrong',
-          actionLabel: 'Retry',
+          title: 'දෝෂයක් සිදු විය', // Error Loading Customers
+          subtitle: state.errorMessage ?? 'නැවත උත්සාහ කරන්න',
+          actionLabel: 'නැවත උත්සාහ කරන්න',
           onAction: () => context.read<CustomersCubit>().loadCustomers(),
         ),
       );
@@ -278,9 +280,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
         return Center(
           child: EmptyStateWidget(
             icon: Icons.search_off,
-            title: 'No Results Found',
-            subtitle: 'Try adjusting your search or filters',
-            actionLabel: 'Clear Filters',
+            title: 'ප්‍රතිඵල නැත', // No Results Found
+            subtitle: 'සෙවුම් පද වෙනස් කර නැවත උත්සාහ කරන්න',
+            actionLabel: 'පෙරහන් ඉවත් කරන්න',
             onAction: () => context.read<CustomersCubit>().clearFilters(),
           ),
         );
@@ -289,9 +291,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       return Center(
         child: EmptyStateWidget(
           icon: Icons.people_outline,
-          title: 'No Customers Yet',
-          subtitle: 'Add your first customer to get started',
-          actionLabel: 'Add Customer',
+          title: 'ගනුදෙනුකරුවන් නැත', // No Customers Yet
+          subtitle: 'පළමු ගනුදෙනුකරු එක් කර ආරම්භ කරන්න',
+          actionLabel: SiStrings.addNewCustomer,
           onAction: () => context.pushNamed('customerAdd'),
         ),
       );
@@ -302,9 +304,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       child: SingleChildScrollView(
         child: PaginatedDataTable(
           columns: const [
-            DataColumn(label: Text('Name')),
-            DataColumn(label: Text('Phone')),
-            DataColumn(label: Text('Balance')),
+            DataColumn(label: Text('නම')), // Name
+            DataColumn(label: Text('දුරකථන අංකය')), // Phone
+            DataColumn(label: Text('ශේෂය')), // Balance
           ],
           source: _CustomerDataSource(state.filteredCustomers, context),
           rowsPerPage: _rowsPerPage,
@@ -323,7 +325,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       onPressed: () => context.pushNamed('customerAdd'),
       backgroundColor: AppColors.primary,
       icon: const Icon(Icons.person_add),
-      label: const Text('Add Customer'),
+      label: Text(SiStrings.addNewCustomer),
     );
   }
 
@@ -345,7 +347,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Sort By',
+              'පිළිවෙල සකසන්න', // Sort By
               style: AppTextStyles.titleLarge.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -359,7 +361,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   color:
                       isSelected ? AppColors.primary : AppColors.textSecondary,
                 ),
-                title: Text(sortBy.displayName),
+                title: Text(_getSortDisplayName(sortBy)),
                 trailing: isSelected
                     ? Icon(
                         state.sortAscending
@@ -386,6 +388,19 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     );
   }
 
+  String _getSortDisplayName(CustomerSortBy sortBy) {
+    switch (sortBy) {
+      case CustomerSortBy.name:
+        return 'නම අනුව';
+      case CustomerSortBy.balance:
+        return 'ශේෂය අනුව';
+      case CustomerSortBy.createdAt:
+        return 'එක් කළ දිනය අනුව';
+      default:
+        return sortBy.displayName;
+    }
+  }
+
   void _showFilterOptions(BuildContext context, CustomersState state) {
     showModalBottomSheet(
       context: context,
@@ -405,7 +420,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Filters',
+                  'පෙරහන්', // Filters
                   style: AppTextStyles.titleLarge.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -416,7 +431,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                       context.read<CustomersCubit>().clearFilters();
                       Navigator.pop(context);
                     },
-                    child: const Text('Clear All'),
+                    child: const Text('සියල්ල ඉවත් කරන්න'), // Clear All
                   ),
               ],
             ),
@@ -424,7 +439,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
             // Balance filters
             Text(
-              'Balance',
+              'ශේෂය', // Balance
               style: AppTextStyles.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -435,14 +450,14 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               runSpacing: 8,
               children: [
                 _FilterChip(
-                  label: 'With Balance',
+                  label: 'ශේෂයක් සහිත', // With Balance
                   isSelected: state.showOnlyWithBalance,
                   onTap: () {
                     context.read<CustomersCubit>().toggleShowOnlyWithBalance();
                   },
                 ),
                 _FilterChip(
-                  label: 'Receivable',
+                  label: 'ලැබිය යුතු', // Receivable
                   isSelected: state.balanceFilter == BalanceType.receivable,
                   color: AppColors.success,
                   onTap: () {
@@ -452,7 +467,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   },
                 ),
                 _FilterChip(
-                  label: 'Payable',
+                  label: 'ගෙවිය යුතු', // Payable
                   isSelected: state.balanceFilter == BalanceType.payable,
                   color: AppColors.error,
                   onTap: () {
@@ -467,7 +482,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
             // Customer type filters
             Text(
-              'Customer Role',
+              'ගනුදෙනුකරුගේ භූමිකාව', // Customer Role
               style: AppTextStyles.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -478,7 +493,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               runSpacing: 8,
               children: [
                 _FilterChip(
-                  label: 'Buyer',
+                  label: 'මිලදී ගන්නා (Buyer)',
                   isSelected: state.customerTypeFilter == CustomerType.buyer,
                   onTap: () {
                     context
@@ -487,7 +502,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   },
                 ),
                 _FilterChip(
-                  label: 'Seller',
+                  label: 'විකුණුම්කරු (Seller)',
                   isSelected: state.customerTypeFilter == CustomerType.seller,
                   onTap: () {
                     context
@@ -510,7 +525,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Apply Filters'),
+                child: const Text('තහවුරු කරන්න'), // Apply Filters
               ),
             ),
             const SizedBox(height: 16),
@@ -643,3 +658,4 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+

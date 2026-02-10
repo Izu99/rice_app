@@ -3,10 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/constants/paddy_constants.dart';
@@ -15,7 +19,6 @@ import '../../../../data/models/transaction_model.dart';
 import '../../../../routes/route_names.dart';
 import '../cubit/buy_cubit.dart';
 import '../cubit/buy_state.dart';
-import '../../../stock/presentation/cubit/stock_cubit.dart'; // Add StockCubit import
 import '../widgets/customer_selector.dart';
 import '../widgets/temp_items_table.dart';
 import '../widgets/price_input_dialog.dart';
@@ -155,58 +158,59 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Paddy Details',
-            style: AppTextStyles.titleSmall.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+        Text(
+          'වී විස්තර', // Paddy Details
+          style: AppTextStyles.titleSmall.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
-          const SizedBox(height: 16),
+        ),
+        const SizedBox(height: 16),
 
-          // Modern Styled Dropdown
-          GestureDetector(
-            onTap: state.tempItems.isNotEmpty
-                ? () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                            'Please add or clear the current batch before changing paddy variety.'),
-                        backgroundColor: AppColors.warning,
-                        behavior: SnackBarBehavior.fixed,
-                      ),
-                    );
-                  }
-                : null,
-            child: AbsorbPointer(
-              absorbing: state.tempItems.isNotEmpty,
-              child: Opacity(
-                opacity: state.tempItems.isNotEmpty ? 0.6 : 1.0,
-                child: DropdownButtonFormField<String>(
-                  value: state.selectedVariety,
-                  decoration: InputDecoration(
-                    labelText: 'Paddy Variety',
-                    prefixIcon:
-                        const Icon(Icons.grass, color: AppColors.primary),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
+        // Modern Styled Dropdown
+        GestureDetector(
+          onTap: state.tempItems.isNotEmpty
+              ? () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('තවදුරටත් අයිතම වෙනස් කිරීමට පෙර තිබෙන අයිතම ඉවත් කරන්න.'),
+                      backgroundColor: AppColors.warning,
+                      behavior: SnackBarBehavior.fixed,
                     ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
+                  );
+                }
+              : null,
+          child: AbsorbPointer(
+            absorbing: state.tempItems.isNotEmpty,
+            child: Opacity(
+              opacity: state.tempItems.isNotEmpty ? 0.6 : 1.0,
+              child: DropdownButtonFormField<String>(
+                value: PaddyConstants.paddyVarieties.contains(state.selectedVariety) 
+                    ? state.selectedVariety 
+                    : null,
+                decoration: InputDecoration(
+                  labelText: 'වී වර්ගය', // Paddy Variety
+                  prefixIcon:
+                      const Icon(Icons.grass, color: AppColors.primary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
                   ),
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.primary),
-                  borderRadius: BorderRadius.circular(16),
-                  items: PaddyConstants.paddyVarieties.map((String variety) {
-                    return DropdownMenuItem<String>(
-                      value: variety,
-                      child: Text(variety,
-                          style: const TextStyle(fontWeight: FontWeight.w500)),
-                    );
-                  }).toList(),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 16),
+                ),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.primary),
+                borderRadius: BorderRadius.circular(16),
+                items: PaddyConstants.paddyVarieties.map((String variety) {
+                  return DropdownMenuItem<String>(
+                    value: variety,
+                    child: Text(variety,
+                        style: const TextStyle(fontWeight: FontWeight.w500)),
+                  );
+                }).toList(),
                   onChanged: (value) {
                     if (value != null && value != state.selectedVariety) {
                       context.read<BuyCubit>().updateVariety(value);
@@ -227,7 +231,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 fontSize: 18,
                 color: AppColors.success),
             decoration: InputDecoration(
-              labelText: 'Price per kg (Rs.)',
+              labelText: 'මිල (රු/kg)', // Price per kg
               hintText: '0.00',
               prefixIcon:
                   const Icon(Icons.payments_outlined, color: AppColors.success),
@@ -251,7 +255,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
             keyboardType: TextInputType.number,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             decoration: InputDecoration(
-              labelText: 'Number of Bags',
+              labelText: 'මලු ගණන', // Number of Bags
               hintText: '0',
               prefixIcon: const Icon(Icons.shopping_bag_outlined,
                   color: AppColors.primary),
@@ -278,7 +282,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 fontSize: 18,
                 color: AppColors.primary),
             decoration: InputDecoration(
-              labelText: 'Total Weight',
+              labelText: 'මුළු බර', // Total Weight
               hintText: '0.00',
               suffixText: 'kg',
               prefixIcon:
@@ -308,7 +312,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 },
                 icon: const Icon(Icons.delete_sweep_outlined),
                 color: AppColors.error,
-                tooltip: 'Clear Current Batch',
+                tooltip: 'වත්මන් අයිතම ඉවත් කරන්න',
                 style: IconButton.styleFrom(
                   backgroundColor: AppColors.error.withOpacity(0.1),
                   padding: const EdgeInsets.all(16),
@@ -352,16 +356,16 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
 
     switch (state.status) {
       case BuyStatus.reviewing:
-        title = 'Review Order';
-        subtitle = 'ඇණවුම සමාලෝචනය';
+        title = 'ඇණවුම පරීක්ෂා කිරීම'; // Review Order
+        subtitle = 'Review Order';
         break;
       case BuyStatus.success:
-        title = 'Order Complete';
-        subtitle = 'ඇණවුම සම්පූර්ණයි';
+        title = 'ඇණවුම සාර්ථකයි'; // Order Complete
+        subtitle = 'Order Complete';
         break;
       default:
-        title = 'Buy / Purchase';
-        subtitle = 'මිලදී ගැනීම';
+        title = SiStrings.buyPaddy;
+        subtitle = 'Buy Paddy';
     }
 
     return AppBar(
@@ -376,37 +380,26 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
             _showExitConfirmation(context);
           } else {
             if (GoRouter.of(context).canPop()) {
-              context.pop();
+              context.pop(true);
             } else {
               context.go(RouteNames.home);
             }
           }
         },
       ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+      title: Text(
             title,
             style: AppTextStyles.titleMedium.copyWith(
               color: AppColors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            subtitle,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.white.withOpacity(0.8),
-            ),
-          ),
-        ],
-      ),
       actions: [
         if (state.hasItems && state.status != BuyStatus.reviewing)
           IconButton(
             icon: const Icon(Icons.delete_outline, color: AppColors.white),
             onPressed: () => _showClearConfirmation(context),
-            tooltip: 'Clear all',
+            tooltip: 'සියල්ල ඉවත් කරන්න',
           ),
       ],
     );
@@ -424,8 +417,8 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         children: [
           // Customer Selector
           CustomerSelector(
-            title: 'Seller',
-            subtitle: 'විකුණුම්කරු (ගොවියා)',
+            title: 'විකුණුම්කරු (ගොවියා)', // Seller
+            subtitle: '',
             selectedCustomer: state.selectedCustomer,
             onCustomerSelected: (customer) {
               context.read<BuyCubit>().selectCustomer(customer);
@@ -451,7 +444,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
           // Batch Table (Table 1)
           if (state.tempItems.isNotEmpty) ...[
             _buildSectionHeader(
-                'Current Batches', '${state.totalBags} Bags Total'),
+                'දැනට ඇතුළත් කළ අයිතම', 'මලු ${state.totalBags} ක එකතුවක්'),
             const SizedBox(height: 12),
             TempItemsTable(
               items: state.tempItems,
@@ -471,7 +464,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().addBatchToSession()
                     : null,
                 icon: const Icon(Icons.add_task),
-                label: const Text('ADD BATCH TO SESSION'),
+                label: const Text('සැසියට එක් කරන්න'), // ADD BATCH TO SESSION
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -486,7 +479,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
 
           // Session Batches Table (Table 2)
           if (state.sessionBatches.isNotEmpty) ...[
-            _buildSectionHeader('Current Session Batches', 'Unsaved Weights'),
+            _buildSectionHeader('වත්මන් සැසියේ අයිතම', 'තහවුරු නොකළ බර ප්‍රමාණයන්'),
             const SizedBox(height: 12),
             _buildRecentTransactionsSection(state),
             const SizedBox(height: 24),
@@ -499,7 +492,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().finalizeSessionToStock()
                     : null,
                 icon: const Icon(Icons.cloud_upload_outlined),
-                label: const Text('FINALIZE & SAVE TO STOCK'),
+                label: const Text('තොගයට එක් කර අවසන් කරන්න'), // FINALIZE & SAVE TO STOCK
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
@@ -571,8 +564,8 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         padding: const EdgeInsets.all(24.0),
         child: Text(
           state.selectedCustomer != null
-              ? 'No recent batches for ${state.selectedCustomer!.name}'
-              : 'No recent transactions today',
+              ? '${state.selectedCustomer!.name} සඳහා මෑත ගනුදෙනු නැත'
+              : 'අද දින මෑත ගනුදෙනු නැත',
           style:
               AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
         ),
@@ -659,24 +652,24 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
               children: [
                 Expanded(
                     flex: 3,
-                    child: Text('Type',
+                    child: Text('වර්ගය', // Type
                         style: AppTextStyles.bodySmall
                             .copyWith(fontWeight: FontWeight.bold))),
                 Expanded(
                     flex: 2,
-                    child: Text('Bags',
+                    child: Text('මලු', // Bags
                         style: AppTextStyles.bodySmall
                             .copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center)),
                 Expanded(
                     flex: 3,
-                    child: Text('Weight',
+                    child: Text('බර', // Weight
                         style: AppTextStyles.bodySmall
                             .copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.right)),
                 Expanded(
                     flex: 3,
-                    child: Text('Amount',
+                    child: Text('මුදල', // Amount
                         style: AppTextStyles.bodySmall
                             .copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.right)),
@@ -702,7 +695,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                   Expanded(
                     flex: 5,
                     child: Text(
-                      'Total Payable to ${state.selectedCustomer!.name}',
+                      '${state.selectedCustomer!.name} හට ගෙවිය යුතු මුළු මුදල', // Total Payable to
                       style: AppTextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
@@ -769,7 +762,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
               children: [
                 Expanded(
                   child: _buildMetricTile(
-                    'Total Bags',
+                    'මුළු මලු ගණන', // Total Bags
                     state.totalBags.toString(),
                     Icons.shopping_bag_rounded,
                   ),
@@ -781,7 +774,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 ),
                 Expanded(
                   child: _buildMetricTile(
-                    'Total Weight',
+                    'මුළු බර', // Total Weight
                     '${state.totalPaddyWeight.toStringAsFixed(1)} kg',
                     Icons.scale_rounded,
                   ),
@@ -805,7 +798,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
             child: Column(
               children: [
                 Text(
-                  'TOTAL AMOUNT (මුළු එකතුව)',
+                  'මුළු එකතුව (TOTAL AMOUNT)',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.6),
                     fontSize: 11,
@@ -976,13 +969,13 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Items (${state.tempItems.length})',
+                'අයිතම (${state.tempItems.length})', // Items
                 style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '${state.totalBags} bags | ${state.totalWeight.toStringAsFixed(2)} kg',
+                'මලු ${state.totalBags} | ${state.totalWeight.toStringAsFixed(2)} kg',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -1022,7 +1015,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                             style: AppTextStyles.titleSmall,
                           ),
                           Text(
-                            '${item.bagsCount} bags × ${item.formattedWeight} @ ${item.formattedPrice}',
+                            'මලු ${item.bagsCount} × ${item.formattedWeight} @ ${item.formattedPrice}',
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -1044,7 +1037,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Subtotal',
+                'එකතුව', // Subtotal
                 style: AppTextStyles.titleMedium,
               ),
               Text(
@@ -1078,15 +1071,15 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Order Summary',
+            'ඇණවුම් සාරාංශය', // Order Summary
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
-          _buildSummaryRow('Subtotal', state.formattedSubtotal),
+          _buildSummaryRow('එකතුව', state.formattedSubtotal), // Subtotal
           _buildSummaryRow(
-            'Total',
+            'මුළු එකතුව', // Total
             state.formattedTotal,
             isTotal: true,
           ),
@@ -1145,7 +1138,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Additional Information',
+            'අමතර විස්තර', // Additional Information
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -1153,9 +1146,9 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
           const SizedBox(height: 16),
           TextField(
             decoration: const InputDecoration(
-              labelText: 'Vehicle Number',
+              labelText: 'වාහන අංකය', // Vehicle Number
               prefixIcon: Icon(Icons.local_shipping),
-              hintText: 'e.g., WP ABC-1234',
+              hintText: 'උදා: WP ABC-1234',
             ),
             onChanged: (value) {
               // TODO: context.read<BuyCubit>().updateVehicleNumber(value);
@@ -1164,9 +1157,9 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
           const SizedBox(height: 16),
           TextField(
             decoration: const InputDecoration(
-              labelText: 'Notes',
+              labelText: 'සටහන්', // Notes
               prefixIcon: Icon(Icons.note),
-              hintText: 'Additional notes...',
+              hintText: 'වෙනත් සටහන්...',
             ),
             maxLines: 3,
             onChanged: (value) {
@@ -1200,7 +1193,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Amount',
+                    'මුළු එකතුව', // Total Amount
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -1236,7 +1229,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     const Icon(Icons.check_circle),
                     const SizedBox(width: 8),
                     Text(
-                      'Complete',
+                      'අවසන් කරන්න', // Complete
                       style: AppTextStyles.titleMedium.copyWith(
                         color: AppColors.white,
                         fontWeight: FontWeight.bold,
@@ -1283,10 +1276,10 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (dialogContext) => ConfirmationDialog(
-        title: 'Discard Transaction?',
-        message: 'You have unsaved items. Are you sure you want to go back?',
-        confirmLabel: 'Discard',
-        cancelLabel: 'Stay',
+        title: 'ගනුදෙනුව අත්හරින්නද?', // Discard Transaction?
+        message: 'ඔබ තවමත් සුරැකී නැති අයිතම පවතී. ඔබට ඉවත් වීමට අවශ්‍යද?',
+        confirmLabel: 'ඔව්, ඉවත් වන්න',
+        cancelLabel: 'නැත',
         isDangerous: true,
         onConfirm: () {
           // Dialog closes itself automatically
@@ -1301,10 +1294,10 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Clear All Items?',
-        message: 'This will remove all items from the current transaction.',
-        confirmLabel: 'Clear',
-        cancelLabel: 'Cancel',
+        title: 'සියලු අයිතම ඉවත් කරන්නද?', // Clear All Items?
+        message: 'මෙමඟින් වත්මන් ගනුදෙනුවේ සියලුම අයිතම මකා දැමෙනු ඇත.',
+        confirmLabel: 'ඉවත් කරන්න',
+        cancelLabel: 'අවලංගු කරන්න',
         isDangerous: true,
         onConfirm: () {
           // Dialog closes itself automatically
@@ -1316,3 +1309,4 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
 
 
 }
+

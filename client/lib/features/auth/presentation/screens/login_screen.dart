@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -81,20 +82,20 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Password'),
+        title: Text(SiStrings.resetPassword),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Enter your phone number to receive an OTP',
-              style: TextStyle(color: AppColors.textSecondary),
+            Text(
+              SiStrings.enterPhoneForOtp,
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
+              decoration: InputDecoration(
+                labelText: SiStrings.phoneNumber,
                 prefixIcon: Icon(Icons.phone),
                 border: OutlineInputBorder(),
               ),
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(SiStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -113,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     phoneController.text.trim(),
                   );
             },
-            child: const Text('Send OTP'),
+            child: Text(SiStrings.sendOtp),
           ),
         ],
       ),
@@ -157,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (state.passwordResetStatus == PasswordResetStatus.success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Password reset successfully. Please login.'),
+              content: Text('මුරපදය සාර්ථකව යාවත්කාලීන කරන ලදී.'),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
             ),
@@ -250,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Title
         Text(
-          'Welcome Back',
+          SiStrings.welcomeBack,
           style: AppTextStyles.headlineMedium.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -260,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Subtitle
         Text(
-          'Sign in to continue to Rice Mill',
+          SiStrings.signInToContinue,
           style: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
           ),
@@ -274,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         // Version info
         Text(
-          'Version 1.0.0',
+          '${SiStrings.version} 1.0.0',
           style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.textHint,
           ),
@@ -311,14 +312,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 state.passwordResetStatus == PasswordResetStatus.otpVerified;
 
             return AlertDialog(
-              title: Text(isOtpVerified ? 'New Password' : 'Enter OTP'),
+              title: Text(isOtpVerified ? SiStrings.newPassword : SiStrings.enterOtp),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (!isOtpVerified) ...[
                       Text(
-                        'Enter the OTP sent to $identifier',
+                        'ඔබගේ $identifier අංකයට ලැබුණු OTP කේතය ඇතුළත් කරන්න',
                         style: const TextStyle(color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 16),
@@ -343,14 +344,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           context.read<AuthCubit>().resendOtp(identifier);
                         },
-                        child: const Text('Resend OTP'),
+                        child: const Text('OTP නැවත යවන්න'),
                       ),
                     ] else ...[
                       TextField(
                         controller: newPasswordController,
                         obscureText: !state.isPasswordVisible,
                         decoration: InputDecoration(
-                          labelText: 'New Password',
+                          labelText: SiStrings.newPassword,
                           prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -372,7 +373,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: confirmPasswordController,
                         obscureText: !state.isConfirmPasswordVisible,
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
+                          labelText: SiStrings.confirmPassword,
                           prefixIcon: const Icon(Icons.lock_outline),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -407,7 +408,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.pop(dialogContext);
                     context.read<AuthCubit>().resetPasswordResetStatus();
                   },
-                  child: const Text('Cancel'),
+                  child: Text(SiStrings.cancel),
                 ),
                 ElevatedButton(
                   onPressed: state.passwordResetStatus ==
@@ -444,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(isOtpVerified ? 'Reset Password' : 'Verify'),
+                      : Text(isOtpVerified ? SiStrings.resetPassword : SiStrings.verify),
                 ),
               ],
             );
@@ -454,3 +455,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

@@ -8,6 +8,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 
@@ -69,7 +70,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           body: LoadingOverlay(
             isLoading: state.status == DashboardStatus.loading ||
                 state.status == DashboardStatus.refreshing,
-            message: 'Loading dashboard data...',
+            message: SiStrings.loading,
             child: CustomScrollView(
               slivers: [
                 _buildSliverAppBar(context, isDesktop),
@@ -113,8 +114,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         },
       ),
       flexibleSpace: FlexibleSpaceBar(
-        title: const Text(
-          'Analytics Dashboard',
+        title: Text(
+          SiStrings.analytics,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -137,12 +138,12 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         IconButton(
           icon: const Icon(Icons.filter_list_rounded),
           onPressed: () {},
-          tooltip: 'Filter',
+          tooltip: SiStrings.filter,
         ),
         IconButton(
           icon: const Icon(Icons.refresh_rounded),
           onPressed: () => context.read<DashboardCubit>().refreshDashboard(),
-          tooltip: 'Refresh',
+          tooltip: SiStrings.refresh,
         ),
         const SizedBox(width: 8),
       ],
@@ -152,15 +153,15 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
   Widget _buildFinancialCards(
       DashboardState state, bool isTablet, bool isDesktop) {
     final cards = [
-      _StatCardData('Total Revenue', state.formattedMonthlySales,
+      _StatCardData(SiStrings.totalRevenue, state.formattedMonthlySales,
           Icons.account_balance_wallet_rounded, AppColors.success, '+12.5%'),
-      _StatCardData('Paddy Purchases', state.formattedMonthlyPurchases,
+      _StatCardData(SiStrings.paddyPurchases, state.formattedMonthlyPurchases,
           Icons.shopping_basket_rounded, AppColors.error, '+8.2%'),
-      _StatCardData('Op. Expenses', state.formattedMonthlyExpenses,
+      _StatCardData(SiStrings.expenses, state.formattedMonthlyExpenses,
           Icons.receipt_long_rounded, AppColors.warning, '+3.1%'),
-      _StatCardData('Net Profit', state.formattedMonthlyProfit,
+      _StatCardData(SiStrings.netProfit, state.formattedMonthlyProfit,
           Icons.trending_up_rounded, AppColors.primary, '+4.3%'),
-      _StatCardData('Customer Base', '${state.totalCustomers}',
+      _StatCardData(SiStrings.customerBase, '${state.totalCustomers}',
           Icons.people_rounded, AppColors.info, '+5.7%'),
     ];
 
@@ -171,6 +172,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           crossAxisCount = 4;
         } else if (isTablet) {
           crossAxisCount = 2;
+        } else if (MediaQuery.of(context).size.width < 400) {
+          crossAxisCount = 1;
         }
 
         return MasonryGridView.count(
@@ -302,7 +305,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sales vs Purchases',
+                      SiStrings.salesVsPurchases,
                       style: AppTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: isDesktop ? 20 : 18,
@@ -310,7 +313,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Last 7 days performance',
+                      SiStrings.last7Days,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -325,7 +328,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sales vs Purchases',
+                  SiStrings.salesVsPurchases,
                   style: AppTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
@@ -333,7 +336,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Last 7 days performance',
+                  SiStrings.last7Days,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -355,9 +358,9 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
   Widget _buildChartLegend() {
     return Row(
       children: [
-        _buildLegendItem('Sales', AppColors.success),
+        _buildLegendItem(SiStrings.sell, AppColors.success),
         const SizedBox(width: 16),
-        _buildLegendItem('Purchases', AppColors.error),
+        _buildLegendItem(SiStrings.buy, AppColors.error),
       ],
     );
   }
@@ -429,7 +432,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               return touchedSpots.map((LineBarSpot touchedSpot) {
                 final isSales = touchedSpot.barIndex == 0;
                 return LineTooltipItem(
-                  '${isSales ? "Sales" : "Purchases"}: ${touchedSpot.y.toStringAsFixed(1)}k\n',
+                  '${isSales ? SiStrings.sell : SiStrings.buy}: ${touchedSpot.y.toStringAsFixed(1)}k\n',
                   TextStyle(
                     color: isSales ? AppColors.success : AppColors.error,
                     fontWeight: FontWeight.bold,
@@ -437,7 +440,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                   ),
                   children: [
                     const TextSpan(
-                      text: 'Click for details',
+                      text: 'වැඩි විස්තර සඳහා ඔබන්න',
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 10,
@@ -511,13 +514,13 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                       // E.g., "Mon", "Tue"
                       // Need simple date formatter
                       const days = [
-                        'Mon',
-                        'Tue',
-                        'Wed',
-                        'Thu',
-                        'Fri',
-                        'Sat',
-                        'Sun'
+                        'සඳුදා',
+                        'අඟහ',
+                        'බදාදා',
+                        'බ්‍රහස්',
+                        'සිකු',
+                        'සෙන',
+                        'ඉරිදා'
                       ];
                       label = days[date.weekday - 1];
                     } catch (_) {}
@@ -598,7 +601,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
 
   Widget _buildStockAndPerformance(
       DashboardState state, bool isTablet, bool isDesktop) {
-    if (isTablet) {
+    if (isDesktop || (isTablet && MediaQuery.of(context).size.width > 800)) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -644,7 +647,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Stock Distribution',
+            SiStrings.stockDistribution,
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: isDesktop ? 18 : 16,
@@ -656,7 +659,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
             child: PieChart(
               PieChartData(
                 sectionsSpace: 4,
-                centerSpaceRadius: 60,
+                centerSpaceRadius: 40,
                 sections: hasStock
                     ? [
                         PieChartSectionData(
@@ -664,28 +667,28 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                           value: state.totalPaddyStock,
                           title:
                               '${state.totalPaddyStock.toStringAsFixed(0)}kg',
-                          radius: 60,
+                          radius: 50,
                           titleStyle: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 12,
                           ),
                           badgeWidget:
-                              _buildPieBadge('Paddy', AppColors.warning),
+                              _buildPieBadge('වී', AppColors.warning),
                           badgePositionPercentageOffset: 1.4,
                         ),
                         PieChartSectionData(
                           color: AppColors.primary,
                           value: state.totalRiceStock,
                           title: '${state.totalRiceStock.toStringAsFixed(0)}kg',
-                          radius: 60,
+                          radius: 50,
                           titleStyle: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 12,
                           ),
                           badgeWidget:
-                              _buildPieBadge('Rice', AppColors.primary),
+                              _buildPieBadge('සහල්', AppColors.primary),
                           badgePositionPercentageOffset: 1.4,
                         ),
                       ]
@@ -693,12 +696,12 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                         PieChartSectionData(
                           color: AppColors.grey300,
                           value: 1,
-                          title: 'No Stock',
-                          radius: 60,
+                          title: 'තොග නොමැත',
+                          radius: 50,
                           titleStyle: const TextStyle(
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -712,15 +715,15 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
 
   Widget _buildPieBadge(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -729,7 +732,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 12,
+          fontSize: 10,
         ),
       ),
     );
@@ -753,7 +756,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Performance Metrics',
+            SiStrings.performanceMetrics,
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.bold,
               fontSize: isDesktop ? 18 : 16,
@@ -761,18 +764,18 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           ),
           const SizedBox(height: 20),
           _buildMetricRow(
-              'Paddy Purchased',
+              'මිලදී ගත් වී',
               '${state.totalPaddyBoughtKg.toStringAsFixed(0)} kg',
-              'Volume',
+              'ප්‍රමාණය',
               AppColors.success),
           _buildMetricRow(
-              'Rice Sold',
+              'විකුණූ සහල්',
               '${state.totalRiceSoldKg.toStringAsFixed(0)} kg',
-              'Volume',
+              'ප්‍රමාණය',
               AppColors.info),
           _buildMetricRow(
-              'Milling Output', '95%', 'Optimal', AppColors.success),
-          _buildMetricRow('Waste Ratio', '2.5%', 'Low', AppColors.warning),
+              SiStrings.millingOutput, '95%', 'ඉතා හොඳයි', AppColors.success),
+          _buildMetricRow(SiStrings.wasteRatio, '2.5%', 'අඩු', AppColors.warning),
         ],
       ),
     );
@@ -785,35 +788,46 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
       child: Row(
         children: [
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               label,
               style: AppTextStyles.bodyMedium.copyWith(
                 fontWeight: FontWeight.w500,
+                fontSize: 13,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: 8),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Text(
               value,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.textSecondary,
+                fontSize: 13,
               ),
+              textAlign: TextAlign.right,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                color: statusColor,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                status,
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -862,12 +876,16 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                 ),
               ),
               const SizedBox(width: 16),
-              Text(
-                'Inventory Overview',
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: isDesktop ? 20 : 18,
+              Expanded(
+                child: Text(
+                  SiStrings.stockOverview,
+                  style: AppTextStyles.titleMedium.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: isDesktop ? 20 : 18,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -875,51 +893,30 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           SizedBox(height: isDesktop ? 28 : 24),
           LayoutBuilder(
             builder: (context, constraints) {
-              if (isTablet) {
-                return Row(
-                  children: [
-                    Expanded(
-                      child: _buildInventoryItem(
-                        'Total Stock Value',
-                        state.formattedStockValue,
-                        Icons.monetization_on_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInventoryItem(
-                        'Low Stock Alerts',
-                        '${state.lowStockCount} Items',
-                        Icons.warning_amber_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInventoryItem(
-                        'Total Items',
-                        '${state.lowStockItems.length + 10}',
-                        Icons.inventory_rounded,
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return Column(
+              final crossAxisCount = constraints.maxWidth > 700
+                  ? 3
+                  : (constraints.maxWidth > 400 ? 2 : 1);
+
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: crossAxisCount == 1 ? 4.0 : 2.2,
                 children: [
                   _buildInventoryItem(
-                    'Total Stock Value',
+                    SiStrings.inventoryValue,
                     state.formattedStockValue,
                     Icons.monetization_on_rounded,
                   ),
-                  const SizedBox(height: 16),
                   _buildInventoryItem(
-                    'Low Stock Alerts',
-                    '${state.lowStockCount} Items',
+                    SiStrings.lowStockAlerts,
+                    '${state.lowStockCount} අයිතම',
                     Icons.warning_amber_rounded,
                   ),
-                  const SizedBox(height: 16),
                   _buildInventoryItem(
-                    'Total Items',
+                    SiStrings.totalItemsCount,
                     '${state.lowStockItems.length + 10}',
                     Icons.inventory_rounded,
                   ),
@@ -934,7 +931,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
 
   Widget _buildInventoryItem(String label, String value, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
@@ -945,32 +942,38 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: Colors.white, size: 18),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   label,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: Colors.white.withOpacity(0.8),
+                    fontSize: 10,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
                   child: Text(
                     value,
                     style: AppTextStyles.titleMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontSize: 14,
                     ),
                   ),
                 ),

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 import '../widgets/chart_widget.dart';
@@ -41,18 +42,18 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
   }
 
   static const _months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
+    'ජනවාරි', // Jan
+    'පෙබරවාරි', // Feb
+    'මාර්තු', // Mar
+    'අප්‍රේල්', // Apr
+    'මැයි', // May
+    'ජූනි', // Jun
+    'ජූලි', // Jul
+    'අගෝස්තු', // Aug
+    'සැප්තැම්බර්', // Sep
+    'ඔක්තෝබර්', // Oct
+    'නොවැම්බර්', // Nov
+    'දෙසැම්බර්' // Dec
   ];
 
   @override
@@ -64,7 +65,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
           child: Scaffold(
             backgroundColor: AppColors.background,
             appBar: AppBar(
-              title: const Text('Monthly Report'),
+              title: const Text('මාසික වාර්තාව'), // Monthly Report
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
             ),
@@ -153,17 +154,17 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStat('Purchases', summary?.totalPurchases ?? 0),
-              _buildStat('Sales', summary?.totalSales ?? 0),
-              _buildStat('Profit', summary?.grossProfit ?? 0),
+              _buildStat(SiStrings.buy, summary?.totalPurchases ?? 0),
+              _buildStat(SiStrings.sell, summary?.totalSales ?? 0),
+              _buildStat('ලාභය', summary?.grossProfit ?? 0),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildCount('Buy Orders', summary?.purchaseCount ?? 0),
-              _buildCount('Sell Orders', summary?.saleCount ?? 0),
+              _buildCount('මිලදී ගැනීම්', summary?.purchaseCount ?? 0), // Buy Orders
+              _buildCount('විකිණීම්', summary?.saleCount ?? 0), // Sell Orders
             ],
           ),
         ],
@@ -205,7 +206,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
         child: GridView.builder(
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, childAspectRatio: 2),
+              crossAxisCount: 3, childAspectRatio: 2), // Changed to 3 for longer Sinhala names
           itemCount: 12,
           itemBuilder: (ctx, i) {
             final isSelected = i + 1 == state.selectedMonth;
@@ -224,7 +225,7 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
                 ),
                 child: Text(_months[i],
                     style:
-                        TextStyle(color: isSelected ? AppColors.white : null)),
+                        TextStyle(color: isSelected ? AppColors.white : null, fontSize: 12)),
               ),
             );
           },
@@ -236,3 +237,4 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen>
   String _format(double v) =>
       v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}K' : v.toStringAsFixed(0);
 }
+

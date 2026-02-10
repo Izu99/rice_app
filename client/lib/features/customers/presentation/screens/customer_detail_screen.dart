@@ -1,5 +1,3 @@
-// lib/features/customers/presentation/screens/customer_detail_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../routes/route_names.dart';
@@ -76,7 +75,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.formSuccessMessage ?? 'Success'),
+              content: Text(state.formSuccessMessage ?? 'සාර්ථකයි'),
               backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
             ),
@@ -93,7 +92,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         if (state.detailStatus == CustomerDetailStatus.error ||
             state.selectedCustomer == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Customer')),
+            appBar: AppBar(title: const Text('ගනුදෙනුකරු')), // Customer
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +104,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    state.errorMessage ?? 'Customer not found',
+                    state.errorMessage ?? 'ගනුදෙනුකරු හමු නොවීය', // Customer not found
                     style: AppTextStyles.bodyLarge,
                   ),
                   const SizedBox(height: 24),
@@ -117,7 +116,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                         context.go(RouteNames.customers);
                       }
                     },
-                    child: const Text('Go Back'),
+                    child: const Text('ආපසු යන්න'), // Go Back
                   ),
                 ],
               ),
@@ -204,7 +203,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () => _editCustomer(customer),
-          tooltip: 'Edit',
+          tooltip: 'යාවත්කාලීන කරන්න', // Edit
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
@@ -225,7 +224,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 children: [
                   Icon(Icons.share, size: 20),
                   SizedBox(width: 12),
-                  Text('Share'),
+                  Text('බෙදාගන්න'), // Share
                 ],
               ),
             ),
@@ -235,7 +234,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 children: [
                   Icon(Icons.delete, color: AppColors.error, size: 20),
                   SizedBox(width: 12),
-                  Text('Delete', style: TextStyle(color: AppColors.error)),
+                  Text('මකා දමන්න', style: TextStyle(color: AppColors.error)), // Delete
                 ],
               ),
             ),
@@ -266,7 +265,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             Expanded(
               child: _buildStatItem(
                 icon: Icons.account_balance_wallet,
-                label: 'Balance',
+                label: 'ශේෂය', // Balance
                 value: customer.formattedBalance,
                 valueColor:
                     customer.balance >= 0 ? AppColors.success : AppColors.error,
@@ -280,8 +279,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             Expanded(
               child: _buildStatItem(
                 icon: Icons.timeline,
-                label: 'Status',
-                value: customer.balanceStatus,
+                label: 'තත්ත්වය', // Status
+                value: _getSinhalaBalanceStatus(customer.balance),
                 valueColor: _getBalanceStatusColor(customer.balance),
               ),
             ),
@@ -289,6 +288,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         ),
       ),
     );
+  }
+
+  String _getSinhalaBalanceStatus(double balance) {
+    if (balance > 0) return 'ලැබිය යුතුයි';
+    if (balance < 0) return 'ගෙවිය යුතුයි';
+    return 'ශේෂයක් නැත';
   }
 
   Widget _buildStatItem({
@@ -334,9 +339,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             indicatorColor: AppColors.primary,
             indicatorWeight: 3,
             tabs: const [
-              Tab(text: 'Info'),
-              Tab(text: 'History'),
-              Tab(text: 'Balance'),
+              Tab(text: 'විස්තර'), // Info
+              Tab(text: 'ඉතිහාසය'), // History
+              Tab(text: 'ශේෂය'), // Balance
             ],
           ),
         ),
@@ -349,12 +354,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
       padding: const EdgeInsets.all(16),
       children: [
         _buildInfoCard(
-          title: 'Contact Details',
+          title: 'සම්බන්ධ කර ගැනීමට', // Contact Details
           icon: Icons.contact_phone,
           children: [
             _buildInfoRow(
               icon: Icons.phone,
-              label: 'Phone',
+              label: 'දුරකථන අංකය',
               value: customer.formattedPhone,
               onTap: () => _callCustomer(customer.phone),
               trailing: Row(
@@ -377,33 +382,33 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 customer.secondaryPhone!.isNotEmpty)
               _buildInfoRow(
                 icon: Icons.phone_android,
-                label: 'Secondary Phone',
+                label: 'අමතර දුරකථන අංකය',
                 value: customer.secondaryPhone!,
               ),
             if (customer.email != null && customer.email!.isNotEmpty)
               _buildInfoRow(
                 icon: Icons.email_outlined,
-                label: 'Email',
+                label: 'විද්‍යුත් තැපෑල',
                 value: customer.email!,
               ),
           ],
         ),
         const SizedBox(height: 16),
         _buildInfoCard(
-          title: 'Location',
+          title: 'ලිපිනය', // Location
           icon: Icons.location_on,
           children: [
             if (customer.address != null && customer.address!.isNotEmpty)
               _buildInfoRow(
                 icon: Icons.map_outlined,
-                label: 'Address',
+                label: 'ලිපිනය',
                 value: customer.address!,
                 onTap: () => _copyToClipboard(customer.address!),
               ),
             if (customer.city != null && customer.city!.isNotEmpty)
               _buildInfoRow(
                 icon: Icons.location_city,
-                label: 'City',
+                label: 'නගරය',
                 value: customer.city!,
               ),
           ],
@@ -411,12 +416,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         const SizedBox(height: 16),
         if (customer.nic != null && customer.nic!.isNotEmpty) ...[
           _buildInfoCard(
-            title: 'Additional Details',
+            title: 'අමතර තොරතුරු', // Additional Details
             icon: Icons.info_outline,
             children: [
               _buildInfoRow(
                 icon: Icons.badge_outlined,
-                label: 'NIC Number',
+                label: 'හැඳුනුම්පත් අංකය',
                 value: customer.nic!,
               ),
             ],
@@ -424,13 +429,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           const SizedBox(height: 16),
         ],
         _buildInfoCard(
-          title: 'Account Settings',
+          title: 'ගිණුමේ තොරතුරු', // Account Settings
           icon: Icons.settings_outlined,
           children: [
             _buildInfoRow(
               icon: Icons.category_outlined,
-              label: 'Customer Role',
-              value: customer.customerType.displayName,
+              label: 'භූමිකාව',
+              value: customer.customerType.sinhalaName,
               valueColor: AppColors.primary,
             ),
           ],
@@ -438,7 +443,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         const SizedBox(height: 16),
         if (customer.notes != null && customer.notes!.isNotEmpty) ...[
           _buildInfoCard(
-            title: 'Internal Notes',
+            title: 'සටහන්', // Internal Notes
             icon: Icons.note_outlined,
             children: [
               Padding(
@@ -543,7 +548,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   Widget _buildTransactionsTab(CustomersState state) {
     if (state.customerTransactions.isEmpty) {
       return const Center(
-        child: Text('No transactions found'),
+        child: Text('ගනුදෙනු කිසිවක් හමු නොවීය'), // No transactions found
       );
     }
 
@@ -570,11 +575,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               ),
             ),
             title: Text(
-              isBuy ? 'Purchase' : 'Sale',
+              isBuy ? 'මිලදී ගැනීම' : 'විකිණීම', // Purchase / Sale
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-                DateFormat('MMM dd, yyyy').format(DateTime.parse(txn['date']))),
+                DateFormat('yyyy-MM-dd').format(DateTime.parse(txn['date']))),
             trailing: Text(
               'Rs. ${txn['total_amount']}',
               style: TextStyle(
@@ -606,7 +611,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             ),
             child: Column(
               children: [
-                const Text('Current Balance',
+                const Text('වත්මන් ශේෂය', // Current Balance
                     style: TextStyle(color: Colors.white70)),
                 const SizedBox(height: 8),
                 FittedBox(
@@ -620,7 +625,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  customer.balanceStatus.toUpperCase(),
+                  _getSinhalaBalanceStatus(customer.balance).toUpperCase(),
                   style: const TextStyle(
                       color: Colors.white,
                       letterSpacing: 1.2,
@@ -655,7 +660,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 child: ElevatedButton.icon(
                   onPressed: () => _continueToBuy(customer),
                   icon: const Icon(Icons.shopping_cart_checkout),
-                  label: const Text('BUY',
+                  label: const Text('මිලදී ගැනීම', // BUY
                       style: TextStyle(
                           fontWeight: FontWeight.bold, letterSpacing: 1.1)),
                   style: ElevatedButton.styleFrom(
@@ -675,7 +680,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 child: ElevatedButton.icon(
                   onPressed: () => _continueToSell(customer),
                   icon: const Icon(Icons.sell),
-                  label: const Text('SELL',
+                  label: const Text('විකිණීම', // SELL
                       style: TextStyle(
                           fontWeight: FontWeight.bold, letterSpacing: 1.1)),
                   style: ElevatedButton.styleFrom(
@@ -712,7 +717,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Copied to clipboard')),
+      const SnackBar(content: Text('පිටපත් කරන ලදී')), // Copied to clipboard
     );
   }
 
@@ -723,9 +728,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   Future<void> _deleteCustomer(CustomerEntity customer) async {
     final confirmed = await ConfirmationDialog.show(
       context,
-      title: 'Delete Customer?',
-      message: 'Are you sure you want to delete ${customer.name}?',
-      confirmLabel: 'Delete',
+      title: 'ගනුදෙනුකරු මකා දමන්නද?', // Delete Customer?
+      message: '${customer.name} මකා දැමීමට ඔබට විශ්වාසද?',
+      confirmLabel: 'මකා දමන්න',
       isDangerous: true,
     );
 

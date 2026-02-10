@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/sync_status_indicator.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/sync/sync_status.dart';
@@ -107,7 +110,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
           StretchMode.blurBackground,
         ],
         title: Text(
-          'Live Stock',
+          'වත්මන් තොග', // Live Stock
           style: AppTextStyles.titleLarge.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -175,9 +178,9 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
       children: [
         Expanded(
           child: _buildModernSummaryCard(
-            title: 'Paddy Stock',
+            title: SiStrings.paddyStock,
             value: '${state.totalPaddyKg.toStringAsFixed(0)} kg',
-            subtitle: '${state.totalPaddyBags} Bags Available',
+            subtitle: 'මලු ${state.totalPaddyBags} ක් ඇත',
             icon: Icons.grass,
             color: AppColors.paddy,
             isSelected: state.filterType == StockFilterType.paddy,
@@ -188,9 +191,9 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
         const SizedBox(width: 12),
         Expanded(
           child: _buildModernSummaryCard(
-            title: 'Rice Stock',
+            title: SiStrings.riceStock,
             value: '${state.totalRiceKg.toStringAsFixed(0)} kg',
-            subtitle: '${state.totalRiceBags} Bags Available',
+            subtitle: 'මලු ${state.totalRiceBags} ක් ඇත',
             icon: Icons.rice_bowl,
             color: AppColors.riceAccent,
             isSelected: state.filterType == StockFilterType.rice,
@@ -281,7 +284,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('RAW PADDY STOCK', Icons.inventory_2_outlined),
+        _buildSectionHeader('වී තොග', Icons.inventory_2_outlined), // RAW PADDY STOCK
         const SizedBox(height: 16),
         _buildStockTable(paddyItems, AppColors.paddy),
       ],
@@ -297,7 +300,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('FINISHED RICE STOCK', Icons.check_circle_outline),
+        _buildSectionHeader('සහල් තොග', Icons.check_circle_outline), // FINISHED RICE STOCK
         const SizedBox(height: 16),
         _buildStockTable(riceItems, AppColors.riceAccent),
       ],
@@ -337,7 +340,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                 size: 48, color: AppColors.grey300),
             const SizedBox(height: 16),
             Text(
-              'No items in this category',
+              'මෙම කාණ්ඩය යටතේ අයිතම නැත', // No items in this category
               style:
                   AppTextStyles.bodyMedium.copyWith(color: AppColors.grey500),
             ),
@@ -369,7 +372,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text('VARIETY',
+                  child: Text('වර්ගය', // VARIETY
                       style: AppTextStyles.labelSmall.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -377,7 +380,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                 ),
                 Expanded(
                   flex: 2,
-                  child: Text('BAGS',
+                  child: Text('මලු', // BAGS
                       textAlign: TextAlign.center,
                       style: AppTextStyles.labelSmall.copyWith(
                         fontWeight: FontWeight.bold,
@@ -386,7 +389,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                 ),
                 Expanded(
                   flex: 3,
-                  child: Text('WEIGHT (KG)',
+                  child: Text('බර (KG)', // WEIGHT (KG)
                       textAlign: TextAlign.right,
                       style: AppTextStyles.labelSmall.copyWith(
                         fontWeight: FontWeight.bold,
@@ -436,7 +439,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: const Text(
-                                  'LOW STOCK',
+                                  'තොග අඩුයි', // LOW STOCK
                                   style: TextStyle(
                                       color: AppColors.error,
                                       fontSize: 9,
@@ -503,7 +506,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                         ),
                       ),
                       Text(
-                        'Stock Item Details',
+                        'තොග අයිතම විස්තර', // Stock Item Details
                         style: AppTextStyles.bodyMedium
                             .copyWith(color: AppColors.textSecondary),
                       ),
@@ -527,8 +530,8 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                 child: const Icon(Icons.history_outlined,
                     color: AppColors.secondary),
               ),
-              title: const Text('View History'),
-              subtitle: const Text('See recent movements of this item'),
+              title: const Text('ඉතිහාසය බලන්න'), // View History
+              subtitle: const Text('මෑතකදී සිදු වූ වෙනස්කම් බලන්න'), // See recent movements
               onTap: () {
                 Navigator.pop(context);
                 // TODO: Open history screen
@@ -541,3 +544,4 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     );
   }
 }
+

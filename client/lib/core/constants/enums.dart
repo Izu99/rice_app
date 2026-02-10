@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'si_strings.dart';
 
 /// User roles in the system
 enum UserRole {
@@ -250,8 +251,9 @@ enum MovementType {
 
 /// Customer types
 enum CustomerType {
-  buyer('buyer', 'Buyer', 'ගැනුම්කරු'),
-  seller('seller', 'Seller', 'විකුණුම්කරු');
+  buyer('buyer', 'Buyer', 'පාරිභෝගිකයා (Buyer)'),
+  seller('seller', 'Seller', 'සැපයුම්කරු (Seller)'),
+  both('both', 'Both', 'දෙකම (Both)');
 
   final String value;
   final String displayName;
@@ -262,12 +264,12 @@ enum CustomerType {
   static CustomerType fromString(String value) {
     return CustomerType.values.firstWhere(
       (e) => e.value == value || e.name == value,
-      orElse: () => CustomerType.seller,
+      orElse: () => CustomerType.both,
     );
   }
 
-  bool get canBuy => this == seller;
-  bool get canSell => this == buyer;
+  bool get canBuy => this == seller || this == both;
+  bool get canSell => this == buyer || this == both;
 }
 
 /// Weight units
@@ -315,6 +317,8 @@ enum ExpenseCategory {
 
   const ExpenseCategory(
       this.value, this.displayName, this.sinhalaName, this.icon);
+
+  String get displayNameLocal => SiStrings.isSinhala ? sinhalaName : displayName;
 
   static ExpenseCategory fromString(String value) {
     return ExpenseCategory.values.firstWhere(

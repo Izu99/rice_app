@@ -2,6 +2,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/repositories/auth_repository.dart';
+import '../../../../core/constants/si_strings.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -9,7 +10,10 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   ProfileCubit({required AuthRepository authRepository})
       : _authRepository = authRepository,
-        super(ProfileState.initial());
+        super(ProfileState.initial()) {
+    // Set initial language
+    SiStrings.setLanguage(state.language);
+  }
 
   Future<void> loadProfile() async {
     emit(state.copyWith(status: ProfileStatus.loading, clearError: true));
@@ -155,6 +159,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   void changeLanguage(String language) {
+    SiStrings.setLanguage(language);
     emit(state.copyWith(language: language));
     // TODO: Save to preferences and update app locale
   }

@@ -17,6 +17,7 @@ import 'features/customers/presentation/cubit/customers_cubit.dart';
 import 'features/reports/presentation/cubit/reports_cubit.dart';
 import 'features/expenses/presentation/cubit/expenses_cubit.dart';
 import 'features/profile/presentation/cubit/profile_cubit.dart';
+import 'features/profile/presentation/cubit/profile_state.dart';
 import 'features/super_admin/presentation/cubit/admin_cubit.dart';
 
 class RiceMillApp extends StatelessWidget {
@@ -82,13 +83,20 @@ class RiceMillApp extends StatelessWidget {
           create: (_) => sl<AdminCubit>(),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'Rice Mill ERP',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        routerConfig: sl<AppRouter>().router,
+      child: BlocBuilder<ProfileCubit, ProfileState>(
+        buildWhen: (previous, current) => previous.language != current.language,
+        builder: (context, state) {
+          return MaterialApp.router(
+            key: ValueKey(state.language),
+            title: 'Rice Mill ERP',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.light,
+            routerConfig: sl<AppRouter>().router,
+            locale: Locale(state.language),
+          );
+        },
       ),
     );
   }

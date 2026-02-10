@@ -155,6 +155,11 @@ class CustomersCubit extends Cubit<CustomersState> {
     // Customer type filter
     if (state.customerTypeFilter != null) {
       filtered = filtered.where((c) {
+        if (state.customerTypeFilter == CustomerType.buyer) {
+          return c.customerType.canSell;
+        } else if (state.customerTypeFilter == CustomerType.seller) {
+          return c.customerType.canBuy;
+        }
         return c.customerType == state.customerTypeFilter;
       }).toList();
     }
