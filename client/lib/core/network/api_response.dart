@@ -360,4 +360,3 @@ class AuthResponse extends Equatable {
         user,
       ];
 }
-

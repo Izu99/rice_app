@@ -697,4 +697,3 @@ class TransactionModel extends Equatable {
   String toString() =>
       'TransactionModel(id: $id, number: $transactionNumber, type: ${type.name}, amount: $totalAmount)';
 }
-

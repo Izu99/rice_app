@@ -45,7 +45,7 @@ class CustomerModel extends Equatable {
     this.totalPurchases = 0.0,
     this.totalSales = 0.0,
     this.balance = 0.0,
-    this.customerType = CustomerType.both,
+    this.customerType = CustomerType.seller,
     this.notes,
     this.isActive = true,
     required this.createdAt,
@@ -299,7 +299,7 @@ class CustomerModel extends Equatable {
     String? city,
     String? nicNumber,
     required String companyId,
-    CustomerType customerType = CustomerType.both,
+    CustomerType customerType = CustomerType.seller,
     String? notes,
   }) {
     final now = DateTime.now();
@@ -449,4 +449,3 @@ class CustomerModel extends Equatable {
   @override
   String toString() => 'CustomerModel(id: $id, name: $name, phone: $phone)';
 }
-

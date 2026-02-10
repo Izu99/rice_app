@@ -57,6 +57,11 @@ const CustomerSchema = new mongoose.Schema({
     trim: true,
     maxlength: [100, 'City cannot exceed 100 characters']
   },
+  customerType: {
+    type: String,
+    enum: ['buyer', 'seller'],
+    default: 'seller'
+  },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
@@ -141,6 +146,7 @@ CustomerSchema.methods.getSummary = function () {
     secondaryPhone: this.secondaryPhone,
     address: this.address,
     city: this.city,
+    customerType: this.customerType,
     totalBuyAmount: this.totalBuyAmount,
     totalSellAmount: this.totalSellAmount,
     balance: this.balance,

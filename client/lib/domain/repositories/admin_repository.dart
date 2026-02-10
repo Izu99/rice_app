@@ -21,4 +21,3 @@ abstract class AdminRepository {
   Future<Either<Failure, bool>> resetCompanyPassword(
       String companyId, String newPassword);
 }
-

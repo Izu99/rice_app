@@ -708,4 +708,3 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
   }
 }
-

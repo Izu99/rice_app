@@ -44,4 +44,3 @@ class RefreshTokenUseCase implements UseCase<UserEntity, NoParams> {
     return await repository.refreshToken();
   }
 }
-

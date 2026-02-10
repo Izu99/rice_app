@@ -520,4 +520,3 @@ class TransactionValidationResult {
 
   bool hasError(String field) => errors.containsKey(field);
 }
-

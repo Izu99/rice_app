@@ -48,6 +48,10 @@ class RouteNames {
   static const String stockReport = '/reports/stock';
   static const String transactionReport = '/reports/transactions';
 
+  // ==================== Expenses Routes ====================
+  static const String expenses = '/expenses';
+  static const String expenseAdd = '/expenses/add';
+
   // ==================== Profile Routes ====================
   static const String profile = '/profile';
   static const String profileEdit = '/profile/edit';
@@ -117,4 +121,3 @@ class RouteQueryParams {
   static const String endDate = 'endDate';
   static const String page = 'page';
 }
-

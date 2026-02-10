@@ -403,4 +403,3 @@ class SelectableCustomerCard extends StatelessWidget {
     );
   }
 }
-

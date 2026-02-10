@@ -290,4 +290,3 @@ extension KeyboardControllerExtension on KeyboardController {
     return formatForDisplay(suffix: ' bags');
   }
 }
-

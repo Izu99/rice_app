@@ -254,4 +254,3 @@ class SellItemEntry extends Equatable {
         addedAt,
       ];
 }
-

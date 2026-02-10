@@ -39,7 +39,7 @@ class CustomersInjection {
 
     // ==================== CUBIT ====================
 
-    _sl.registerFactory<CustomersCubit>(
+    _sl.registerLazySingleton<CustomersCubit>(
       () => CustomersCubit(
         customerRepository: _sl<CustomerRepository>(),
       ),
@@ -83,4 +83,3 @@ class CustomersInjection {
         _sl.isRegistered<CustomerRepository>();
   }
 }
-

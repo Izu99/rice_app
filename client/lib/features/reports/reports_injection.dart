@@ -9,7 +9,7 @@ class ReportsInjection {
   static final GetIt _sl = GetIt.instance;
 
   static Future<void> init() async {
-    _sl.registerFactory<ReportsCubit>(
+    _sl.registerLazySingleton<ReportsCubit>(
       () => ReportsCubit(
         reportRepository: _sl<ReportRepository>(),
         authRepository: _sl<AuthRepository>(),
@@ -19,4 +19,3 @@ class ReportsInjection {
 
   static ReportsCubit get reportsCubit => _sl<ReportsCubit>();
 }
-

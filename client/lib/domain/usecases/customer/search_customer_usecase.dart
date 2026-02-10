@@ -77,4 +77,3 @@ class GetCustomerByIdUseCase implements UseCase<CustomerEntity, String> {
     return await repository.getCustomerById(id);
   }
 }
-

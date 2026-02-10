@@ -139,4 +139,3 @@ abstract class CustomerRepository {
     CustomerType type,
   );
 }
-

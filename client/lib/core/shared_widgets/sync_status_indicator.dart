@@ -418,4 +418,3 @@ class SyncDetailsSheet extends StatelessWidget {
     }
   }
 }
-

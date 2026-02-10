@@ -577,4 +577,3 @@ class ConflictFieldDiff {
   void selectServer() => selectedValue = serverValue;
 }
 */
-

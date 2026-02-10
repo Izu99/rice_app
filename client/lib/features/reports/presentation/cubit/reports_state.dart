@@ -86,4 +86,3 @@ class _DefaultDate implements DateTime {
   @override
   dynamic noSuchMethod(Invocation i) => DateTime.now();
 }
-

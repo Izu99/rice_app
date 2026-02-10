@@ -604,4 +604,3 @@ class ReportRepositoryImpl implements ReportRepository {
     return const Right([]);
   }
 }
-

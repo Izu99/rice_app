@@ -147,4 +147,3 @@ class StockFilter extends StatelessWidget {
     );
   }
 }
-

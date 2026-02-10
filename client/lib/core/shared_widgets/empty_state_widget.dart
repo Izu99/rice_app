@@ -613,4 +613,3 @@ class _ShimmerItemState extends State<_ShimmerItem>
     );
   }
 }
-

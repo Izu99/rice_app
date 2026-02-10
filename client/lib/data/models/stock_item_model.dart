@@ -507,4 +507,3 @@ class StockItemModel extends Equatable {
   String toString() =>
       'StockItemModel(id: $id, type: ${type.name}, variety: $variety, qty: $currentQuantity kg)';
 }
-

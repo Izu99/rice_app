@@ -105,8 +105,8 @@ class BuyInjection {
 
   /// Register cubits
   static void _registerCubits() {
-    // Buy Cubit - Factory (new instance each time)
-    _sl.registerFactory<BuyCubit>(
+    // Buy Cubit - Lazy Singleton
+    _sl.registerLazySingleton<BuyCubit>(
       () => BuyCubit(
         transactionRepository: _sl<TransactionRepository>(),
         customerRepository: _sl<CustomerRepository>(),
@@ -115,8 +115,8 @@ class BuyInjection {
       ),
     );
 
-    // Customer Cubit - Factory (new instance each time)
-    _sl.registerFactory<CustomerCubit>(
+    // Customer Cubit - Lazy Singleton
+    _sl.registerLazySingleton<CustomerCubit>(
       () => CustomerCubit(
         customerRepository: _sl<CustomerRepository>(),
         authRepository: _sl<AuthRepository>(),
@@ -194,4 +194,3 @@ class BuyInjection {
         _sl.isRegistered<CustomerRepository>();
   }
 }
-

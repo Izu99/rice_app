@@ -2,4 +2,3 @@
 class ModernSyncEngine {
   void initialize() {}
 }
-

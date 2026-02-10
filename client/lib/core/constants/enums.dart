@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// User roles in the system
 enum UserRole {
   admin('admin', 'Admin', 'පරිපාලක'),
@@ -248,14 +250,8 @@ enum MovementType {
 
 /// Customer types
 enum CustomerType {
-  farmer('farmer', 'Farmer', 'ගොවියා'),
-  trader('trader', 'Trader', 'වෙළඳුනා'),
-  retailer('retailer', 'Retailer', 'සිල්ලර වෙළඳුනා'),
-  wholesaler('wholesaler', 'Wholesaler', 'තොග වෙළඳුනා'),
   buyer('buyer', 'Buyer', 'ගැනුම්කරු'),
-  seller('seller', 'Seller', 'විකුණුම්කරු'),
-  both('both', 'Both', 'දෙකම'),
-  other('other', 'Other', 'වෙනත්');
+  seller('seller', 'Seller', 'විකුණුම්කරු');
 
   final String value;
   final String displayName;
@@ -266,22 +262,12 @@ enum CustomerType {
   static CustomerType fromString(String value) {
     return CustomerType.values.firstWhere(
       (e) => e.value == value || e.name == value,
-      orElse: () => CustomerType.other,
+      orElse: () => CustomerType.seller,
     );
   }
 
-  bool get canBuy =>
-      this == seller || this == both || this == farmer || this == trader;
-  bool get canSell =>
-      this == buyer ||
-      this == both ||
-      this == retailer ||
-      this == wholesaler ||
-      this == trader;
-  bool get isFarmer => this == farmer;
-  bool get isTrader => this == trader;
-  bool get isRetailer => this == retailer;
-  bool get isWholesaler => this == wholesaler;
+  bool get canBuy => this == seller;
+  bool get canSell => this == buyer;
 }
 
 /// Weight units
@@ -308,6 +294,34 @@ enum WeightUnit {
 
   double toKg(double value) => value * toKgFactor;
   double fromKg(double kg) => kg / toKgFactor;
+}
+
+/// Expense categories
+enum ExpenseCategory {
+  electricity('electricity', 'Electricity', 'විදුලිය', Icons.bolt),
+  water('water', 'Water', 'ජලය', Icons.water_drop),
+  fuel('fuel', 'Fuel', 'ඉන්ධන', Icons.local_gas_station),
+  transport('transport', 'Transport', 'ප්‍රවාහනය', Icons.local_shipping),
+  labor('labor', 'Labor / Wages', 'වැටුප්', Icons.groups),
+  maintenance('maintenance', 'Maintenance', 'නඩත්තු', Icons.build),
+  rent('rent', 'Rent', 'කුලිය', Icons.home_work),
+  taxes('taxes', 'Taxes', 'බදු', Icons.account_balance),
+  other('other', 'Other', 'වෙනත්', Icons.more_horiz);
+
+  final String value;
+  final String displayName;
+  final String sinhalaName;
+  final IconData icon;
+
+  const ExpenseCategory(
+      this.value, this.displayName, this.sinhalaName, this.icon);
+
+  static ExpenseCategory fromString(String value) {
+    return ExpenseCategory.values.firstWhere(
+      (e) => e.value == value || e.name == value,
+      orElse: () => ExpenseCategory.other,
+    );
+  }
 }
 
 /// Report types
@@ -581,4 +595,3 @@ enum SortOption {
     );
   }
 }
-

@@ -15,6 +15,7 @@ import 'features/stock/presentation/cubit/stock_cubit.dart';
 import 'features/stock/presentation/cubit/milling_cubit.dart';
 import 'features/customers/presentation/cubit/customers_cubit.dart';
 import 'features/reports/presentation/cubit/reports_cubit.dart';
+import 'features/expenses/presentation/cubit/expenses_cubit.dart';
 import 'features/profile/presentation/cubit/profile_cubit.dart';
 import 'features/super_admin/presentation/cubit/admin_cubit.dart';
 
@@ -66,6 +67,11 @@ class RiceMillApp extends StatelessWidget {
           create: (_) => sl<ReportsCubit>(),
         ),
 
+        // Expenses
+        BlocProvider<ExpensesCubit>(
+          create: (_) => sl<ExpensesCubit>(),
+        ),
+
         // Profile
         BlocProvider<ProfileCubit>(
           create: (_) => sl<ProfileCubit>(),
@@ -87,4 +93,3 @@ class RiceMillApp extends StatelessWidget {
     );
   }
 }
-

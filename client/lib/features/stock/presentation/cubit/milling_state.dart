@@ -106,4 +106,3 @@ class MillingState extends Equatable {
         millingHistory,
       ];
 }
-

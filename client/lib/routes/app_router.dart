@@ -12,7 +12,6 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/screens/detailed_dashboard_screen.dart';
 import '../features/home/presentation/screens/main_wrapper_screen.dart';
-import '../features/home/presentation/screens/landing_screen.dart';
 
 // Features - Buy
 import '../features/buy/presentation/screens/buy_screen.dart';
@@ -36,6 +35,13 @@ import '../features/customers/presentation/screens/customer_add_edit_screen.dart
 import '../features/reports/presentation/screens/reports_screen.dart';
 import '../features/reports/presentation/screens/daily_report_screen.dart';
 import '../features/reports/presentation/screens/monthly_report_screen.dart';
+
+// Features - Transactions
+import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
+
+// Features - Expenses
+import '../features/expenses/presentation/screens/expenses_list_screen.dart';
+import '../features/expenses/presentation/screens/expense_add_edit_screen.dart';
 
 // Features - Profile
 import '../features/profile/presentation/screens/profile_screen.dart';
@@ -67,13 +73,15 @@ final GlobalKey<NavigatorState> _adminShellNavigatorKey =
 class AppRouter {
   final AuthGuard _authGuard;
 
+  final AppRouteObserver routeObserver = AppRouteObserver();
+
   AppRouter({required AuthGuard authGuard}) : _authGuard = authGuard;
 
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: RouteNames.splash,
     debugLogDiagnostics: true,
-    observers: [AppRouteObserver()],
+    observers: [routeObserver],
 
     // Global redirect for authentication
     redirect: (context, state) => authRedirect(context, state, _authGuard),
@@ -184,6 +192,24 @@ class AppRouter {
             ],
           ),
 
+          // Branch: Expenses
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RouteNames.expenses,
+                name: 'expenses',
+                builder: (context, state) => const ExpensesListScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'expenseAdd',
+                    builder: (context, state) => const ExpenseAddEditScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
           // Branch: Profile
           StatefulShellBranch(
             routes: [
@@ -225,6 +251,17 @@ class AppRouter {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return BuyReceiptScreen(transactionId: id);
+        },
+      ),
+
+      // Transaction Detail (Full Screen)
+      GoRoute(
+        path: '/transactions/:id',
+        name: 'transactionDetail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return TransactionDetailScreen(transactionId: id);
         },
       ),
 
@@ -495,4 +532,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
-

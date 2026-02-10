@@ -235,4 +235,3 @@ class DbConstants {
   static const int defaultIsDeleted = 0;
   static const int defaultIsActive = 1;
 }
-

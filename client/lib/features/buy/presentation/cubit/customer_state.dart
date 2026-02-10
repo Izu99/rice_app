@@ -62,7 +62,7 @@ class CustomerState extends Equatable {
     this.address,
     this.city,
     this.nic,
-    this.customerType = CustomerType.farmer,
+    this.customerType = CustomerType.seller,
     this.notes,
     this.fieldErrors,
     this.allCustomers = const [],
@@ -164,7 +164,7 @@ class CustomerState extends Equatable {
       city: clearForm ? null : (city ?? this.city),
       nic: clearForm ? null : (nic ?? this.nic),
       customerType:
-          clearForm ? CustomerType.farmer : (customerType ?? this.customerType),
+          clearForm ? CustomerType.seller : (customerType ?? this.customerType),
       notes: clearForm ? null : (notes ?? this.notes),
       fieldErrors: clearError ? null : (fieldErrors ?? this.fieldErrors),
       allCustomers: allCustomers ?? this.allCustomers,
@@ -195,4 +195,3 @@ class CustomerState extends Equatable {
         isLoadingCustomers,
       ];
 }
-

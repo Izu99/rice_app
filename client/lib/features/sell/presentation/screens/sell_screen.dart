@@ -20,7 +20,7 @@ class SellScreen extends StatefulWidget {
   State<SellScreen> createState() => _SellScreenState();
 }
 
-class _SellScreenState extends State<SellScreen> {
+class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _bagsController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
@@ -28,15 +28,25 @@ class _SellScreenState extends State<SellScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<SellCubit>().initialize();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _priceController.dispose();
     _bagsController.dispose();
     _weightController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh data when app comes to foreground
+      context.read<SellCubit>().initialize();
+    }
   }
 
   @override
@@ -437,4 +447,3 @@ class _SellScreenState extends State<SellScreen> {
     );
   }
 }
-

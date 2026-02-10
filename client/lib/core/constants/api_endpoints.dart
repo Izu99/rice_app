@@ -8,14 +8,21 @@ class ApiEndpoints {
   static const String prodBaseUrl = 'https://api.ricemill.example.com/api/v1';
 
   /// Development base URL
-  static const String devBaseUrl = 'http://localhost:5001/api';
+  static const String devBaseUrl = 'http://localhost:5000/api';
+
+  /// VPS base URL
+  static const String vpsBaseUrl = 'http://4.1.8.2/rice/api';
 
   /// Staging base URL
   static const String stagingBaseUrl =
       'https://staging-api.ricemill.example.com/api/v1';
 
+  /// Production base URL (Live)
+  static const String liveBaseUrl = 'http://82.25.180.20/rice/api';
+
   /// Current base URL (change based on environment)
-  static const String baseUrl = devBaseUrl;
+  // For Android Emulator, use 10.0.2.2 to reach your local machine
+  static const String baseUrl = 'http://10.0.2.2:5000/api';
 
   // ==================== AUTH ====================
 
@@ -207,6 +214,17 @@ class ApiEndpoints {
   /// Milling summary
   static const String millingSummary = '/milling/summary';
 
+  // ==================== EXPENSES ====================
+
+  /// Expenses base endpoint
+  static const String expenses = '/expenses';
+
+  /// Get expense by ID
+  static String expense(dynamic id) => '/expenses/$id';
+
+  /// Expense summary
+  static const String expenseSummary = '/expenses/summary';
+
   // ==================== REPORTS ====================
 
   /// Reports base endpoint
@@ -397,4 +415,3 @@ class ApiEndpoints {
     return withQuery(endpoint, params);
   }
 }
-

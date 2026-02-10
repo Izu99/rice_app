@@ -620,63 +620,78 @@ class BuyCubit extends Cubit<BuyState> {
       }
 
       debugPrint(
-          '🚀 [BuyCubit] Finalizing ${batchesToSave.length} batches locally (INSTANT)');
+          '🚀 [BuyCubit] Finalizing ${batchesToSave.length} batches (SEQUENTIAL)');
 
-      // 2. Save ALL batches to LOCAL SQLite ONLY (this is FAST - no network)
-      for (final batch in batchesToSave) {
-        if (batch.customerId.isEmpty) continue;
+      // 2. Save batches SEQUENTIALLY to avoid server overload/race conditions
+      final validBatches = batchesToSave.where((b) => b.customerId.isNotEmpty).toList();
+      int successCount = 0;
+      String? firstError;
 
-        final result = await _transactionRepository.createBuyTransaction(
-          customerId: batch.customerId,
-          companyId: _companyId,
-          createdById: currentUserId,
-          items: batch.items,
-          discount: batch.discount,
-          paidAmount: batch.paidAmount,
-          paymentMethod: batch.paymentMethod ?? PaymentMethod.cash,
-          notes: batch.notes,
-        );
+      for (final batch in validBatches) {
+        try {
+          final result = await _transactionRepository.createBuyTransaction(
+            customerId: batch.customerId,
+            companyId: _companyId,
+            createdById: currentUserId,
+            items: batch.items,
+            discount: batch.discount,
+            paidAmount: batch.paidAmount,
+            paymentMethod: batch.paymentMethod ?? PaymentMethod.cash,
+            notes: batch.notes,
+            transactionNumber: batch.transactionNumber, // Pass the client-generated ID
+          );
 
-        bool hadError = false;
-        result.fold(
-          (failure) {
-            debugPrint('❌ [BuyCubit] FAILED to save batch: ${failure.message}');
-            emit(state.copyWith(
-              status: BuyStatus.error,
-              errorMessage: 'Failed to save batch: ${failure.message}',
-            ));
-            hadError = true;
-          },
-          (saved) => debugPrint(
-              '✅ [BuyCubit] Batch saved locally: ${saved.transactionNumber}'),
-        );
-        if (hadError) return;
+          result.fold(
+            (failure) {
+              debugPrint('❌ [BuyCubit] Batch failed: ${failure.message}');
+              firstError ??= failure.message;
+            },
+            (saved) {
+              debugPrint('✅ [BuyCubit] Batch saved: ${saved.transactionNumber}');
+              successCount++;
+            },
+          );
+        } catch (e) {
+          debugPrint('❌ [BuyCubit] Batch exception: $e');
+          firstError ??= e.toString();
+        }
       }
 
-      // 3. ⚡ INSTANT SUCCESS - Show popup immediately (don't wait for anything else)
-      final customerId = state.selectedCustomer!.id;
+      if (successCount == validBatches.length) {
+        // 3. ⚡ ALL SUCCESS - Show popup immediately
+        final customerId = state.selectedCustomer!.id;
 
-      emit(state.copyWith(
-        status: BuyStatus.success,
-        successMessage: 'Stock updated successfully!',
-        sessionBatches: [],
-        tempItems: [],
-        totalPaddyWeight: 0.0,
-        totalRiceWeight: 0.0,
-        totalBags: 0,
-        totalAmount: 0.0,
-        pricePerKg: 0.0,
-        clearCustomer: true,
-        clearCurrentItem: true,
-        currentStep: BuyStep.selectCustomer,
-      ));
+        emit(state.copyWith(
+          status: BuyStatus.success,
+          successMessage: 'Stock updated successfully!',
+          sessionBatches: [],
+          tempItems: [],
+          totalPaddyWeight: 0.0,
+          totalRiceWeight: 0.0,
+          totalBags: 0,
+          totalAmount: 0.0,
+          pricePerKg: 0.0,
+          clearCustomer: true,
+          clearCurrentItem: true,
+          currentStep: BuyStep.selectCustomer,
+        ));
 
-      // 4. 🔄 Background cleanup & refresh (DON'T AWAIT - runs asynchronously)
-      _cleanupAndRefreshInBackground(customerId);
+        // 4. 🔄 Background cleanup & refresh (DON'T AWAIT - runs asynchronously)
+        _cleanupAndRefreshInBackground(customerId);
+      } else {
+        // PARTIAL OR TOTAL FAILURE
+        emit(state.copyWith(
+          status: BuyStatus.error,
+          errorMessage: 'Saved $successCount/${validBatches.length} batches. Error: $firstError',
+        ));
+      }
     } catch (e, stack) {
-      debugPrint('❌ BuyCubit: Unexpected error during finalization: $e');
+      debugPrint('❌ BuyCubit: Error during finalization: $e');
       debugPrint(stack.toString());
-      emit(state.copyWith(status: BuyStatus.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+        status: BuyStatus.error,
+        errorMessage: e.toString(),
+      ));
     }
   }
 
@@ -833,5 +848,23 @@ class BuyCubit extends Cubit<BuyState> {
       (_) => debugPrint('✅ [BuyCubit] Session batches cleared successfully'),
     );
   }
-}
 
+  void updateItemPrice(int index, double newPrice) {
+    if (index < 0 || index >= state.tempItems.length) return;
+
+    final updatedItems = List<TempBuyItem>.from(state.tempItems);
+    final itemToUpdate = updatedItems[index];
+    updatedItems[index] = itemToUpdate.copyWith(
+      pricePerKg: newPrice,
+      totalPrice: itemToUpdate.totalWeight * newPrice,
+      isPriceSet: newPrice > 0,
+    );
+
+    _updateStateWithNewTotals(updatedItems);
+    emit(state.copyWith(editingItemIndex: null)); // Clear editing state
+  }
+
+  void cancelEditing() {
+    emit(state.copyWith(editingItemIndex: null)); // Clear editing state
+  }
+}

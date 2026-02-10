@@ -451,4 +451,3 @@ class AppColors {
     return lightened.toColor();
   }
 }
-

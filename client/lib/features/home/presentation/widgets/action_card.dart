@@ -78,8 +78,8 @@ class ActionCard extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isEnabled 
-                                  ? color.withOpacity(0.1) 
+                              color: isEnabled
+                                  ? color.withOpacity(0.1)
                                   : AppColors.textDisabled.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -115,7 +115,9 @@ class ActionCard extends StatelessWidget {
                       Text(
                         title,
                         style: AppTextStyles.titleMedium.copyWith(
-                          color: isEnabled ? AppColors.textPrimary : AppColors.textDisabled,
+                          color: isEnabled
+                              ? AppColors.textPrimary
+                              : AppColors.textDisabled,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
@@ -131,9 +133,9 @@ class ActionCard extends StatelessWidget {
                           height: 1.2,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Bottom bar
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -321,4 +323,3 @@ class HorizontalActionCard extends StatelessWidget {
     );
   }
 }
-

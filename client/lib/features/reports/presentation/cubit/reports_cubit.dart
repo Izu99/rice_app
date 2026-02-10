@@ -100,4 +100,3 @@ class ReportsCubit extends Cubit<ReportsState> {
     loadMonthlyReport(year: year, month: month);
   }
 }
-

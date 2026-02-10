@@ -21,13 +21,14 @@ class CustomersListScreen extends StatefulWidget {
 }
 
 class _CustomersListScreenState extends State<CustomersListScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 1, vsync: this);
 
     // Load customers
@@ -38,8 +39,16 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<CustomersCubit>().loadCustomers();
+    }
   }
 
   @override
@@ -486,15 +495,6 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                         .filterByType(CustomerType.seller);
                   },
                 ),
-                _FilterChip(
-                  label: 'Both',
-                  isSelected: state.customerTypeFilter == CustomerType.both,
-                  onTap: () {
-                    context
-                        .read<CustomersCubit>()
-                        .filterByType(CustomerType.both);
-                  },
-                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -629,7 +629,8 @@ class _FilterChip extends StatelessWidget {
           color: isSelected ? effectiveColor : effectiveColor.withOpacity(0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-                          color: effectiveColor.withOpacity(isSelected ? 0 : 0.3),          ),
+            color: effectiveColor.withOpacity(isSelected ? 0 : 0.3),
+          ),
         ),
         child: Text(
           label,
@@ -642,4 +643,3 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
-

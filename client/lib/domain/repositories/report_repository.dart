@@ -302,4 +302,3 @@ abstract class ReportRepository {
   /// Returns list of scheduled reports
   Future<Either<Failure, List<Map<String, dynamic>>>> getScheduledReports();
 }
-

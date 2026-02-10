@@ -116,8 +116,7 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                         activeIcon: LucideIcons.package,
                         label: 'Stock',
                       ),
-                      if (!isAdmin)
-                        const SizedBox(width: 48), // Space for FAB
+                      if (!isAdmin) const SizedBox(width: 48), // Space for FAB
                       _buildNavItem(
                         index: 2,
                         icon: LucideIcons.activity,
@@ -126,6 +125,12 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                       ),
                       _buildNavItem(
                         index: 3,
+                        icon: LucideIcons.receipt,
+                        activeIcon: LucideIcons.receipt,
+                        label: 'Expenses',
+                      ),
+                      _buildNavItem(
+                        index: 4,
                         icon: LucideIcons.user,
                         activeIcon: LucideIcons.user,
                         label: 'Profile',
@@ -159,7 +164,9 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
           duration: const Duration(milliseconds: 300),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+            color: isSelected
+                ? AppColors.primary.withOpacity(0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Stack(
@@ -222,7 +229,8 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.white),
                     ),
                   )
                 : const Icon(
@@ -334,6 +342,26 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.receipt_long,
+                      label: 'Add Expense',
+                      sublabel: 'වියදම් එක් කරන්න',
+                      color: AppColors.error,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push('/expenses/add');
+                      },
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
 
               const SizedBox(height: 24),
             ],
@@ -407,4 +435,3 @@ class _QuickActionButton extends StatelessWidget {
     );
   }
 }
-

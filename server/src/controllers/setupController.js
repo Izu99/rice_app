@@ -8,11 +8,11 @@ const { errorResponse, successResponse } = require('../utils/responseHandler')
  */
 exports.setupSuperAdmin = async (req, res) => {
   try {
-    // Check if any Super Admin already exists
-    const adminCount = await User.countDocuments({ role: 'super_admin' })
+    // Check if any Admin already exists
+    const adminCount = await User.countDocuments({ role: 'admin' })
 
     if (adminCount > 0) {
-      return errorResponse(res, 'Setup already completed. Super Admin already exists.', 403)
+      return errorResponse(res, 'Setup already completed. Admin already exists.', 403)
     }
 
     const { name, email, phone, password } = req.body
@@ -27,15 +27,14 @@ exports.setupSuperAdmin = async (req, res) => {
       email: email || `${phone}@temp.com`,
       phone,
       password,
-      role: 'super_admin',
+      role: 'admin',
       isActive: true,
-      isEmailVerified: true,
-      companyId: null // Super admins don't belong to a specific company
+      isEmailVerified: true
     })
 
     const token = superAdmin.generateAuthToken()
 
-    return successResponse(res, 'Super Admin created successfully. Setup complete.', {
+    return successResponse(res, 'Admin created successfully. Setup complete.', {
       user: {
         id: superAdmin._id,
         name: superAdmin.name,

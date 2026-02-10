@@ -542,4 +542,3 @@ class _CompactStat extends StatelessWidget {
     );
   }
 }
-

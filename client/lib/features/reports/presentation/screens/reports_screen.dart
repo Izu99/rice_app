@@ -16,12 +16,29 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class _ReportsScreenState extends State<ReportsScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<ReportsCubit>().loadDashboardSummary();
     context.read<ReportsCubit>().loadDailyReport();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh reports data when app comes to foreground
+      context.read<ReportsCubit>().loadDashboardSummary();
+      context.read<ReportsCubit>().loadDailyReport();
+    }
   }
 
   @override
@@ -153,4 +170,3 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return v.toStringAsFixed(0);
   }
 }
-

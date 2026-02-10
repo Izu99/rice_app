@@ -1,7 +1,9 @@
+const mongoose = require('mongoose')
 const Transaction = require('../models/Transaction')
 const StockItem = require('../models/StockItem')
 const Customer = require('../models/Customer')
 const MillingRecord = require('../models/MillingRecord')
+const Expense = require('../models/Expense')
 const Company = require('../models/Company')
 const { errorResponse, successResponse } = require('../utils/responseHandler')
 
@@ -12,30 +14,38 @@ const { errorResponse, successResponse } = require('../utils/responseHandler')
  */
 exports.getDashboard = async (req, res) => {
   try {
+    const rawCompanyId = req.companyId || req.user.companyId
+    const companyId = new mongoose.Types.ObjectId(rawCompanyId)
+    const companyFilter = { companyId }
+
+    console.log(`🔍 [Dashboard] Loading for Company ID: ${companyId}`)
+
     // Today's data
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const tomorrow = new Date(today)
     tomorrow.setDate(tomorrow.getDate() + 1)
 
-    const todayFilter = {
-      ...req.companyFilter,
-      transactionDate: { $gte: today, $lt: tomorrow }
-    }
-
     // Today's transactions
     const todayBuy = await Transaction.countDocuments({
-      ...todayFilter,
-      type: 'buy'
+      companyId,
+      type: 'buy',
+      transactionDate: { $gte: today, $lt: tomorrow }
     })
 
     const todaySell = await Transaction.countDocuments({
-      ...todayFilter,
-      type: 'sell'
+      companyId,
+      type: 'sell',
+      transactionDate: { $gte: today, $lt: tomorrow }
     })
 
     const todayAmounts = await Transaction.aggregate([
-      { $match: todayFilter },
+      { 
+        $match: { 
+          companyId,
+          transactionDate: { $gte: today, $lt: tomorrow }
+        } 
+      },
       {
         $group: {
           _id: '$type',
@@ -47,25 +57,47 @@ exports.getDashboard = async (req, res) => {
     const todayBuyAmount = todayAmounts.find(s => s._id === 'buy')?.totalAmount || 0
     const todaySellAmount = todayAmounts.find(s => s._id === 'sell')?.totalAmount || 0
 
+    // Today's operating expenses
+    const todayExpenseSummary = await Expense.aggregate([
+      { 
+        $match: { 
+          companyId, 
+          isActive: true,
+          expenseDate: { $gte: today, $lt: tomorrow } 
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ])
+
+    const todayOperatingExpenses = todayExpenseSummary[0]?.totalAmount || 0
+
     // This month's data
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
-    const monthFilter = {
-      ...req.companyFilter,
-      transactionDate: { $gte: monthStart }
-    }
 
     const monthBuy = await Transaction.countDocuments({
-      ...monthFilter,
-      type: 'buy'
+      companyId,
+      type: 'buy',
+      transactionDate: { $gte: monthStart }
     })
 
     const monthSell = await Transaction.countDocuments({
-      ...monthFilter,
-      type: 'sell'
+      companyId,
+      type: 'sell',
+      transactionDate: { $gte: monthStart }
     })
 
     const monthAmounts = await Transaction.aggregate([
-      { $match: monthFilter },
+      { 
+        $match: { 
+          companyId,
+          transactionDate: { $gte: monthStart }
+        } 
+      },
       {
         $group: {
           _id: '$type',
@@ -77,26 +109,52 @@ exports.getDashboard = async (req, res) => {
     const monthBuyAmount = monthAmounts.find(s => s._id === 'buy')?.totalAmount || 0
     const monthSellAmount = monthAmounts.find(s => s._id === 'sell')?.totalAmount || 0
 
-    // Stock summary
-    const stockSummary = await StockItem.getStockSummary(req.companyId)
+    // Operating expenses for this month
+    const expenseSummary = await Expense.aggregate([
+      { 
+        $match: { 
+          companyId, 
+          isActive: true,
+          expenseDate: { $gte: monthStart } 
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ])
 
-    // Low stock count
+    const monthOperatingExpenses = expenseSummary[0]?.totalAmount || 0
+
+    console.log('📊 [Dashboard] Results:', { todayBuy, todaySell, todayExp: todayOperatingExpenses, monthBuy: monthBuyAmount, monthSell: monthSellAmount, monthExp: monthOperatingExpenses })
+
+    // Stock summary
+    const stockSummary = await StockItem.getStockSummary(companyId)
+
+    // Low stock count (cannot use virtual isLowStock in query)
     const lowStockCount = await StockItem.countDocuments({
-      ...req.companyFilter,
-      isLowStock: true,
-      isActive: true
+      companyId,
+      isActive: true,
+      $expr: { $lt: ["$totalWeightKg", "$minimumStock"] }
     })
 
     // Recent transactions (last 5)
-    const recentTransactions = await Transaction.find(req.companyFilter)
+    const recentTransactions = await Transaction.find({ companyId })
       .populate('customerId', 'name')
       .sort({ createdAt: -1 })
       .limit(5)
       .select('transactionNumber type totalAmount paidAmount status transactionDate customerId')
 
+    // Recent expenses (last 5)
+    const recentExpenses = await Expense.find({ companyId, isActive: true })
+      .sort({ expenseDate: -1 })
+      .limit(5)
+
     // Top customers by transaction volume
     const topCustomers = await Transaction.aggregate([
-      { $match: req.companyFilter },
+      { $match: { companyId } },
       {
         $group: {
           _id: '$customerId',
@@ -124,25 +182,51 @@ exports.getDashboard = async (req, res) => {
       }
     ])
 
+    // Recent transactions & performance
+    const performanceMetrics = await Transaction.aggregate([
+      { $match: { companyId } },
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$type",
+          totalPaddyWeight: { 
+            $sum: { $cond: [{ $eq: ["$items.itemType", "paddy"] }, "$items.weightKg", 0] } 
+          },
+          totalRiceWeight: { 
+            $sum: { $cond: [{ $eq: ["$items.itemType", "rice"] }, "$items.weightKg", 0] } 
+          }
+        }
+      }
+    ])
+
+    const buyMetrics = performanceMetrics.find(m => m._id === 'buy') || { totalPaddyWeight: 0 }
+    const sellMetrics = performanceMetrics.find(m => m._id === 'sell') || { totalRiceWeight: 0 }
+
     const data = {
       today: {
         buyTransactions: todayBuy,
         sellTransactions: todaySell,
         buyAmount: todayBuyAmount,
         sellAmount: todaySellAmount,
-        netAmount: todaySellAmount - todayBuyAmount
+        operatingExpenses: todayOperatingExpenses,
+        netAmount: todaySellAmount - todayBuyAmount - todayOperatingExpenses
       },
       thisMonth: {
         buyTransactions: monthBuy,
         sellTransactions: monthSell,
         buyAmount: monthBuyAmount,
         sellAmount: monthSellAmount,
-        profit: monthSellAmount - monthBuyAmount
+        operatingExpenses: monthOperatingExpenses,
+        profit: monthSellAmount - monthBuyAmount - monthOperatingExpenses
       },
       stock: {
         totalPaddyKg: stockSummary.paddy.totalKg,
         totalRiceKg: stockSummary.rice.totalKg,
         lowStockItems: lowStockCount
+      },
+      performance: {
+        totalPaddyBoughtKg: buyMetrics.totalPaddyWeight,
+        totalRiceSoldKg: sellMetrics.totalRiceWeight
       },
       recentTransactions: recentTransactions.map(t => ({
         id: t._id,
@@ -154,6 +238,7 @@ exports.getDashboard = async (req, res) => {
         status: t.status,
         transactionDate: t.transactionDate
       })),
+      recentExpenses,
       topCustomers
     }
 
@@ -469,9 +554,9 @@ exports.getStockReport = async (req, res) => {
 
     // Low stock alerts
     const lowStockAlerts = await StockItem.find({
-      ...req.companyFilter,
-      isLowStock: true,
-      isActive: true
+      companyId,
+      isActive: true,
+      $expr: { $lt: ["$totalWeightKg", "$minimumStock"] }
     })
       .select('name itemType totalWeightKg minimumStock')
       .sort({ totalWeightKg: 1 })
@@ -696,8 +781,27 @@ exports.getProfitLossReport = async (req, res) => {
 
     const millingCost = millingCosts[0]?.totalWastage || 0 // Simplified
 
+    // Operating expenses
+    const operatingExpenseSummary = await Expense.aggregate([
+      { 
+        $match: { 
+          ...req.companyFilter, 
+          isActive: true,
+          expenseDate: dateFilter.transactionDate || { $exists: true }
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ])
+
+    const operatingExpenses = operatingExpenseSummary[0]?.totalAmount || 0
+
     const grossProfit = sales - purchases
-    const netProfit = grossProfit - millingCost
+    const netProfit = grossProfit - millingCost - operatingExpenses
 
     // Breakdown by categories
     const breakdown = await Transaction.aggregate([
@@ -777,9 +881,9 @@ exports.getProfitLossReport = async (req, res) => {
       breakdown,
       monthlyTrend,
       ratios: {
-        profitMargin: sales > 0 ? (grossProfit / sales) * 100 : 0,
+        profitMargin: sales > 0 ? (netProfit / sales) * 100 : 0,
         costOfGoodsSold: purchases,
-        operatingExpenses: millingCost
+        operatingExpenses: millingCost + operatingExpenses
       }
     }
 

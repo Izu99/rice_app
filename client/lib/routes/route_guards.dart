@@ -119,7 +119,7 @@ FutureOr<String?> adminRedirect(
 }
 
 /// Route observer for analytics and logging
-class AppRouteObserver extends NavigatorObserver {
+class AppRouteObserver extends RouteObserver<ModalRoute<dynamic>> {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
@@ -234,4 +234,3 @@ class AppPageTransitions {
     );
   }
 }
-

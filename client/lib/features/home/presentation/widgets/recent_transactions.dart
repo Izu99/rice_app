@@ -57,14 +57,17 @@ class RecentTransactions extends StatelessWidget {
             itemCount: displayTransactions.length,
             separatorBuilder: (context, index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
+              child:
+                  Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
             ),
             itemBuilder: (context, index) {
               return TransactionListItem(
                 transaction: displayTransactions[index],
                 onTap: () {
-                  context
-                      .push('/transactions/${displayTransactions[index].id}');
+                  context.pushNamed(
+                    'transactionDetail',
+                    pathParameters: {'id': displayTransactions[index].id},
+                  );
                 },
               );
             },
@@ -223,7 +226,8 @@ class TransactionListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isBuy = transaction.type == TransactionType.buy;
     final color = isBuy ? AppColors.error : AppColors.success;
-    final icon = isBuy ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
+    final icon =
+        isBuy ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
     final typeLabel = isBuy ? 'Purchase' : 'Sale';
 
     return InkWell(
@@ -429,4 +433,3 @@ class TransactionGroup extends StatelessWidget {
     );
   }
 }
-

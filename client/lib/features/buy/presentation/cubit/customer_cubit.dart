@@ -335,4 +335,3 @@ class CustomerCubit extends Cubit<CustomerState> {
     return super.close();
   }
 }
-

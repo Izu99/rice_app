@@ -24,6 +24,9 @@ abstract class TransactionRepository {
   /// Returns [TransactionEntity] if found
   Future<Either<Failure, TransactionEntity>> getTransactionById(String id);
 
+  /// Get full transaction details including items and metadata
+  Future<Either<Failure, TransactionModel>> getFullTransactionById(String id);
+
   /// Get transactions by type
   ///
   /// Parameters:
@@ -80,6 +83,7 @@ abstract class TransactionRepository {
   /// - [paymentMethod]: Method of payment
   /// - [notes]: Optional notes
   /// - [vehicleNumber]: Optional vehicle number
+  /// - [transactionNumber]: Optional custom transaction number (to prevent server-side ID collisions)
   ///
   /// Returns the created [TransactionEntity]
   /// Also updates stock (adds stock)
@@ -93,6 +97,7 @@ abstract class TransactionRepository {
     PaymentMethod? paymentMethod,
     String? notes,
     String? vehicleNumber,
+    String? transactionNumber,
   });
 
   /// Create a sell transaction (selling to buyer)
@@ -318,4 +323,3 @@ abstract class TransactionRepository {
   /// Clear session batches (Table 2)
   Future<Either<Failure, void>> clearSessionBatches(String customerId);
 }
-

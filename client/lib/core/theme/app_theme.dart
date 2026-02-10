@@ -775,4 +775,3 @@ class AppTheme {
     );
   }
 }
-

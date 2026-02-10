@@ -32,8 +32,16 @@ class AuthRepositoryImpl implements AuthRepository {
           await remoteDataSource.login(identifier: phone, password: password);
       await tokenStorage.saveToken(authResponse.accessToken);
       await tokenStorage.saveRefreshToken(authResponse.refreshToken);
+
       final userEntity = authResponse.user.toEntity();
-      print('📦 [AuthRepo] Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
+      await tokenStorage.saveUser(userEntity);
+
+      if (authResponse.company != null) {
+        await tokenStorage.saveCompany(authResponse.company!);
+      }
+
+      print(
+          '📦 [AuthRepo] Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
       return Right(userEntity);
     } catch (e) {
       if (e is AuthException) {
@@ -63,7 +71,15 @@ class AuthRepositoryImpl implements AuthRepository {
           role: role);
       await tokenStorage.saveToken(authResponse.accessToken);
       await tokenStorage.saveRefreshToken(authResponse.refreshToken);
-      return Right(authResponse.user.toEntity());
+
+      final userEntity = authResponse.user.toEntity();
+      await tokenStorage.saveUser(userEntity);
+
+      if (authResponse.company != null) {
+        await tokenStorage.saveCompany(authResponse.company!);
+      }
+
+      return Right(userEntity);
     } catch (e) {
       if (e is AuthException) {
         return Left(AuthFailure(message: e.message, code: e.statusCode));
@@ -80,8 +96,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> logout() async {
-    await tokenStorage.clearToken();
-    await tokenStorage.clearRefreshToken();
+    await tokenStorage.clearAll();
     if (await networkInfo.isConnected) {
       remoteDataSource.logout().catchError((e) {});
     }
@@ -91,18 +106,28 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, bool>> isLoggedIn() async {
     final token = await tokenStorage.getToken();
-    return Right(token != null && token.isNotEmpty);
+    final user = await tokenStorage.getUser();
+    return Right(token != null && token.isNotEmpty && user != null);
   }
 
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    // Check local storage first
+    final cachedUser = await tokenStorage.getUser();
+
     if (!await networkInfo.isConnected) {
+      if (cachedUser != null) return Right(cachedUser);
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
+
     try {
       final remoteUser = await remoteDataSource.getCurrentUser();
-      return Right(remoteUser.toEntity());
+      final userEntity = remoteUser.toEntity();
+      await tokenStorage.saveUser(userEntity);
+      return Right(userEntity);
     } catch (e) {
+      if (cachedUser != null) return Right(cachedUser);
+
       if (e is AuthException) {
         return Left(AuthFailure(message: e.message, code: e.statusCode));
       }
@@ -120,7 +145,9 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final updatedUser = await remoteDataSource.updateProfile(
           name: name, email: email, avatar: avatar);
-      return Right(updatedUser.toEntity());
+      final entity = updatedUser.toEntity();
+      await tokenStorage.saveUser(entity);
+      return Right(entity);
     } catch (e) {
       if (e is AuthException) return Left(AuthFailure(message: e.message));
       if (e is ServerException) return Left(ServerFailure(message: e.message));
@@ -239,7 +266,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final authResponse = await remoteDataSource.refreshToken(refresh);
       await tokenStorage.saveToken(authResponse.accessToken);
       await tokenStorage.saveRefreshToken(authResponse.refreshToken);
-      return Right(authResponse.user.toEntity());
+
+      final userEntity = authResponse.user.toEntity();
+      await tokenStorage.saveUser(userEntity);
+
+      return Right(userEntity);
     } catch (e) {
       if (e is AuthException) {
         return Left(AuthFailure(message: e.message, code: e.statusCode));
@@ -256,19 +287,27 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, CompanyModel?>> getCompany() async {
+    // Check local storage first
+    final cachedCompany = await tokenStorage.getCompany();
+
     if (!await networkInfo.isConnected) {
+      if (cachedCompany != null) return Right(cachedCompany);
       return const Left(NetworkFailure(message: 'No internet connection'));
     }
+
     try {
       final remoteUser = await remoteDataSource.getCurrentUser();
       final companyId = remoteUser.companyId;
       print('🔍 [AuthRepo] getCompany: companyId="$companyId"');
       if (companyId.isNotEmpty) {
         final company = await remoteDataSource.getCompanyDetails(companyId);
+        await tokenStorage.saveCompany(company);
         return Right(company);
       }
       return const Right(null);
     } catch (e) {
+      if (cachedCompany != null) return Right(cachedCompany);
+
       if (e is AuthException) {
         return Left(AuthFailure(message: e.message, code: e.statusCode));
       }
@@ -282,6 +321,7 @@ class AuthRepositoryImpl implements AuthRepository {
       {required CompanyModel company}) async {
     try {
       final updated = await remoteDataSource.updateCompany(company);
+      await tokenStorage.saveCompany(updated);
       return Right(updated);
     } catch (e) {
       if (e is ServerException) return Left(ServerFailure(message: e.message));
@@ -324,4 +364,3 @@ class AuthRepositoryImpl implements AuthRepository {
     return const Right(null);
   }
 }
-

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const { errorResponse } = require('../utils/responseHandler')
 
 /**
@@ -11,14 +12,15 @@ const companyGuard = (req, res, next) => {
     return errorResponse(res, 'Authentication required.', 401)
   }
 
-  const { role, companyId } = req.user
+  const { role, companyId: rawCompanyId } = req.user
 
   // Super admin logic
   if (role === 'super_admin') {
     // If companyId provided in query params, filter by that company
     if (req.query.companyId) {
-      req.companyFilter = { companyId: req.query.companyId }
-      req.companyId = req.query.companyId
+      const companyId = new mongoose.Types.ObjectId(req.query.companyId)
+      req.companyFilter = { companyId }
+      req.companyId = companyId
     } else {
       // No filter - super admin can see all data
       req.companyFilter = {}
@@ -28,11 +30,12 @@ const companyGuard = (req, res, next) => {
   }
 
   // Company user logic
-  if (!companyId) {
+  if (!rawCompanyId) {
     return errorResponse(res, 'Company association not found. Please contact support.', 403)
   }
 
   // Set company filter for company-level data isolation
+  const companyId = new mongoose.Types.ObjectId(rawCompanyId)
   req.companyFilter = { companyId }
   req.companyId = companyId
 

@@ -54,6 +54,23 @@ class TransactionRepositoryImpl implements TransactionRepository {
   }
 
   @override
+  Future<Either<Failure, TransactionModel>> getFullTransactionById(
+      String id) async {
+    try {
+      final transaction = await remoteDataSource.getTransactionById(id);
+      return Right(transaction);
+    } catch (e) {
+      if (e is NotFoundException) {
+        return const Left(NotFoundFailure(message: 'Transaction not found'));
+      }
+      if (e is ServerException) {
+        return Left(ServerFailure(message: e.message, code: e.statusCode));
+      }
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<TransactionEntity>>> getTransactionsByType(
     TransactionType type,
   ) async {
@@ -133,11 +150,12 @@ class TransactionRepositoryImpl implements TransactionRepository {
     PaymentMethod? paymentMethod,
     String? notes,
     String? vehicleNumber,
+    String? transactionNumber,
   }) async {
     try {
-      // Note: transactionNumber is left empty, expecting server to generate or we generate a placeholder
+      // Use provided transactionNumber or let server generate it (empty string)
       final transaction = TransactionModel.createBuy(
-        transactionNumber: "",
+        transactionNumber: transactionNumber ?? "",
         customerId: customerId,
         customerLocalId: null,
         customerName: "", // Server usually populates names from ID
@@ -509,4 +527,3 @@ class TransactionRepositoryImpl implements TransactionRepository {
     return const Right(null);
   }
 }
-

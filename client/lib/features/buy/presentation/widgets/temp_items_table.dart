@@ -125,4 +125,3 @@ class TempItemsTable extends StatelessWidget {
     );
   }
 }
-

@@ -462,4 +462,3 @@ class SellCubit extends Cubit<SellState> {
     }
   }
 }
-

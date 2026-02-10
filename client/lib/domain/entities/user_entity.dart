@@ -193,4 +193,3 @@ class UserEntity extends Equatable {
     return 'UserEntity(id: $id, name: $name, role: $role, isActive: $isActive)';
   }
 }
-

@@ -883,4 +883,3 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     return null;
   }
 }
-

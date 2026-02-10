@@ -1150,4 +1150,3 @@ class WeightSummary extends StatelessWidget {
     );
   }
 }
-

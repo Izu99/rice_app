@@ -293,4 +293,3 @@ extension CustomerSortByExtension on CustomerSortBy {
     }
   }
 }
-

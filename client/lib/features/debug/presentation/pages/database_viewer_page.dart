@@ -132,4 +132,3 @@ class _DatabaseViewerPageState extends State<DatabaseViewerPage> {
   }
 }
 */
-

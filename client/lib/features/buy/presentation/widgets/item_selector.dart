@@ -609,4 +609,3 @@ class _StockItemTile extends StatelessWidget {
     );
   }
 }
-

@@ -311,4 +311,3 @@ class AddPaymentParams extends Equatable {
   @override
   List<Object?> get props => [transactionId, amount, paymentMethod, notes];
 }
-

@@ -167,4 +167,3 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(clearError: true));
   }
 }
-

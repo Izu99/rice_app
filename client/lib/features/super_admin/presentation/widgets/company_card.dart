@@ -403,4 +403,3 @@ class CompanyCard extends StatelessWidget {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
-

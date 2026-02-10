@@ -469,4 +469,3 @@ class StockCubit extends Cubit<StockState> {
     emit(state.copyWith(errorMessage: null));
   }
 }
-

@@ -396,4 +396,3 @@ enum HapticFeedbackType {
   heavy,
   selection,
 }
-
