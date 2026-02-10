@@ -43,9 +43,9 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.noCustomers({VoidCallback? onAddCustomer}) {
     return EmptyStateWidget(
       icon: Icons.people_outline,
-      title: 'No Customers Yet',
-      subtitle: 'Start by adding your first customer',
-      actionLabel: 'Add Customer',
+      title: 'ගනුදෙනුකරුවන් නැත', // No Customers Yet
+      subtitle: 'පළමු ගනුදෙනුකරු එක් කර ආරම්භ කරන්න',
+      actionLabel: 'ගනුදෙනුකරුවෙකු එක් කරන්න',
       actionIcon: Icons.person_add_outlined,
       onAction: onAddCustomer,
     );
@@ -55,9 +55,9 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.noTransactions({VoidCallback? onCreateTransaction}) {
     return EmptyStateWidget(
       icon: Icons.receipt_long_outlined,
-      title: 'No Transactions',
-      subtitle: 'Your transactions will appear here',
-      actionLabel: 'New Transaction',
+      title: 'ගනුදෙනු නැත', // No Transactions
+      subtitle: 'ඔබගේ ගනුදෙනු මෙහි දිස්වනු ඇත',
+      actionLabel: 'නව ගනුදෙනුවක්',
       actionIcon: Icons.add,
       onAction: onCreateTransaction,
     );
@@ -67,9 +67,9 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.noStock({VoidCallback? onAddStock}) {
     return EmptyStateWidget(
       icon: Icons.inventory_2_outlined,
-      title: 'Stock Empty',
-      subtitle: 'Add items to your stock',
-      actionLabel: 'Add Stock',
+      title: 'තොගය හිස්ව ඇත', // Stock Empty
+      subtitle: 'ඔබගේ තොගයට අයිතම එක් කරන්න',
+      actionLabel: 'තොග එක් කරන්න',
       actionIcon: Icons.add_box_outlined,
       onAction: onAddStock,
     );
@@ -82,11 +82,11 @@ class EmptyStateWidget extends StatelessWidget {
   }) {
     return EmptyStateWidget(
       icon: Icons.search_off,
-      title: 'No Results Found',
+      title: 'ප්‍රතිඵල නැත', // No Results Found
       subtitle: query.isNotEmpty
-          ? 'No results for "$query"'
-          : 'Try a different search term',
-      actionLabel: onClearSearch != null ? 'Clear Search' : null,
+          ? '"$query" සඳහා ප්‍රතිඵල හමු නොවීය'
+          : 'වෙනත් පදයක් සොයා බලන්න',
+      actionLabel: onClearSearch != null ? 'සෙවුම ඉවත් කරන්න' : null,
       actionIcon: Icons.clear,
       onAction: onClearSearch,
     );
@@ -96,9 +96,9 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.noInternet({VoidCallback? onRetry}) {
     return EmptyStateWidget(
       icon: Icons.wifi_off_outlined,
-      title: 'No Internet Connection',
-      subtitle: 'Please check your connection and try again',
-      actionLabel: 'Retry',
+      title: 'අන්තර්ජාල සම්බන්ධතාවය නැත', // No Internet Connection
+      subtitle: 'කරුණාකර ඔබගේ සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න',
+      actionLabel: 'නැවත උත්සාහ කරන්න',
       actionIcon: Icons.refresh,
       onAction: onRetry,
       iconColor: AppColors.warning,
@@ -112,9 +112,9 @@ class EmptyStateWidget extends StatelessWidget {
   }) {
     return EmptyStateWidget(
       icon: Icons.error_outline,
-      title: 'Something Went Wrong',
-      subtitle: message ?? 'An unexpected error occurred',
-      actionLabel: onRetry != null ? 'Try Again' : null,
+      title: 'දෝෂයක් සිදු විය', // Something Went Wrong
+      subtitle: message ?? 'අනපේක්ෂිත දෝෂයක් සිදු විය',
+      actionLabel: onRetry != null ? 'නැවත උත්සාහ කරන්න' : null,
       actionIcon: Icons.refresh,
       onAction: onRetry,
       iconColor: AppColors.error,
@@ -126,8 +126,8 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.noNotifications() {
     return const EmptyStateWidget(
       icon: Icons.notifications_none_outlined,
-      title: 'No Notifications',
-      subtitle: 'You\'re all caught up!',
+      title: 'දැනුම්දීම් නැත', // No Notifications
+      subtitle: 'ඔබ සියලු දැනුම්දීම් දැක ඇත!',
     );
   }
 
@@ -135,9 +135,9 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.emptyCart({VoidCallback? onBrowse}) {
     return EmptyStateWidget(
       icon: Icons.shopping_cart_outlined,
-      title: 'No Items Added',
-      subtitle: 'Add items to continue',
-      actionLabel: onBrowse != null ? 'Add Items' : null,
+      title: 'අයිතම එක් කර නැත', // No Items Added
+      subtitle: 'ඉදිරියට යාමට අයිතම එක් කරන්න',
+      actionLabel: onBrowse != null ? 'අයිතම එක් කරන්න' : null,
       actionIcon: Icons.add_shopping_cart,
       onAction: onBrowse,
     );
@@ -150,11 +150,11 @@ class EmptyStateWidget extends StatelessWidget {
   }) {
     return EmptyStateWidget(
       icon: Icons.analytics_outlined,
-      title: 'No Data Available',
+      title: 'තොරතුරු නැත', // No Data Available
       subtitle: dateRange != null
-          ? 'No data found for $dateRange'
-          : 'No data found for the selected period',
-      actionLabel: onChangeDateRange != null ? 'Change Period' : null,
+          ? '$dateRange සඳහා තොරතුරු හමු නොවීය'
+          : 'තෝරාගත් කාලය සඳහා තොරතුරු හමු නොවීය',
+      actionLabel: onChangeDateRange != null ? 'කාලය වෙනස් කරන්න' : null,
       actionIcon: Icons.date_range,
       onAction: onChangeDateRange,
     );
@@ -164,10 +164,10 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.comingSoon({String? featureName}) {
     return EmptyStateWidget(
       icon: Icons.construction_outlined,
-      title: 'Coming Soon',
+      title: 'ළඟදීම බලාපොරොත්තු වන්න', // Coming Soon
       subtitle: featureName != null
-          ? '$featureName is under development'
-          : 'This feature is under development',
+          ? '$featureName සඳහා වැඩ කටයුතු සිදු වෙමින් පවතී'
+          : 'මෙම අංගය සඳහා වැඩ කටයුතු සිදු වෙමින් පවතී',
       iconColor: AppColors.info,
       iconBackgroundColor: AppColors.infoLight,
     );
@@ -177,15 +177,16 @@ class EmptyStateWidget extends StatelessWidget {
   factory EmptyStateWidget.maintenance({VoidCallback? onRetry}) {
     return EmptyStateWidget(
       icon: Icons.engineering_outlined,
-      title: 'Under Maintenance',
-      subtitle: 'We\'ll be back shortly',
-      actionLabel: onRetry != null ? 'Refresh' : null,
+      title: 'නඩත්තු කටයුතු සිදු වේ', // Under Maintenance
+      subtitle: 'අප ඉක්මනින් නැවත පැමිණෙනු ඇත',
+      actionLabel: onRetry != null ? 'යාවත්කාලීන කරන්න' : null,
       actionIcon: Icons.refresh,
       onAction: onRetry,
       iconColor: AppColors.warning,
       iconBackgroundColor: AppColors.warningLight,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

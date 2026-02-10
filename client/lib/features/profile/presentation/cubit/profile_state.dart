@@ -42,7 +42,7 @@ class ProfileState extends Equatable {
     this.errorMessage,
     this.successMessage,
     this.isDarkMode = false,
-    this.language = 'en',
+    this.language = 'si',
     this.notificationsEnabled = true,
     this.biometricEnabled = false,
     this.lastSyncTime,

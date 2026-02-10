@@ -44,23 +44,22 @@ class _ItemSelectorState extends State<ItemSelector> {
 
   // Predefined varieties
   static const List<String> _paddyVarieties = [
-    'Samba',
-    'Nadu',
-    'Keeri Samba',
-    'Suwandel',
-    'Kuruluthuda',
-    'Pachchaperumal',
-    'Rathu Heenati',
-    'Madathawalu',
+    'සම්බා', // Samba
+    'නාඩු', // Nadu
+    'කීරි සම්බා', // Keeri Samba
+    'සුවඳැල්', // Suwandel
+    'පච්චපෙරුමාල්', // Pachchaperumal
+    'රතු හීනටි', // Rathu Heenati
+    'මඩතවාලු', // Madathawalu
   ];
 
   static const List<String> _riceVarieties = [
-    'Samba Rice',
-    'Nadu Rice',
-    'Keeri Samba Rice',
-    'Red Rice',
-    'White Rice',
-    'Basmati',
+    'සම්බා සහල්', // Samba Rice
+    'නාඩු සහල්', // Nadu Rice
+    'කීරි සම්බා සහල්', // Keeri Samba Rice
+    'රතු සහල්', // Red Rice
+    'සුදු සහල්', // White Rice
+    'බාස්මතී', // Basmati
   ];
 
   List<String> get _currentVarieties =>
@@ -79,16 +78,9 @@ class _ItemSelectorState extends State<ItemSelector> {
       children: [
         // Section Header
         Text(
-          'Select Item',
+          'අයිතමය තෝරන්න',
           style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'අයිතමය තෝරන්න',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textSecondary,
           ),
         ),
         const SizedBox(height: 16),
@@ -108,8 +100,8 @@ class _ItemSelectorState extends State<ItemSelector> {
       children: [
         Expanded(
           child: _TypeCard(
-            title: 'Paddy',
-            subtitle: 'වී',
+            title: 'වී',
+            subtitle: 'Paddy',
             icon: Icons.grass,
             color: AppColors.warning,
             isSelected: widget.selectedType == ItemType.paddy,
@@ -126,8 +118,8 @@ class _ItemSelectorState extends State<ItemSelector> {
         const SizedBox(width: 12),
         Expanded(
           child: _TypeCard(
-            title: 'Rice',
-            subtitle: 'සහල්',
+            title: 'සහල්',
+            subtitle: 'Rice',
             icon: Icons.rice_bowl,
             color: AppColors.primary,
             isSelected: widget.selectedType == ItemType.rice,
@@ -153,7 +145,7 @@ class _ItemSelectorState extends State<ItemSelector> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Variety / ප්‍රභේදය',
+              'ප්‍රභේදය (Variety)',
               style: AppTextStyles.labelLarge.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -173,7 +165,7 @@ class _ItemSelectorState extends State<ItemSelector> {
                   size: 16,
                 ),
                 label: Text(
-                  _isCustomVariety ? 'Select Existing' : 'Custom',
+                  _isCustomVariety ? 'ලැයිස්තුව' : 'වෙනත්',
                   style: AppTextStyles.labelMedium,
                 ),
               ),
@@ -220,7 +212,7 @@ class _ItemSelectorState extends State<ItemSelector> {
               ),
               const SizedBox(height: 8),
               Text(
-                'No ${widget.selectedType == ItemType.paddy ? 'paddy' : 'rice'} in stock',
+                'තොගයේ ${widget.selectedType == ItemType.paddy ? 'වී' : 'සහල්'} නැත',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -297,7 +289,7 @@ class _ItemSelectorState extends State<ItemSelector> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    widget.selectedVariety ?? 'Select variety',
+                    widget.selectedVariety ?? 'ප්‍රභේදය තෝරන්න',
                     style: AppTextStyles.titleSmall.copyWith(
                       color: widget.selectedVariety != null
                           ? AppColors.textPrimary
@@ -346,7 +338,7 @@ class _ItemSelectorState extends State<ItemSelector> {
       controller: _customVarietyController,
       enabled: widget.isEnabled,
       decoration: InputDecoration(
-        hintText: 'Enter variety name',
+        hintText: 'ප්‍රභේදයේ නම ඇතුළත් කරන්න',
         prefixIcon: const Icon(Icons.eco),
         suffixIcon: IconButton(
           icon: const Icon(Icons.check),

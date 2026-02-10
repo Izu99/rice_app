@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../domain/entities/customer_entity.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../customers/presentation/cubit/customers_cubit.dart';
 import '../../../customers/presentation/cubit/customers_state.dart';
+import '../cubit/sell_cubit.dart';
+import '../cubit/sell_state.dart';
 
 class SellCustomerSelectionScreen extends StatefulWidget {
   const SellCustomerSelectionScreen({super.key});
@@ -25,11 +28,12 @@ class _SellCustomerSelectionScreenState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final cubit = context.read<CustomersCubit>();
-      cubit.loadCustomers().then((_) {
-        cubit.filterByType(CustomerType.buyer);
-      });
+      // Clear any existing filters first to ensure a clean state
+      cubit.clearFilters();
+      await cubit.loadCustomers();
+      cubit.filterByType(CustomerType.buyer);
     });
   }
 
@@ -44,7 +48,7 @@ class _SellCustomerSelectionScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Select Selling Customer'),
+        title: Text(SiStrings.selectCustomer),
         backgroundColor: AppColors.cardSell,
         foregroundColor: AppColors.white,
         elevation: 0,
@@ -76,7 +80,7 @@ class _SellCustomerSelectionScreenState
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search by name or phone...',
+                          hintText: SiStrings.searchHint,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
@@ -111,9 +115,9 @@ class _SellCustomerSelectionScreenState
                           if (state.filteredCustomers.isEmpty) {
                             return EmptyStateWidget(
                               icon: Icons.person_off_outlined,
-                              title: 'No Customers Found',
-                              subtitle: 'Add a new selling customer to start',
-                              actionLabel: 'Add New Customer',
+                              title: SiStrings.noCustomersFound,
+                              subtitle: 'විකිණීම ආරම්භ කිරීමට නව පාරිභෝගිකයෙකු එක් කරන්න',
+                              actionLabel: SiStrings.addNewCustomer,
                               onAction: () =>
                                   context.pushNamed('sellAddCustomer'),
                             );
@@ -137,11 +141,11 @@ class _SellCustomerSelectionScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed('sellAddCustomer'),
-        icon: const Icon(Icons.person_add),
-        label: const Text('New Customer'),
+        child: const Icon(Icons.add),
         backgroundColor: AppColors.cardSell,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -153,12 +157,12 @@ class _SellCustomerSelectionScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Who are you selling to?',
+            'ඔබ විකුණන්නේ කාටද?',
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 4),
           Text(
-            'Search or select from list',
+            SiStrings.searchOrSelect,
             style: AppTextStyles.headlineSmall.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -226,7 +230,7 @@ class _SellCustomerSelectionScreenState
           children: [
             IconButton(
               icon: const Icon(Icons.info_outline, color: AppColors.cardSell),
-              tooltip: 'View Profile',
+              tooltip: SiStrings.viewProfile,
               onPressed: () {
                 context.pushNamed('customerDetail',
                     pathParameters: {'id': customer.id});
@@ -242,9 +246,8 @@ class _SellCustomerSelectionScreenState
           if (context.canPop()) {
             context.pop(customerModel);
           } else {
-            // Need to implement SellCubit similar to BuyCubit
-            // context.read<SellCubit>().selectCustomer(customerModel);
-            // context.pushReplacementNamed('sellProcess');
+            context.read<SellCubit>().selectCustomer(customerModel);
+            context.pushReplacementNamed('sellProcess');
           }
         },
       ),

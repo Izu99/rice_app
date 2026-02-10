@@ -3,8 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 import '../widgets/report_card.dart';
@@ -48,7 +52,7 @@ class _ReportsScreenState extends State<ReportsScreen>
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            title: const Text('Reports'),
+            title: Text(SiStrings.reports),
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.white,
           ),
@@ -65,14 +69,14 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const SizedBox(height: 24),
 
                   // Report types
-                  Text('Reports',
+                  Text(SiStrings.reports,
                       style: AppTextStyles.titleMedium
                           .copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
 
                   ReportCard(
-                    title: 'Daily Report',
-                    subtitle: 'දෛනික වාර්තාව',
+                    title: 'දෛනික වාර්තාව', // Daily Report
+                    subtitle: 'Daily Report',
                     icon: Icons.today,
                     color: AppColors.primary,
                     onTap: () => context.push('/reports/daily'),
@@ -80,8 +84,8 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const SizedBox(height: 12),
 
                   ReportCard(
-                    title: 'Monthly Report',
-                    subtitle: 'මාසික වාර්තාව',
+                    title: 'මාසික වාර්තාව', // Monthly Report
+                    subtitle: 'Monthly Report',
                     icon: Icons.calendar_month,
                     color: AppColors.success,
                     onTap: () => context.push('/reports/monthly'),
@@ -89,8 +93,8 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const SizedBox(height: 12),
 
                   ReportCard(
-                    title: 'Stock Report',
-                    subtitle: 'තොග වාර්තාව',
+                    title: 'තොග වාර්තාව', // Stock Report
+                    subtitle: 'Stock Report',
                     icon: Icons.inventory,
                     color: AppColors.warning,
                     onTap: () {},
@@ -98,8 +102,8 @@ class _ReportsScreenState extends State<ReportsScreen>
                   const SizedBox(height: 12),
 
                   ReportCard(
-                    title: 'Customer Report',
-                    subtitle: 'පාරිභෝගික වාර්තාව',
+                    title: 'පාරිභෝගික වාර්තාව', // Customer Report
+                    subtitle: 'Customer Report',
                     icon: Icons.people,
                     color: AppColors.info,
                     onTap: () {},
@@ -127,20 +131,20 @@ class _ReportsScreenState extends State<ReportsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Today\'s Summary',
+          Text(SiStrings.todaySummary,
               style:
                   AppTextStyles.titleMedium.copyWith(color: AppColors.white)),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem('Sales', 'Rs. ${_format(today['totalSell'] ?? 0)}',
+              _buildStatItem(SiStrings.sell, 'Rs. ${_format(today['totalSell'] ?? 0)}',
                   Icons.trending_up),
               _buildStatItem(
-                  'Purchases',
+                  SiStrings.buy,
                   'Rs. ${_format(today['totalBuy'] ?? 0)}',
                   Icons.trending_down),
-              _buildStatItem('Profit', 'Rs. ${_format(today['profit'] ?? 0)}',
+              _buildStatItem('ලාභය', 'Rs. ${_format(today['profit'] ?? 0)}',
                   Icons.account_balance_wallet),
             ],
           ),
@@ -170,3 +174,4 @@ class _ReportsScreenState extends State<ReportsScreen>
     return v.toStringAsFixed(0);
   }
 }
+

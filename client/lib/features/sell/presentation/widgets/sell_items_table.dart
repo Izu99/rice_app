@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../cubit/sell_state.dart';
 
 class SellItemsTable extends StatelessWidget {
@@ -52,7 +53,7 @@ class SellItemsTable extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Cart is empty',
+            SiStrings.cartIsEmpty,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -60,7 +61,7 @@ class SellItemsTable extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Select items from stock to add',
+            'එක් කිරීමට තොගයෙන් අයිතම තෝරන්න',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[500],
@@ -220,7 +221,7 @@ class _SellItemRow extends StatelessWidget {
                     // Bags
                     _DetailChip(
                       icon: Icons.shopping_bag_outlined,
-                      label: '${item.bags} bags',
+                      label: '${item.bags} ${SiStrings.bags}',
                     ),
                     const SizedBox(width: 8),
 

@@ -3,9 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../cubit/profile_cubit.dart';
@@ -77,19 +81,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 24),
 
                     // Account Section
-                    _buildSectionTitle('Account', 'ගිණුම'),
+                    _buildSectionTitle('ගිණුම', 'Account'),
                     const SizedBox(height: 12),
                     _buildAccountSection(state),
                     const SizedBox(height: 24),
 
                     // Settings Section
-                    _buildSectionTitle('Settings', 'සැකසුම්'),
+                    _buildSectionTitle('සැකසුම්', 'Settings'),
                     const SizedBox(height: 12),
                     _buildSettingsSection(state),
                     const SizedBox(height: 24),
 
                     // Support Section
-                    _buildSectionTitle('Support', 'සහාය'),
+                    _buildSectionTitle('සහාය', 'Support'),
                     const SizedBox(height: 12),
                     _buildSupportSection(),
                     const SizedBox(height: 24),
@@ -117,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       pinned: true,
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.white,
-      title: const Text('Profile'),
+      title: Text(SiStrings.profile),
       actions: [
         if (state.pendingSyncCount > 0)
           Badge(
@@ -180,7 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'User',
+                  user?.name ?? 'පරිශීලකයා', // User
                   style: AppTextStyles.titleLarge.copyWith(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
@@ -204,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    user?.roleDisplayName ?? 'Operator',
+                    _getRoleDisplayName(user?.role),
                     style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.white,
                     ),
@@ -230,6 +234,19 @@ class _ProfileScreenState extends State<ProfileScreen>
         ],
       ),
     );
+  }
+
+  String _getRoleDisplayName(dynamic role) {
+    if (role == null) return 'ක්‍රියාකරු'; // Operator
+    final roleStr = role.toString().split('.').last;
+    switch (roleStr) {
+      case 'admin':
+        return 'පරිපාලක'; // Admin
+      case 'operator':
+        return 'ක්‍රියාකරු'; // Operator
+      default:
+        return 'ක්‍රියාකරු';
+    }
   }
 
   Widget _buildAvatarPlaceholder(dynamic user) {
@@ -284,28 +301,28 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           ProfileMenuItem(
             icon: Icons.person_outline,
-            title: 'Edit Profile',
-            subtitle: 'Change name, email, photo',
+            title: 'ගිණුම යාවත්කාලීන කරන්න', // Edit Profile
+            subtitle: 'නම, ඊමේල්, ඡායාරූපය වෙනස් කරන්න',
             onTap: () => _showEditProfileDialog(state),
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.lock_outline,
-            title: 'Change Password',
-            subtitle: 'Update your password',
+            title: 'මුරපදය වෙනස් කරන්න', // Change Password
+            subtitle: 'ඔබගේ මුරපදය යාවත්කාලීන කරන්න',
             onTap: _showChangePasswordDialog,
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.business,
-            title: 'Company Info',
-            subtitle: state.company?.name ?? 'Not set',
+            title: 'ආයතනයේ විස්තර', // Company Info
+            subtitle: state.company?.name ?? 'ඇතුළත් කර නැත',
             onTap: () {
               if (state.company != null) {
                 _showCompanyDialog(state);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('No company info available')),
+                  const SnackBar(content: Text('ආයතනයේ විස්තර ලබා ගත නොහැක')),
                 );
               }
             },
@@ -331,8 +348,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           ProfileMenuItem(
             icon: Icons.dark_mode_outlined,
-            title: 'Dark Mode',
-            subtitle: 'Enable dark theme',
+            title: 'අඳුරු තේමාව', // Dark Mode
+            subtitle: 'Dark Mode සක්‍රීය කරන්න',
             trailing: Switch(
               value: state.isDarkMode,
               onChanged: (value) {
@@ -344,8 +361,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Push notifications',
+            title: 'දැනුම්දීම්', // Notifications
+            subtitle: 'Push Notifications',
             trailing: Switch(
               value: state.notificationsEnabled,
               onChanged: (value) {
@@ -358,7 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ProfileMenuItem(
             icon: Icons.fingerprint,
             title: 'Biometric Login',
-            subtitle: 'Use fingerprint/face ID',
+            subtitle: 'ඇඟිලි සලකුණු/මුහුණ හඳුනාගැනීම භාවිතා කරන්න',
             trailing: Switch(
               value: state.biometricEnabled,
               onChanged: (value) {
@@ -370,7 +387,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.language,
-            title: 'Language',
+            title: 'භාෂාව', // Language
             subtitle: state.language == 'en' ? 'English' : 'සිංහල',
             onTap: _showLanguageDialog,
           ),
@@ -395,8 +412,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           ProfileMenuItem(
             icon: Icons.help_outline,
-            title: 'Help & FAQ',
-            subtitle: 'Get help and answers',
+            title: 'උදව් සහ නිතර අසන පැණ', // Help & FAQ
+            subtitle: 'සහාය ලබා ගන්න',
             onTap: () {
               // TODO: Navigate to help
             },
@@ -404,8 +421,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.description_outlined,
-            title: 'Terms & Privacy',
-            subtitle: 'Read our policies',
+            title: 'කොන්දේසි සහ රහස්‍යතාව', // Terms & Privacy
+            subtitle: 'අපගේ ප්‍රතිපත්ති කියවන්න',
             onTap: () {
               // TODO: Navigate to terms
             },
@@ -413,8 +430,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.feedback_outlined,
-            title: 'Send Feedback',
-            subtitle: 'Help us improve',
+            title: 'ප්‍රතිචාර එවන්න', // Send Feedback
+            subtitle: 'අපව වැඩිදියුණු කිරීමට උදව් වන්න',
             onTap: () {
               // TODO: Show feedback dialog
             },
@@ -438,8 +455,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
       child: ProfileMenuItem(
         icon: Icons.logout,
-        title: 'Logout',
-        subtitle: 'Sign out of your account',
+        title: SiStrings.logout,
+        subtitle: 'ඔබගේ ගිණුමෙන් ඉවත් වන්න',
         iconColor: AppColors.error,
         titleColor: AppColors.error,
         onTap: _handleLogout,
@@ -458,14 +475,14 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
           ),
           Text(
-            'Version ${state.appVersion}',
+            '${SiStrings.version} ${state.appVersion}',
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textHint,
             ),
           ),
           if (state.lastSyncTime != null)
             Text(
-              'Last sync: ${state.formattedLastSync}',
+              'අවසන් වරට සමමුහුර්ත කළේ: ${state.formattedLastSync}',
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textHint,
               ),
@@ -482,14 +499,14 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Profile'),
+        title: const Text('ගිණුම යාවත්කාලීන කිරීම'), // Edit Profile
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Name',
+                labelText: 'නම', // Name
                 prefixIcon: Icon(Icons.person),
               ),
             ),
@@ -497,7 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
-                labelText: 'Email',
+                labelText: 'විද්‍යුත් තැපෑල (Email)', // Email
                 prefixIcon: Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
@@ -507,7 +524,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(SiStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -517,7 +534,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     email: emailController.text,
                   );
             },
-            child: const Text('Save'),
+            child: Text(SiStrings.save),
           ),
         ],
       ),
@@ -544,7 +561,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
           builder: (context, state) {
             return AlertDialog(
-              title: const Text('Change Password'),
+              title: Text(SiStrings.resetPassword),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -552,7 +569,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     controller: currentController,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'Current Password',
+                      labelText: 'වත්මන් මුරපදය', // Current Password
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
                   ),
@@ -561,7 +578,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     controller: newController,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'New Password',
+                      labelText: 'නව මුරපදය', // New Password
                       prefixIcon: Icon(Icons.lock),
                     ),
                   ),
@@ -570,7 +587,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     controller: confirmController,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: 'මුරපදය නැවත ඇතුළත් කරන්න', // Confirm Password
                       prefixIcon: Icon(Icons.lock),
                     ),
                   ),
@@ -587,7 +604,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(SiStrings.cancel),
                 ),
                 ElevatedButton(
                   onPressed: state.isChangingPassword
@@ -596,7 +613,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           if (newController.text != confirmController.text) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Passwords do not match'),
+                                content: Text('මුරපද එකිනෙකට නොගැලපේ'), // Passwords do not match
                                 backgroundColor: AppColors.error,
                               ),
                             );
@@ -613,7 +630,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Change'),
+                      : const Text('වෙනස් කරන්න'), // Change
                 ),
               ],
             );
@@ -634,7 +651,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Company Info'),
+        title: const Text('ආයතනයේ විස්තර'), // Company Info
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -642,7 +659,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Company Name',
+                  labelText: 'ආයතනයේ නම', // Company Name
                   prefixIcon: Icon(Icons.business),
                 ),
               ),
@@ -650,7 +667,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               TextField(
                 controller: phoneController,
                 decoration: const InputDecoration(
-                  labelText: 'Phone',
+                  labelText: 'දුරකථන අංකය', // Phone
                   prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
@@ -659,7 +676,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               TextField(
                 controller: addressController,
                 decoration: const InputDecoration(
-                  labelText: 'Address',
+                  labelText: 'ලිපිනය', // Address
                   prefixIcon: Icon(Icons.location_on),
                 ),
                 maxLines: 2,
@@ -670,7 +687,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(SiStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -681,7 +698,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     address: addressController.text,
                   );
             },
-            child: const Text('Save'),
+            child: Text(SiStrings.save),
           ),
         ],
       ),
@@ -692,7 +709,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: const Text('භාෂාව තෝරන්න'), // Select Language
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -701,7 +718,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               title: const Text('English'),
               onTap: () {
                 Navigator.pop(context);
-                this.context.read<ProfileCubit>().changeLanguage('en');
+                context.read<ProfileCubit>().changeLanguage('en');
               },
             ),
             ListTile(
@@ -709,7 +726,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               title: const Text('සිංහල'),
               onTap: () {
                 Navigator.pop(context);
-                this.context.read<ProfileCubit>().changeLanguage('si');
+                context.read<ProfileCubit>().changeLanguage('si');
               },
             ),
           ],
@@ -726,3 +743,4 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 }
+

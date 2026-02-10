@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/sync_status_indicator.dart';
 import '../../../../core/sync/sync_status.dart';
 import '../cubit/sell_cubit.dart';
@@ -48,17 +49,17 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
   final List<_SellNavItem> _navItems = [
     _SellNavItem(
       icon: Icons.point_of_sale,
-      label: 'Sell',
+      label: SiStrings.sell,
       route: '/sell',
     ),
     _SellNavItem(
       icon: Icons.inventory_2_outlined,
-      label: 'Stock',
+      label: SiStrings.stock,
       route: '/sell/stock',
     ),
     _SellNavItem(
       icon: Icons.receipt_long_outlined,
-      label: 'History',
+      label: SiStrings.history,
       route: '/sell/history',
     ),
   ];
@@ -75,7 +76,7 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
               action: SnackBarAction(
-                label: 'Dismiss',
+                label: 'ඉවත් කරන්න',
                 textColor: Colors.white,
                 onPressed: () {
                   context.read<SellCubit>().clearError();
@@ -119,9 +120,9 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sell',
-            style: TextStyle(
+          Text(
+            SiStrings.sell,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -181,19 +182,19 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
           icon: const Icon(Icons.more_vert, color: Colors.white),
           onSelected: (value) => _handleMenuAction(context, value),
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'refresh',
               child: ListTile(
-                leading: Icon(Icons.refresh),
-                title: Text('Refresh Stock'),
+                leading: const Icon(Icons.refresh),
+                title: Text(SiStrings.refreshStock),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'clear',
               child: ListTile(
-                leading: Icon(Icons.clear_all),
-                title: Text('Clear All'),
+                leading: const Icon(Icons.clear_all),
+                title: Text(SiStrings.clearAll),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -299,14 +300,14 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Discard Changes?'),
+          title: Text(SiStrings.discardChanges),
           content: const Text(
-            'You have items in your cart. Are you sure you want to go back?',
+            'ඔබේ කාඩ්පතේ අයිතම පවතී. ඔබට විශ්වාසද?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(SiStrings.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -317,7 +318,7 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.error,
               ),
-              child: const Text('Discard'),
+              child: const Text('ඉවත් කරන්න'),
             ),
           ],
         ),
@@ -355,12 +356,12 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All Items?'),
-        content: const Text('This will remove all items from your cart.'),
+        title: const Text('සියලු අයිතම ඉවත් කරන්නද?'),
+        content: const Text('මෙමඟින් ඔබේ කාඩ්පතේ සියලුම අයිතම මකා දැමෙනු ඇත.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(SiStrings.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -370,7 +371,7 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,
             ),
-            child: const Text('Clear'),
+            child: const Text('ඉවත් කරන්න'),
           ),
         ],
       ),
@@ -426,13 +427,13 @@ class _CartSummarySheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Cart Summary',
+                    SiStrings.cartSummary,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   Text(
-                    '${state.sellItems.length} items',
+                    '${state.sellItems.length} ${SiStrings.items}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -471,9 +472,9 @@ class _CartSummarySheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Grand Total:',
-                    style: TextStyle(
+                  Text(
+                    '${SiStrings.total}:',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -503,9 +504,9 @@ class _CartSummarySheet extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: const Text(
-                    'Continue to Checkout',
-                    style: TextStyle(fontSize: 16),
+                  child: Text(
+                    SiStrings.continueToCheckout,
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ),

@@ -183,7 +183,7 @@ class BuyCubit extends Cubit<BuyState> {
     emit(state.copyWith(
       selectedCustomer: customer,
       selectedItemType: ItemType.paddy, // Mill only buys paddy
-      selectedVariety: 'Nadu', // Default variety
+      selectedVariety: 'නාඩු', // Default variety
       currentStep: BuyStep.selectItem,
       clearError: true,
     ));
@@ -354,7 +354,7 @@ class BuyCubit extends Cubit<BuyState> {
     final newItem = TempBuyItem(
       id: _uuid.v4(),
       itemType: state.selectedItemType!,
-      variety: (state.selectedVariety ?? 'Nadu').trim(),
+      variety: (state.selectedVariety ?? 'නාඩු').trim(),
       stockItemId: state.currentStockItemId ?? '',
       bagWeights: bagWeights,
       totalWeight: state.currentWeight,
@@ -732,7 +732,7 @@ class BuyCubit extends Cubit<BuyState> {
       recentTransactions: [], // Clear history table
       selectedCustomer: null, // Deselect customer
       selectedItemType: ItemType.paddy, // Reset type
-      selectedVariety: 'Nadu', // Reset variety
+      selectedVariety: 'නාඩු', // Reset variety
       currentStockItemId: null,
       tempItems: [], // Ensure temp items are cleared
       currentWeight: 0.0,

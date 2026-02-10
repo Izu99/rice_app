@@ -3,9 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../data/models/stock_item_model.dart';
@@ -108,23 +112,13 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
           }
         },
       ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            state.currentStep == SellStep.review
-                ? 'Review Sale'
-                : 'Sell / Sales',
-            style: AppTextStyles.titleMedium
-                .copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            'විකුණුම්',
-            style: AppTextStyles.bodySmall
-                .copyWith(color: AppColors.white.withOpacity(0.8)),
-          ),
-        ],
-      ),
+      title: Text(
+      state.currentStep == SellStep.review
+          ? SiStrings.reviewSale
+          : SiStrings.sellRice,
+      style: AppTextStyles.titleMedium
+          .copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
+    ),
     );
   }
 
@@ -136,8 +130,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
         children: [
           // 1. Customer Selector (Buyer)
           CustomerSelector(
-            title: 'Buyer',
-            subtitle: 'පාරිභෝගිකයා (මිලදී ගන්නා)',
+            title: SiStrings.buyer,
+            subtitle: '',
             color: AppColors.cardSell,
             colorDark: AppColors.cardSellDark,
             selectedCustomer: state.selectedCustomer,
@@ -176,7 +170,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Sell Details',
+            SiStrings.sellDetails,
             style: AppTextStyles.titleSmall.copyWith(
                 fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
@@ -185,7 +179,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
           DropdownButtonFormField<ItemType>(
             initialValue: state.selectedItemType,
             decoration: InputDecoration(
-              labelText: 'Item Type',
+              labelText: 'වර්ගය', // Item Type
               prefixIcon: const Icon(Icons.category, color: AppColors.cardSell),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -199,14 +193,14 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: ItemType.paddy,
-                child: Text('Paddy'),
+                child: Text(SiStrings.paddy),
               ),
               DropdownMenuItem(
                 value: ItemType.rice,
-                child: Text('Rice'),
+                child: Text(SiStrings.rice),
               ),
             ],
             onChanged: (value) {
@@ -221,7 +215,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
             initialValue: state.selectedStockItem,
             isExpanded: true,
             decoration: InputDecoration(
-              labelText: 'Select Variety from Stock',
+              labelText: 'තොගයෙන් තෝරන්න', // Select Variety from Stock
               prefixIcon: const Icon(Icons.grass, color: AppColors.cardSell),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -244,7 +238,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                   children: [
                     Expanded(
                       child: Text(
-                        '${item.itemName} (${item.currentQuantity}kg avail)',
+                        '${item.itemName} (${item.currentQuantity}kg ඉතිරිව ඇත)',
                         style: const TextStyle(
                             fontWeight: FontWeight.w500, fontSize: 13),
                         overflow: TextOverflow.ellipsis,
@@ -273,7 +267,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 fontSize: 18,
                 color: AppColors.success),
             decoration: InputDecoration(
-              labelText: 'Selling Price (Rs/kg)',
+              labelText: '${SiStrings.sellingPrice} (රු/kg)',
               prefixIcon:
                   const Icon(Icons.payments_outlined, color: AppColors.success),
               border: OutlineInputBorder(
@@ -296,7 +290,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 fontSize: 18,
                 color: AppColors.cardSell),
             decoration: InputDecoration(
-              labelText: 'Total Weight to Sell',
+              labelText: '${SiStrings.totalWeightToSell} (kg)',
               suffixText: 'kg',
               prefixIcon:
                   const Icon(Icons.scale_outlined, color: AppColors.cardSell),
@@ -317,7 +311,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
-                'Note: Approx. ${((state.inputQuantity / (state.selectedStockItem!.currentQuantity / state.selectedStockItem!.currentBags))).round().clamp(1, state.selectedStockItem!.currentBags)} bags will be deducted.',
+                'සටහන: දළ වශයෙන් මලු ${((state.inputQuantity / (state.selectedStockItem!.currentQuantity / state.selectedStockItem!.currentBags))).round().clamp(1, state.selectedStockItem!.currentBags)} ක් තොගයෙන් අඩු වේ.',
                 style: const TextStyle(
                     color: Colors.blue,
                     fontWeight: FontWeight.bold,
@@ -340,8 +334,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
-              child: const Text('COMPLETE SALE',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              child: Text(SiStrings.completeSale,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ),
           ),
         ],
@@ -369,8 +363,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Grand Total',
-                      style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(SiStrings.total,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
                   Text('Rs. ${state.grandTotal.toStringAsFixed(2)}',
                       style: const TextStyle(
                           fontWeight: FontWeight.bold,
@@ -389,8 +383,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Finalize',
-                    style: TextStyle(
+                child: Text(SiStrings.confirm,
+                    style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
@@ -418,8 +412,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                   color: AppColors.success, size: 64),
             ),
             const SizedBox(height: 24),
-            const Text('Sale Complete!',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            Text(SiStrings.saleComplete,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
@@ -435,11 +429,11 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                     borderRadius: BorderRadius.circular(12)),
               ),
               child:
-                  const Text('NEW SALE', style: TextStyle(color: Colors.white)),
+                  Text(SiStrings.newSale, style: const TextStyle(color: Colors.white)),
             ),
             TextButton(
               onPressed: () => context.goNamed('dashboard'),
-              child: const Text('Back to Home'),
+              child: Text(SiStrings.backToHome),
             ),
           ],
         ),
@@ -447,3 +441,4 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
     );
   }
 }
+

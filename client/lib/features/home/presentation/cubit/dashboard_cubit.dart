@@ -12,6 +12,10 @@ import '../../../../data/models/transaction_model.dart';
 import '../../../../data/models/expense_model.dart';
 import 'dashboard_state.dart';
 
+import '../../../../domain/repositories/expense_repository.dart';
+import '../../../../domain/entities/transaction_entity.dart';
+import '../../../../domain/entities/expense_entity.dart';
+
 /// Dashboard Cubit - Manages dashboard business logic
 class DashboardCubit extends Cubit<DashboardState> {
   final TransactionRepository _transactionRepository;
@@ -19,6 +23,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   final CustomerRepository _customerRepository;
   final ReportRepository _reportRepository;
   final AuthRepository _authRepository;
+  final ExpenseRepository _expenseRepository;
 
   DashboardCubit({
     required TransactionRepository transactionRepository,
@@ -26,11 +31,13 @@ class DashboardCubit extends Cubit<DashboardState> {
     required CustomerRepository customerRepository,
     required ReportRepository reportRepository,
     required AuthRepository authRepository,
+    required ExpenseRepository expenseRepository,
   })  : _transactionRepository = transactionRepository,
         _stockRepository = stockRepository,
         _customerRepository = customerRepository,
         _reportRepository = reportRepository,
         _authRepository = authRepository,
+        _expenseRepository = expenseRepository,
         super(DashboardState.initial());
 
   /// Load dashboard data
@@ -172,6 +179,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         _loadCustomerSummary(),
         _loadSyncStatus(),
         _loadLocalStockData(), // Override with local stock data
+        _loadLocalActivityData(), // Override stats with local data
       ]);
 
       emit(state.copyWith(status: DashboardStatus.loaded));
@@ -295,6 +303,152 @@ class DashboardCubit extends Cubit<DashboardState> {
   /// Clear error
   void clearError() {
     emit(state.copyWith(clearError: true));
+  }
+
+  /// Load local activity (transactions, expenses) for graph and summaries
+  Future<void> _loadLocalActivityData() async {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final startOfMonth = DateTime(now.year, now.month, 1);
+      
+      // We need data for the graph (last 7 days including today)
+      // AND for the month stats (from startOfMonth)
+      final sevenDaysAgo = today.subtract(const Duration(days: 6));
+      final fetchStart = startOfMonth.isBefore(sevenDaysAgo) ? startOfMonth : sevenDaysAgo;
+
+      // Fetch transactions
+      final txnResult = await _transactionRepository.getTransactionsByDateRange(
+        startDate: fetchStart,
+        endDate: now,
+      );
+
+      // Fetch expenses
+      final expResult = await _expenseRepository.getExpenses(
+        startDate: fetchStart,
+        endDate: now,
+      );
+
+      // Process Transactions
+      txnResult.fold(
+        (l) => debugPrint('⚠️ [DashboardCubit] create local transactions error: ${l.message}'),
+        (transactions) {
+            // Filter valid transactions
+            final validTxns = transactions.where((t) => t.status != TransactionStatus.cancelled).toList();
+
+            // Handle Expenses
+            List<ExpenseEntity> expenses = [];
+            expResult.fold(
+              (l) => debugPrint('⚠️ [DashboardCubit] create local expenses error: ${l.message}'),
+              (r) => expenses = r,
+            );
+
+
+            // 1. Weekly Activity (Last 7 days)
+            final Map<int, Map<String, double>> localWeeklyActivity = {};
+            final List<Map<String, dynamic>> localWeeklyTrend = [];
+            
+            for (int i = 0; i < 7; i++) {
+              final date = today.subtract(Duration(days: 6 - i));
+              
+              double buy = 0;
+              double sell = 0;
+              
+              for (final t in validTxns) {
+                  final tDate = t.transactionDate;
+                  if (tDate.year == date.year && tDate.month == date.month && tDate.day == date.day) {
+                      if (t.type == TransactionType.buy) buy += t.totalAmount;
+                      if (t.type == TransactionType.sell) sell += t.totalAmount;
+                  }
+              }
+              localWeeklyActivity[i] = {'buy': buy, 'sell': sell};
+              localWeeklyTrend.add({
+                '_id': '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                'buy': buy,
+                'sell': sell,
+              });
+            }
+
+            // 2. Month & Today Stats
+            double localTodayPurchases = 0;
+            double localTodaySales = 0;
+            int localTodayBuyCount = 0;
+            int localTodaySellCount = 0;
+            
+            double localMonthPurchases = 0;
+            double localMonthSales = 0;
+            int localMonthBuyCount = 0;
+            int localMonthSellCount = 0;
+
+            // Transactions totals
+            for (final t in validTxns) {
+               final tDate = t.transactionDate;
+               
+               // Month
+               if (tDate.year == today.year && tDate.month == today.month) {
+                   if (t.type == TransactionType.buy) {
+                       localMonthPurchases += t.totalAmount;
+                       localMonthBuyCount++;
+                   } else if (t.type == TransactionType.sell) {
+                       localMonthSales += t.totalAmount;
+                       localMonthSellCount++;
+                   }
+               }
+
+               // Today
+               if (tDate.year == today.year && tDate.month == today.month && tDate.day == today.day) {
+                   if (t.type == TransactionType.buy) {
+                       localTodayPurchases += t.totalAmount;
+                       localTodayBuyCount++;
+                   } else if (t.type == TransactionType.sell) {
+                       localTodaySales += t.totalAmount;
+                       localTodaySellCount++;
+                   }
+               }
+            }
+
+            // Expenses totals
+            double localTodayExpenses = 0;
+            double localMonthExpenses = 0;
+
+            for (final e in expenses) {
+                final eDate = e.date;
+                // Month
+                if (eDate.year == today.year && eDate.month == today.month) {
+                    localMonthExpenses += e.amount;
+                }
+                // Today
+                if (eDate.year == today.year && eDate.month == today.month && eDate.day == today.day) {
+                    localTodayExpenses += e.amount;
+                }
+            }
+            
+            // Calculate Profits
+            final localTodayProfit = localTodaySales - localTodayPurchases - localTodayExpenses;
+            final localMonthProfit = localMonthSales - localMonthPurchases - localMonthExpenses;
+
+            emit(state.copyWith(
+                weeklyActivity: localWeeklyActivity,
+                weeklyTrend: localWeeklyTrend,
+                todayPurchases: localTodayPurchases,
+                todaySales: localTodaySales,
+                todayExpenses: localTodayExpenses,
+                todayProfit: localTodayProfit,
+                todayBuyCount: localTodayBuyCount,
+                todaySellCount: localTodaySellCount,
+                monthlyPurchases: localMonthPurchases,
+                monthlySales: localMonthSales,
+                monthlyExpenses: localMonthExpenses,
+                monthlyProfit: localMonthProfit,
+                monthlyBuyCount: localMonthBuyCount,
+                monthlySellCount: localMonthSellCount,
+            ));
+
+        }
+      );
+    } catch (e) {
+      debugPrint('⚠️ [DashboardCubit] Error in _loadLocalActivityData: $e');
+    }
   }
 
   /// Load stock data from local database (Source of Truth)

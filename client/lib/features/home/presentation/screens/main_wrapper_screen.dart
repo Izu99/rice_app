@@ -7,8 +7,12 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
+import '../../../../routes/route_names.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
+import '../../../profile/presentation/cubit/profile_state.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 
@@ -40,6 +44,11 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
+
+    // Automatically refresh dashboard when navigating back to home
+    if (index == 0) {
+      context.read<DashboardCubit>().loadDashboard();
+    }
   }
 
   @override
@@ -52,18 +61,23 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
           context.go('/login');
         }
       },
-      child: BlocBuilder<AuthCubit, AuthState>(
-        buildWhen: (previous, current) => previous.user != current.user,
-        builder: (context, authState) {
-          final isAdmin = authState.user?.isAdmin ?? false;
+      child: BlocBuilder<ProfileCubit, ProfileState>(
+        buildWhen: (previous, current) => previous.language != current.language,
+        builder: (context, profileState) {
+          return BlocBuilder<AuthCubit, AuthState>(
+            buildWhen: (previous, current) => previous.user != current.user,
+            builder: (context, authState) {
+              final isAdmin = authState.user?.isAdmin ?? false;
 
-          return Scaffold(
-            body: widget.navigationShell,
-            bottomNavigationBar:
-                !isAdmin ? _buildBottomNavigationBar(isAdmin) : null,
-            floatingActionButton: isAdmin ? null : _buildSyncFab(),
-            floatingActionButtonLocation:
-                isAdmin ? null : FloatingActionButtonLocation.centerDocked,
+              return Scaffold(
+                body: widget.navigationShell,
+                bottomNavigationBar:
+                    !isAdmin ? _buildBottomNavigationBar(isAdmin) : null,
+                floatingActionButton: isAdmin ? null : _buildSyncFab(),
+                floatingActionButtonLocation:
+                    isAdmin ? null : FloatingActionButtonLocation.centerDocked,
+              );
+            },
           );
         },
       ),
@@ -108,32 +122,32 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                         index: 0,
                         icon: LucideIcons.house,
                         activeIcon: LucideIcons.house,
-                        label: 'Home',
+                        label: 'මුල් පිටුව', // Home
                       ),
                       _buildNavItem(
                         index: 1,
                         icon: LucideIcons.package,
                         activeIcon: LucideIcons.package,
-                        label: 'Stock',
+                        label: SiStrings.stock,
                       ),
                       if (!isAdmin) const SizedBox(width: 48), // Space for FAB
                       _buildNavItem(
                         index: 2,
                         icon: LucideIcons.activity,
                         activeIcon: LucideIcons.activity,
-                        label: 'Reports',
+                        label: SiStrings.reports,
                       ),
                       _buildNavItem(
                         index: 3,
                         icon: LucideIcons.receipt,
                         activeIcon: LucideIcons.receipt,
-                        label: 'Expenses',
+                        label: SiStrings.expenses,
                       ),
                       _buildNavItem(
                         index: 4,
                         icon: LucideIcons.user,
                         activeIcon: LucideIcons.user,
-                        label: 'Profile',
+                        label: SiStrings.profile,
                       ),
                     ],
                   ),
@@ -272,7 +286,7 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
 
               // Title
               Text(
-                'Quick Actions',
+                SiStrings.quickActions,
                 style: AppTextStyles.titleLarge.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -286,12 +300,15 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.shopping_cart,
-                      label: 'Buy',
-                      sublabel: 'මිලදී ගැනීම',
+                      label: SiStrings.buy,
+                      sublabel: 'Buy',
                       color: AppColors.success,
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(context);
-                        context.push('/buy');
+                        final result = await context.push<bool>('/buy');
+                        if (result == true && mounted) {
+                          context.read<DashboardCubit>().loadDashboard();
+                        }
                       },
                     ),
                   ),
@@ -299,12 +316,15 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.sell,
-                      label: 'Sell',
-                      sublabel: 'විකිණීම',
+                      label: SiStrings.sell,
+                      sublabel: 'Sell',
                       color: AppColors.info,
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(context);
-                        context.push('/sell');
+                        final result = await context.push<bool>('/sell');
+                        if (result == true && mounted) {
+                          context.read<DashboardCubit>().loadDashboard();
+                        }
                       },
                     ),
                   ),
@@ -318,12 +338,15 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.person_add,
-                      label: 'Add Customer',
-                      sublabel: 'පාරිභෝගිකයෙකු එක් කරන්න',
+                      label: 'නව ගනුදෙනුකරු', // New Customer
+                      sublabel: 'Add Customer',
                       color: AppColors.warning,
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(context);
-                        context.pushNamed('customerAdd');
+                        final result = await context.push<bool>(RouteNames.customerAdd);
+                        if (result == true && mounted) {
+                          context.read<DashboardCubit>().loadDashboard();
+                        }
                       },
                     ),
                   ),
@@ -331,12 +354,15 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.inventory,
-                      label: 'Add Stock',
-                      sublabel: 'තොගයට එක් කරන්න',
+                      label: 'තොග එක් කරන්න', // Add Stock
+                      sublabel: 'Add Stock',
                       color: AppColors.primary,
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(context);
-                        context.push('/stock/milling');
+                        final result = await context.push<bool>('/stock/milling');
+                        if (result == true && mounted) {
+                          context.read<DashboardCubit>().loadDashboard();
+                        }
                       },
                     ),
                   ),
@@ -350,12 +376,15 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.receipt_long,
-                      label: 'Add Expense',
-                      sublabel: 'වියදම් එක් කරන්න',
+                      label: 'වියදම් එක් කරන්න', // Add Expense
+                      sublabel: 'Add Expense',
                       color: AppColors.error,
-                      onTap: () {
+                      onTap: () async {
                         Navigator.pop(context);
-                        context.push('/expenses/add');
+                        final result = await context.push<bool>('/expenses/add');
+                        if (result == true && mounted) {
+                          context.read<DashboardCubit>().loadDashboard();
+                        }
                       },
                     ),
                   ),

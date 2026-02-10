@@ -238,7 +238,7 @@ class AppRouter {
             path: 'add-customer',
             name: 'buyAddCustomer',
             builder: (context, state) =>
-                const CustomerAddEditScreen(initialType: CustomerType.seller),
+                const CustomerAddEditScreen(initialType: CustomerType.both),
           ),
         ],
       ),
@@ -280,7 +280,7 @@ class AppRouter {
             path: 'add-customer',
             name: 'sellAddCustomer',
             builder: (context, state) =>
-                const CustomerAddEditScreen(initialType: CustomerType.buyer),
+                const CustomerAddEditScreen(initialType: CustomerType.both),
           ),
         ],
       ),

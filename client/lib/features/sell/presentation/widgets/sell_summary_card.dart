@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/constants/si_strings.dart';
 
 class SellSummaryCard extends StatelessWidget {
   final int totalItems;
@@ -47,7 +48,7 @@ class SellSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.inventory_2,
-                    label: 'Items',
+                    label: SiStrings.items,
                     value: '$totalItems',
                     iconColor: AppColors.info,
                   ),
@@ -60,7 +61,7 @@ class SellSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.shopping_bag,
-                    label: 'Bags',
+                    label: SiStrings.bags,
                     value: '$totalBags',
                     iconColor: AppColors.warning,
                   ),
@@ -73,7 +74,7 @@ class SellSummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryItem(
                     icon: Icons.scale,
-                    label: 'Weight',
+                    label: SiStrings.weight,
                     value: '${totalWeight.toStringAsFixed(1)} kg',
                     iconColor: AppColors.primary,
                   ),
@@ -94,7 +95,7 @@ class SellSummaryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Amount',
+                        SiStrings.total,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -132,14 +133,14 @@ class SellSummaryCard extends StatelessWidget {
                     ),
                     elevation: onCheckout != null ? 2 : 0,
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.shopping_cart_checkout),
-                      SizedBox(width: 8),
+                      const Icon(Icons.shopping_cart_checkout),
+                      const SizedBox(width: 8),
                       Text(
-                        'Checkout',
-                        style: TextStyle(
+                        SiStrings.checkout,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -240,7 +241,7 @@ class SellSummaryCardCompact extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '$totalItems items',
+                '$totalItems ${SiStrings.items}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -273,9 +274,9 @@ class SellSummaryCardCompact extends StatelessWidget {
                   vertical: 12,
                 ),
               ),
-              child: const Text(
-                'Checkout',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              child: Text(
+                SiStrings.checkout,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],

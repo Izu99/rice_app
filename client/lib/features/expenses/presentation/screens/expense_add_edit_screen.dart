@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/enums.dart';
@@ -51,16 +55,16 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       listener: (context, state) {
         if (state.status == ExpensesStatus.success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Expense added successfully'), backgroundColor: AppColors.success),
+            const SnackBar(content: Text('වියදම සාර්ථකව ඇතුළත් කරන ලදී'), backgroundColor: AppColors.success),
           );
-          context.pop();
+          context.pop(true);
           context.read<ExpensesCubit>().resetStatus();
         }
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Add New Expense'),
+          title: const Text('නව වියදමක් එක් කරන්න'), // Add New Expense
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
@@ -73,9 +77,9 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
               children: [
                 _buildModernInput(
                   controller: _titleController,
-                  label: 'Expense Title (Required)',
+                  label: 'වියදමේ විස්තරය (අනිවාර්යයි)',
                   icon: Icons.title,
-                  validator: (v) => v == null || v.isEmpty ? 'Please enter a title' : null,
+                  validator: (v) => v == null || v.isEmpty ? 'කරුණාකර විස්තරයක් ඇතුළත් කරන්න' : null,
                 ),
                 const SizedBox(height: 20),
                 
@@ -84,12 +88,12 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
 
                 _buildModernInput(
                   controller: _amountController,
-                  label: 'Amount (Rs.) (Required)',
+                  label: 'මුදල (රු.) (අනිවාර්යයි)',
                   icon: Icons.payments,
                   keyboardType: TextInputType.number,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please enter an amount';
-                    if (double.tryParse(v) == null) return 'Please enter a valid number';
+                    if (v == null || v.isEmpty) return 'කරුණාකර මුදලක් ඇතුළත් කරන්න';
+                    if (double.tryParse(v) == null) return 'කරුණාකර නිවැරදි මුදලක් ඇතුළත් කරන්න';
                     return null;
                   },
                 ),
@@ -100,7 +104,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
 
                 _buildModernInput(
                   controller: _notesController,
-                  label: 'Internal Notes (Optional)',
+                  label: 'වෙනත් සටහන් (අත්‍යවශ්‍ය නොවේ)',
                   icon: Icons.note_alt,
                   maxLines: 3,
                 ),
@@ -116,7 +120,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: const Text('SAVE EXPENSE', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    child: const Text('වියදම සුරකින්න', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                   ),
                 ),
               ],
@@ -126,6 +130,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       ),
     );
   }
+
 
   Widget _buildModernInput({
     required TextEditingController controller,
@@ -156,7 +161,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       value: _selectedCategory,
       isExpanded: true,
       decoration: InputDecoration(
-        labelText: 'Category (Required)',
+        labelText: 'කාණ්ඩය (අනිවාර්යයි)',
         prefixIcon: const Icon(Icons.category, color: AppColors.primary),
         filled: true,
         fillColor: Colors.grey.shade50,
@@ -165,7 +170,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       items: ExpenseCategory.values.map((cat) {
         return DropdownMenuItem(
           value: cat,
-          child: Text('${cat.displayName} (${cat.sinhalaName})'),
+          child: Text(cat.sinhalaName),
         );
       }).toList(),
       onChanged: (v) {
@@ -173,6 +178,7 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       },
     );
   }
+
 
   Widget _buildDatePicker() {
     return InkWell(
@@ -198,8 +204,8 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Date', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                Text(DateFormat('dd MMMM yyyy').format(_selectedDate), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('දිනය', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                Text(DateFormat('yyyy-MM-dd').format(_selectedDate), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -207,4 +213,5 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       ),
     );
   }
+
 }

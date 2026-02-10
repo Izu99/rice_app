@@ -37,8 +37,8 @@ class ConfirmationDialog extends StatelessWidget {
     required this.title,
     required this.message,
     this.subtitle,
-    this.confirmLabel = 'Confirm',
-    this.cancelLabel = 'Cancel',
+    this.confirmLabel = 'තහවුරු කරන්න', // Confirm
+    this.cancelLabel = 'අවලංගු කරන්න', // Cancel
     this.confirmColor,
     this.cancelColor,
     this.icon,
@@ -57,8 +57,8 @@ class ConfirmationDialog extends StatelessWidget {
     required String title,
     required String message,
     String? subtitle,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
+    String confirmLabel = 'තහවුරු කරන්න', // Confirm
+    String cancelLabel = 'අවලංගු කරන්න', // Cancel
     Color? confirmColor,
     Color? cancelColor,
     IconData? icon,
@@ -95,7 +95,7 @@ class ConfirmationDialog extends StatelessWidget {
   /// Show delete confirmation
   static Future<bool> showDelete(
     BuildContext context, {
-    String title = 'Delete?',
+    String title = 'මකා දමන්නද?', // Delete?
     required String itemName,
     String? additionalMessage,
   }) {
@@ -103,8 +103,8 @@ class ConfirmationDialog extends StatelessWidget {
       context,
       title: title,
       message:
-          'Are you sure you want to delete "$itemName"?${additionalMessage != null ? '\n\n$additionalMessage' : ''}',
-      confirmLabel: 'Delete',
+          'ඔබට "$itemName" මකා දැමීමට අවශ්‍ය බව සහතිකද?${additionalMessage != null ? '\n\n$additionalMessage' : ''}',
+      confirmLabel: 'මකා දමන්න', // Delete
       type: DialogType.danger,
       isDangerous: true,
       icon: Icons.delete_forever_outlined,
@@ -115,10 +115,10 @@ class ConfirmationDialog extends StatelessWidget {
   static Future<bool> showDiscardChanges(BuildContext context) {
     return show(
       context,
-      title: 'Discard Changes?',
+      title: 'ඉවත් වන්නද?', // Discard Changes?
       message:
-          'You have unsaved changes. Are you sure you want to discard them?',
-      confirmLabel: 'Discard',
+          'ඔබ සිදු කළ වෙනස්කම් සුරැකී නොමැත. ඒවා ඉවත් කිරීමට ඔබට විශ්වාසද?',
+      confirmLabel: 'ඉවත් වන්න', // Discard
       type: DialogType.warning,
       isDangerous: true,
       icon: Icons.warning_amber_outlined,
@@ -129,9 +129,9 @@ class ConfirmationDialog extends StatelessWidget {
   static Future<bool> showLogout(BuildContext context) {
     return show(
       context,
-      title: 'Logout?',
-      message: 'Are you sure you want to logout?',
-      confirmLabel: 'Logout',
+      title: 'ඉවත් වන්නද?', // Logout?
+      message: 'ඔබට මෙම ගිණුමෙන් ඉවත් වීමට අවශ්‍යද?',
+      confirmLabel: 'ඉවත් වන්න', // Logout
       type: DialogType.warning,
       icon: Icons.logout_outlined,
     );
@@ -140,14 +140,14 @@ class ConfirmationDialog extends StatelessWidget {
   /// Show save confirmation
   static Future<bool> showSave(
     BuildContext context, {
-    String title = 'Save Changes?',
-    String message = 'Do you want to save your changes?',
+    String title = 'සුරකින්නද?', // Save Changes?
+    String message = 'ඔබ කළ වෙනස්කම් සුරැකීමට අවශ්‍යද?',
   }) {
     return show(
       context,
       title: title,
       message: message,
-      confirmLabel: 'Save',
+      confirmLabel: 'සුරකින්න', // Save
       type: DialogType.confirm,
       icon: Icons.save_outlined,
     );
@@ -160,15 +160,16 @@ class ConfirmationDialog extends StatelessWidget {
   }) {
     return show(
       context,
-      title: 'Cancel Transaction?',
+      title: 'ගනුදෙනුව අවලංගු කරන්නද?', // Cancel Transaction?
       message:
-          'Are you sure you want to cancel transaction $transactionId?\n\nThis action cannot be undone.',
-      confirmLabel: 'Cancel Transaction',
+          '$transactionId ගනුදෙනුව අවලංගු කිරීමට ඔබට විශ්වාසද?\n\nමෙය නැවත සැකසිය නොහැක.',
+      confirmLabel: 'ඔව්, අවලංගු කරන්න', // Cancel Transaction
       type: DialogType.danger,
       isDangerous: true,
       icon: Icons.cancel_outlined,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -493,26 +494,26 @@ class SuccessDialog extends StatelessWidget {
   }) {
     return show(
       context,
-      title: 'Transaction Complete!',
-      message: 'Transaction $transactionId has been saved successfully.',
-      subtitle: customerName != null ? 'Customer: $customerName' : null,
+      title: 'ගනුදෙනුව සාර්ථකයි!', // Transaction Complete!
+      message: '$transactionId අංකය සහිත ගනුදෙනුව සාර්ථකව සුරැකිණි.',
+      subtitle: customerName != null ? 'ගනුදෙනුකරු: $customerName' : null,
       icon: Icons.check_circle,
       actions: [
         if (onPrint != null)
           SuccessDialogAction(
-            label: 'Print',
+            label: 'මුද්‍රණය කරන්න', // Print
             icon: Icons.print_outlined,
             onPressed: onPrint,
           ),
         if (onViewDetails != null)
           SuccessDialogAction(
-            label: 'Details',
+            label: 'විස්තර', // Details
             icon: Icons.visibility_outlined,
             onPressed: onViewDetails,
           ),
         if (onNewTransaction != null)
           SuccessDialogAction(
-            label: 'New',
+            label: 'අලුත්', // New
             icon: Icons.add,
             onPressed: onNewTransaction,
             isPrimary: true,
@@ -520,6 +521,7 @@ class SuccessDialog extends StatelessWidget {
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

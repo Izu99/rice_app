@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
@@ -53,14 +58,14 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
   bool _isEditing = false;
   String? _currentEditingId;
   String? _originalPhone;
-  CustomerType _selectedType = CustomerType.seller;
+  CustomerType _selectedType = CustomerType.both;
 
   @override
   void initState() {
     super.initState();
     _isEditing = widget.customerId != null;
     _currentEditingId = widget.customerId;
-    _selectedType = widget.initialType ?? CustomerType.seller;
+    _selectedType = widget.initialType ?? CustomerType.both;
 
     _checkAnimController = AnimationController(
       vsync: this,
@@ -68,7 +73,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     );
 
     if (_isEditing) {
-      _loadCustomerData();
+_loadCustomerData();
     }
 
     _phoneController.addListener(_onPhoneChanged);
@@ -114,7 +119,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
 
     final phone = _phoneController.text.trim();
 
-    // Reset state if empty or same as original (when editing)
     if (phone.isEmpty || (_isEditing && phone == _originalPhone)) {
       setState(() {
         _isPhoneAvailable = true;
@@ -125,7 +129,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       return;
     }
 
-    // Don't check if too short
     if (phone.length < 9) {
       setState(() {
         _isPhoneAvailable = true;
@@ -138,14 +141,13 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
 
     setState(() {
       _isPhoneChecking = true;
-      _phoneStatusMessage = 'Checking number...';
+      _phoneStatusMessage = 'පරීක්ෂා කරමින් පවතී...';
     });
     _checkAnimController.repeat();
 
     _debounce = Timer(const Duration(milliseconds: 600), () async {
       final cubit = context.read<CustomersCubit>();
 
-      // First check local/memory list
       final existingLocally = cubit.state.customers
           .where((c) => c.phone == phone && c.id != _currentEditingId)
           .firstOrNull;
@@ -155,7 +157,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
         return;
       }
 
-      // Then check via repository (remote/local DB)
       final phoneCustomer = await cubit.getCustomerByPhone(phone);
 
       if (mounted) {
@@ -165,7 +166,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
         } else {
           setState(() {
             _isPhoneAvailable = true;
-            _phoneStatusMessage = 'New customer detected';
+            _phoneStatusMessage = 'නව ගනුදෙනුකරුවෙක්';
             _isPhoneChecking = false;
           });
         }
@@ -178,7 +179,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       _checkAnimController.stop();
       setState(() {
         _isPhoneAvailable = false;
-        _phoneStatusMessage = 'Already registered';
+        _phoneStatusMessage = 'දැනටමත් ලියාපදිංචි වී ඇත';
         _isPhoneChecking = false;
       });
       _showExistingCustomerDialog(customer);
@@ -195,14 +196,14 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
           children: [
             Icon(Icons.info_outline, color: AppColors.primary),
             SizedBox(width: 10),
-            Text('Existing Customer'),
+            Text('දැනට සිටින ගනුදෙනුකරුවෙක්'),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('This phone number is already registered to:'),
+            const Text('මෙම දුරකථන අංකය දැනටමත් ලියාපදිංචි කර ඇත:'),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -240,7 +241,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
             ),
             const SizedBox(height: 20),
             const Text(
-                'Do you want to update this customer\'s details or use a different phone number?'),
+                'ඔබට මෙම තොරතුරු යාවත්කාලීන කිරීමට හෝ වෙනත් අංකයක් භාවිතා කිරීමට අවශ්‍යද?'),
           ],
         ),
         actions: [
@@ -250,7 +251,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
               _phoneController.clear();
               _phoneFocusNode.requestFocus();
             },
-            child: const Text('Different Number'),
+            child: const Text('වෙනත් අංකයක්'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -263,7 +264,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Update This Record'),
+            child: const Text('යාවත්කාලීන කරන්න'),
           ),
         ],
       ),
@@ -293,7 +294,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       if (!_isPhoneAvailable) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
-                'Please use a unique phone number or update the existing record.')));
+                'කරුණාකර වෙනත් දුරකථන අංකයක් භාවිතා කරන්න හෝ පවතින වාර්තාව යාවත්කාලීන කරන්න.')));
         return;
       }
 
@@ -303,7 +304,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       if (companyId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
-                'Error: Company information not found. Please log in again.')));
+                'දෝෂයකි: ආයතනයේ තොරතුරු හමු නොවීය. කරුණාකර නැවත ඇතුළු වන්න.')));
         return;
       }
 
@@ -348,13 +349,13 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       listener: (context, state) {
         if (state.formStatus == CustomerFormStatus.success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.formSuccessMessage ?? 'Saved successfully'),
+            const SnackBar(
+              content: Text('සාර්ථකව සුරැකිණි'),
               backgroundColor: AppColors.success,
             ),
           );
           if (context.canPop()) {
-            context.pop();
+            context.pop(true);
           } else {
             context.go('/customers');
           }
@@ -362,7 +363,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
         } else if (state.formStatus == CustomerFormStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.formErrorMessage ?? 'Error saving customer'),
+              content: Text(state.formErrorMessage ?? 'ගනුදෙනුකරු සුරැකීමේදී දෝෂයක් සිදු විය'),
               backgroundColor: AppColors.error,
             ),
           );
@@ -373,21 +374,20 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
           isLoading: state.formStatus == CustomerFormStatus.submitting,
           child: Scaffold(
             appBar: AppBar(
-              title: Text(_isEditing ? 'Edit Customer' : 'Add Customer'),
+              title: Text(_isEditing ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම' : 'නව ගනුදෙනුකරු'),
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
               elevation: 0,
             ),
             body: Column(
               children: [
-                // Header with icon
                 Container(
                   width: double.infinity,
                   color: AppColors.primary,
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 40,
                         backgroundColor: Colors.white24,
                         child: Icon(Icons.person_add_alt_1,
@@ -395,17 +395,16 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        _isEditing ? 'Updating Record' : 'Create New Profile',
+                        _isEditing ? 'තොරතුරු යාවත්කාලීන කිරීම' : 'නව ගිණුමක් සාදන්න',
                         style: AppTextStyles.bodyMedium
                             .copyWith(color: Colors.white70),
                       ),
                     ],
                   ),
                 ),
-
                 Expanded(
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(30)),
@@ -417,39 +416,28 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSectionTitle('Primary Identification'),
+                            _buildSectionTitle('මූලික තොරතුරු'),
                             const SizedBox(height: 16),
-
-                            // Phone
                             TextFormField(
                               controller: _phoneController,
                               focusNode: _phoneFocusNode,
                               decoration: InputDecoration(
-                                labelText: 'Phone Number (Required)',
+                                labelText: 'දුරකථන අංකය (අනිවාර්යයි)',
                                 hintText: '07XXXXXXXX',
-                                prefixIcon: const Icon(Icons.phone_outlined,
+                                prefixIcon: Icon(Icons.phone_outlined,
                                     color: AppColors.primary),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(16),
                                   borderSide: BorderSide.none,
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                      color: AppColors.primary, width: 2),
-                                ),
                                 filled: true,
                                 fillColor: Colors.grey.shade50,
-                                contentPadding: const EdgeInsets.symmetric(
+                                contentPadding: EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 16),
                                 suffixIcon: _isPhoneChecking
                                     ? RotationTransition(
                                         turns: _checkAnimController,
-                                        child: const Icon(Icons.sync,
+                                        child: Icon(Icons.sync,
                                             color: AppColors.primary),
                                       )
                                     : _phoneStatusMessage != null
@@ -475,23 +463,20 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                               ],
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter a phone number';
+                                  return 'කරුණාකර  දුරකථන අංකයක් ඇතුළත් කරන්න';
                                 }
                                 if (value.length < 9) {
-                                  return 'Phone number is too short';
+                                  return 'දුරකථන අංකය කෙටි වැඩියි';
                                 }
                                 if (!_isPhoneAvailable) {
-                                  return 'This phone number is already in use';
+                                  return 'මෙම දුරකථන අංකය දැනටමත් භාවිතා කර ඇත';
                                 }
                                 return null;
                               },
                             ),
                             const SizedBox(height: 24),
-
-                            _buildSectionTitle('Customer Details'),
+                            _buildSectionTitle('ගනුදෙනුකරුගේ විස්තර'),
                             const SizedBox(height: 16),
-
-                            // Customer Type
                             Align(
                               alignment: Alignment.center,
                               child: SizedBox(
@@ -500,41 +485,32 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                                   value: _selectedType,
                                   isExpanded: true,
                                   decoration: InputDecoration(
-                                    labelText:
-                                        'Customer Role / Type (Required)',
-                                    prefixIcon: const Icon(
+                                    labelText: 'භූමිකාව (අනිවාර්යයි)',
+                                    prefixIcon: Icon(
                                         Icons.category_outlined,
                                         color: AppColors.primary),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide.none,
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                          color: AppColors.primary, width: 2),
-                                    ),
                                     filled: true,
                                     fillColor: Colors.grey.shade50,
-                                    contentPadding: const EdgeInsets.symmetric(
+                                    contentPadding: EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 16),
                                   ),
-                                  icon: const Icon(
+                                  icon: Icon(
                                       Icons.keyboard_arrow_down_rounded,
                                       color: AppColors.primary),
                                   borderRadius: BorderRadius.circular(16),
                                   items: [
                                     CustomerType.seller,
                                     CustomerType.buyer,
+                                    CustomerType.both,
                                   ].map((type) {
                                     return DropdownMenuItem(
                                       value: type,
                                       child: Text(
-                                        '${type.displayName} (${type.sinhalaName})',
+                                        type.sinhalaName,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.w500),
                                         overflow: TextOverflow.ellipsis,
@@ -547,31 +523,27 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                                     }
                                   },
                                   validator: (value) => value == null
-                                      ? 'Please select a type'
+                                      ? 'කරුණාකර වර්ගයක් තෝරන්න'
                                       : null,
                                 ),
                               ),
                             ),
                             const SizedBox(height: 16),
-
-                            // Name
                             TextFormField(
                               controller: _nameController,
                               decoration: _inputDecoration(
-                                  'Full Name (Required)', Icons.person_outline),
+                                  'සම්පූර්ණ නම (අනිවාර්යයි)', Icons.person_outline),
                               textCapitalization: TextCapitalization.words,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                      ? 'Please enter the customer name'
+                                      ? 'කරුණාකර නම ඇතුළත් කරන්න'
                                       : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // Secondary Phone
                             TextFormField(
                               controller: _secondaryPhoneController,
                               decoration: _inputDecoration(
-                                  'Secondary Phone (Optional)',
+                                  'අමතර දුරකථන අංකය',
                                   Icons.phone_android_outlined),
                               keyboardType: TextInputType.phone,
                               inputFormatters: [
@@ -580,54 +552,44 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                               ],
                             ),
                             const SizedBox(height: 16),
-
-                            // Address
                             TextFormField(
                               controller: _addressController,
                               decoration: _inputDecoration(
-                                  'Street Address (Required)',
+                                  'ලිපිනය (අනිවාර්යයි)',
                                   Icons.location_on_outlined),
                               maxLines: 2,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                      ? 'Please enter the street address'
+                                      ? 'කරුණාකර ලිපිනය ඇතුළත් කරන්න'
                                       : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // City
                             TextFormField(
                               controller: _cityController,
                               decoration: _inputDecoration(
-                                  'City (Required)', Icons.location_city_outlined),
+                                  'නගරය (අනිවාර්යයි)', Icons.location_city_outlined),
                               textCapitalization: TextCapitalization.words,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                      ? 'Please enter the city'
+                                      ? 'කරුණාකර නගරය ඇතුළත් කරන්න'
                                       : null,
                             ),
                             const SizedBox(height: 16),
-
-                            // NIC
                             TextFormField(
                               controller: _nicController,
                               decoration: _inputDecoration(
-                                  'NIC Number (Optional)', Icons.badge_outlined),
+                                  'හැඳුනුම්පත් අංකය', Icons.badge_outlined),
                               textCapitalization: TextCapitalization.characters,
                             ),
                             const SizedBox(height: 16),
-
-                            // Notes
                             TextFormField(
                               controller: _notesController,
                               decoration: _inputDecoration(
-                                  'Internal Notes (Optional)',
+                                  'සටහන්',
                                   Icons.note_alt_outlined),
                               maxLines: 3,
                             ),
                             const SizedBox(height: 40),
-
-                            // Submit Button
                             Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
@@ -652,8 +614,8 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                                 ),
                                 child: Text(
                                   _isEditing
-                                      ? 'UPDATE CUSTOMER'
-                                      : 'REGISTER CUSTOMER',
+                                      ? 'යාවත්කාලීන කරන්න'
+                                      : 'ලියාපදිංචි කරන්න',
                                   style: AppTextStyles.titleMedium.copyWith(
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.2,
@@ -684,14 +646,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
       filled: true,
       fillColor: Colors.grey.shade50,

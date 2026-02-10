@@ -160,7 +160,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
     return CustomTextField(
       controller: widget.controller,
       label: widget.label,
-      hint: widget.hint ?? 'Enter password',
+      hint: widget.hint ?? 'මුරපදය ඇතුළත් කරන්න', // Enter password
       errorText: widget.errorText,
       obscureText: _obscureText,
       prefixIcon: Icons.lock_outline,
@@ -202,7 +202,7 @@ class PhoneTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomTextField(
       controller: controller,
-      label: label ?? 'Phone Number',
+      label: label ?? 'දුරකථන අංකය', // Phone Number
       hint: hint ?? '07X XXX XXXX',
       errorText: errorText,
       prefixIcon: Icons.phone_outlined,
@@ -217,6 +217,7 @@ class PhoneTextField extends StatelessWidget {
     );
   }
 }
+
 
 class _PhoneNumberFormatter extends TextInputFormatter {
   @override
@@ -318,7 +319,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
       style: AppTextStyles.bodyMedium,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: widget.hint ?? 'Search...',
+        hintText: widget.hint ?? 'සොයන්න...', // Search...
         prefixIcon: const Icon(Icons.search, color: AppColors.grey500),
         suffixIcon: _controller.text.isNotEmpty
             ? IconButton(

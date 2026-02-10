@@ -17,8 +17,11 @@ import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../buy/presentation/cubit/buy_cubit.dart';
 import '../../../sell/presentation/cubit/sell_cubit.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
+import '../../../profile/presentation/cubit/profile_state.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../routes/route_names.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 import '../widgets/action_card.dart';
@@ -103,103 +106,109 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          body: LoadingOverlay(
-            isLoading: state.status == DashboardStatus.loading ||
-                       state.status == DashboardStatus.refreshing,
-            message: 'Loading dashboard data...',
-            child: RefreshIndicator(
-              onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
-              color: AppColors.primary,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  // App Bar
-                  _buildAppBar(state),
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      buildWhen: (previous, current) => previous.language != current.language,
+      builder: (context, profileState) {
+        return BlocBuilder<DashboardCubit, DashboardState>(
+          builder: (context, state) {
+            return Scaffold(
+              backgroundColor: AppColors.background,
+              body: LoadingOverlay(
+                isLoading: state.status == DashboardStatus.loading ||
+                    state.status == DashboardStatus.refreshing,
+                message: SiStrings.loading,
+                child: RefreshIndicator(
+                  onRefresh: () =>
+                      context.read<DashboardCubit>().refreshDashboard(),
+                  color: AppColors.primary,
+                  child: CustomScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      // App Bar
+                      _buildAppBar(state),
 
-                  // Content
-                  SliverPadding(
-                    padding: EdgeInsets.all(
-                      ResponsiveUtils.getResponsivePadding(
-                        context,
-                        mobile: AppDimensions.paddingMedium,
-                        tablet: AppDimensions.paddingL,
-                        desktop: AppDimensions.paddingXL,
+                      // Content
+                      SliverPadding(
+                        padding: EdgeInsets.all(
+                          ResponsiveUtils.getResponsivePadding(
+                            context,
+                            mobile: AppDimensions.paddingMedium,
+                            tablet: AppDimensions.paddingL,
+                            desktop: AppDimensions.paddingXL,
+                          ),
+                        ),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            // Quick Actions - Buy & Sell
+                            _buildQuickActions(),
+                            const SizedBox(height: 20),
+
+                            // Today's Summary
+                            _buildSectionTitle(SiStrings.todaySummary, 'Summary'),
+                            const SizedBox(height: 12),
+                            _buildTodaySummary(state),
+                            const SizedBox(height: 20),
+
+                            // Weekly Activity
+                            _buildSectionTitle(
+                                SiStrings.weeklyActivity, 'Weekly Activity'),
+                            const SizedBox(height: 12),
+                            WeeklyActivityChart(
+                              data: state.weeklyActivity,
+                              isLoading: state.isLoading,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Stock Overview
+                            _buildSectionTitle(SiStrings.stockOverview, 'Stock'),
+                            const SizedBox(height: 12),
+                            _buildStockOverview(state),
+                            const SizedBox(height: 20),
+
+                            // Monthly Summary
+                            _buildSectionTitle(SiStrings.thisMonth, 'This Month'),
+                            const SizedBox(height: 12),
+                            _buildMonthlySummary(state),
+                            const SizedBox(height: 20),
+
+                            // Recent Transactions
+                            _buildSectionTitle(
+                              SiStrings.recentTransactions,
+                              'Recent',
+                              onViewAll: () => context.pushNamed('reports'),
+                            ),
+                            const SizedBox(height: 12),
+                            RecentTransactions(
+                              transactions: state.recentTransactions,
+                              isLoading: state.isLoading &&
+                                  state.recentTransactions.isEmpty,
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Recent Expenses
+                            _buildSectionTitle(
+                              SiStrings.recentExpenses,
+                              'Expenses',
+                              onViewAll: () => context.push('/expenses'),
+                            ),
+                            const SizedBox(height: 12),
+                            RecentExpenses(
+                              expenses: state.recentExpenses,
+                              isLoading: state.isLoading &&
+                                  state.recentExpenses.isEmpty,
+                            ),
+
+                            // Bottom padding
+                            const SizedBox(height: 100),
+                          ]),
+                        ),
                       ),
-                    ),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        // Sync Status
-
-                        // Quick Actions - Buy & Sell
-                        _buildQuickActions(),
-                        const SizedBox(height: 20),
-
-                        // Today's Summary
-                        _buildSectionTitle('Today\'s Summary', 'අද දින සාරාංශය'),
-                        const SizedBox(height: 12),
-                        _buildTodaySummary(state),
-                        const SizedBox(height: 20),
-
-                        // Weekly Activity
-                        _buildSectionTitle('Weekly Activity', 'සතිපතා විශ්ලේෂණය'),
-                        const SizedBox(height: 12),
-                        WeeklyActivityChart(
-                          data: state.weeklyActivity,
-                          isLoading: state.isLoading,
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Stock Overview
-                        _buildSectionTitle('Stock Overview', 'තොග දළ විශ්ලේෂණය'),
-                        const SizedBox(height: 12),
-                        _buildStockOverview(state),
-                        const SizedBox(height: 20),
-
-                        // Monthly Summary
-                        _buildSectionTitle('This Month', 'මෙම මාසය'),
-                        const SizedBox(height: 12),
-                        _buildMonthlySummary(state),
-                        const SizedBox(height: 20),
-
-                        // Recent Transactions
-                        _buildSectionTitle(
-                          'Recent Transactions',
-                          'මෑත ගනුදෙනු',
-                          onViewAll: () => context.pushNamed('reports'),
-                        ),
-                        const SizedBox(height: 12),
-                        RecentTransactions(
-                          transactions: state.recentTransactions,
-                          isLoading:
-                              state.isLoading && state.recentTransactions.isEmpty,
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Recent Expenses
-                        _buildSectionTitle(
-                          'Recent Expenses',
-                          'මෑත වියදම්',
-                          onViewAll: () => context.push('/expenses'),
-                        ),
-                        const SizedBox(height: 12),
-                        RecentExpenses(
-                          expenses: state.recentExpenses,
-                          isLoading: state.isLoading && state.recentExpenses.isEmpty,
-                        ),
-
-                        // Bottom padding
-                        const SizedBox(height: 100),
-                      ]),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -309,15 +318,41 @@ class _HomeScreenState extends State<HomeScreen>
       actions: [
         IconButton(
           icon: const Icon(Icons.cloud_sync_outlined, color: AppColors.white),
-          tooltip: 'Force Refresh',
+          tooltip: 'Refresh',
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Synchronizing data with server...'),
-                duration: Duration(seconds: 1),
+              SnackBar(
+                content: Text(SiStrings.syncing),
+                duration: const Duration(seconds: 1),
               ),
             );
             context.read<DashboardCubit>().syncData();
+          },
+        ),
+        // Language Toggle
+        BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, state) {
+            final isSinhala = state.language == 'si';
+            return TextButton(
+              onPressed: () {
+                context.read<ProfileCubit>().changeLanguage(isSinhala ? 'en' : 'si');
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  isSinhala ? 'EN' : 'සිං',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            );
           },
         ),
         IconButton(
@@ -345,14 +380,14 @@ class _HomeScreenState extends State<HomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle('Quick Actions', 'කඩිනම් ක්‍රියාකාරකම්'),
+        _buildSectionTitle(SiStrings.quickActions, 'Quick Actions'),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: ActionCard(
-                title: 'Buy Paddy',
-                subtitle: 'වී මිලදී ගැනීම',
+                title: SiStrings.buyPaddy,
+                subtitle: 'Buy Paddy',
                 icon: Icons.shopping_bag_rounded,
                 color: AppColors.success,
                 onTap: () async {
@@ -360,7 +395,10 @@ class _HomeScreenState extends State<HomeScreen>
                       await context.push<CustomerModel>('/buy');
                   if (selectedCustomer != null && mounted) {
                     context.read<BuyCubit>().selectCustomer(selectedCustomer);
-                    context.pushNamed('buyProcess');
+                    await context.pushNamed('buyProcess');
+                    if (mounted) {
+                      context.read<DashboardCubit>().loadDashboard();
+                    }
                   }
                 },
               ),
@@ -368,8 +406,8 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 16),
             Expanded(
               child: ActionCard(
-                title: 'Sell Rice',
-                subtitle: 'සහල් විකිණීම',
+                title: SiStrings.sellRice,
+                subtitle: 'Sell Rice',
                 icon: Icons.sell_rounded,
                 color: AppColors.info,
                 onTap: () async {
@@ -377,7 +415,10 @@ class _HomeScreenState extends State<HomeScreen>
                       await context.push<CustomerModel>(RouteNames.sell);
                   if (selectedCustomer != null && mounted) {
                     context.read<SellCubit>().selectCustomer(selectedCustomer);
-                    context.pushNamed('sellProcess');
+                    await context.pushNamed('sellProcess');
+                    if (mounted) {
+                      context.read<DashboardCubit>().loadDashboard();
+                    }
                   }
                 },
               ),
@@ -389,21 +430,31 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(
               child: ActionCard(
-                title: 'Stock',
-                subtitle: 'තොග කළමනාකරණය',
+                title: SiStrings.stock,
+                subtitle: 'Stock',
                 icon: Icons.inventory_2_rounded,
                 color: AppColors.warning,
-                onTap: () => context.push('/stock'),
+                onTap: () async {
+                  await context.push('/stock');
+                  if (mounted) {
+                    context.read<DashboardCubit>().loadDashboard();
+                  }
+                },
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: ActionCard(
-                title: 'Analytics',
-                subtitle: 'විස්තරාත්මක විශ්ලේෂණය',
+                title: SiStrings.analytics,
+                subtitle: 'Analytics',
                 icon: Icons.analytics_rounded,
                 color: AppColors.primary,
-                onTap: () => context.pushNamed('detailedDashboard'),
+                onTap: () async {
+                  await context.pushNamed('detailedDashboard');
+                  if (mounted) {
+                    context.read<DashboardCubit>().loadDashboard();
+                  }
+                },
               ),
             ),
           ],
@@ -459,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'View All',
+                  SiStrings.viewAll,
                   style: AppTextStyles.labelMedium.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -481,7 +532,7 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(
               child: SummaryCard(
-                title: 'Purchases',
+                title: SiStrings.buy,
                 value: state.formattedTodayPurchases,
                 subtitle: '${state.todayBuyCount} orders',
                 icon: Icons.arrow_downward_rounded,
@@ -492,9 +543,9 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 16),
             Expanded(
               child: SummaryCard(
-                title: 'Expenses',
+                title: SiStrings.expenses,
                 value: state.formattedTodayExpenses,
-                subtitle: 'Op. costs',
+                subtitle: 'Expenses',
                 icon: Icons.receipt_long_rounded,
                 iconColor: AppColors.warning,
                 isLoading: state.isLoading,
@@ -507,7 +558,7 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             Expanded(
               child: SummaryCard(
-                title: 'Sales',
+                title: SiStrings.sell,
                 value: state.formattedTodaySales,
                 subtitle: '${state.todaySellCount} orders',
                 icon: Icons.arrow_upward_rounded,
@@ -518,9 +569,9 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 16),
             Expanded(
               child: SummaryCard(
-                title: 'Profit',
+                title: 'ලාභය', // Profit
                 value: state.formattedTodayProfit,
-                subtitle: 'Net from all',
+                subtitle: 'Profit',
                 icon: Icons.monetization_on_rounded,
                 iconColor: AppColors.primary,
                 isLoading: state.isLoading,
@@ -555,8 +606,8 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               Expanded(
                 child: _buildStockItem(
-                  'Paddy Stock',
-                  'වී තොගය',
+                  SiStrings.paddyStock,
+                  'Paddy',
                   state.formattedPaddyStock,
                   Icons.grass_rounded,
                   AppColors.warning,
@@ -570,8 +621,8 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               Expanded(
                 child: _buildStockItem(
-                  'Rice Stock',
-                  'සහල් තොගය',
+                  SiStrings.riceStock,
+                  'Rice',
                   state.formattedRiceStock,
                   Icons.rice_bowl_rounded,
                   AppColors.primary,
@@ -600,7 +651,7 @@ class _HomeScreenState extends State<HomeScreen>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        '${state.lowStockCount} items are running low',
+                        '${state.lowStockCount} ${SiStrings.lowStockWarning}',
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.warning,
                           fontWeight: FontWeight.bold,
@@ -702,7 +753,7 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               Expanded(
                 child: _buildMonthlyItem(
-                  'Sales',
+                  SiStrings.sell,
                   state.formattedMonthlySales,
                   Icons.payments_rounded,
                   state.isLoading,
@@ -710,7 +761,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               Expanded(
                 child: _buildMonthlyItem(
-                  'Profit',
+                  'ලාභය', // Profit
                   state.formattedMonthlyProfit,
                   Icons.analytics_rounded,
                   state.isLoading,
@@ -725,7 +776,7 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               Expanded(
                 child: _buildMonthlyItem(
-                  'Purchases',
+                  SiStrings.buy,
                   state.formattedMonthlyPurchases,
                   Icons.shopping_cart_checkout_rounded,
                   state.isLoading,
@@ -733,7 +784,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               Expanded(
                 child: _buildMonthlyItem(
-                  'Op. Exp',
+                  SiStrings.expenses,
                   state.formattedMonthlyExpenses,
                   Icons.receipt_long_rounded,
                   state.isLoading,
@@ -754,13 +805,13 @@ class _HomeScreenState extends State<HomeScreen>
               children: [
                 Expanded(
                     child: _buildStatItem(
-                        '${state.monthlyBuyCount}', 'Purchases')),
+                        '${state.monthlyBuyCount}', SiStrings.buy)),
                 Expanded(
                     child:
-                        _buildStatItem('${state.monthlySellCount}', 'Sales')),
+                        _buildStatItem('${state.monthlySellCount}', SiStrings.sell)),
                 Expanded(
                     child:
-                        _buildStatItem('${state.totalCustomers}', 'Customers')),
+                        _buildStatItem('${state.totalCustomers}', SiStrings.customers)),
               ],
             ),
           ),
@@ -847,3 +898,4 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 }
+

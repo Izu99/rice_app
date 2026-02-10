@@ -6,6 +6,7 @@ import '../../domain/repositories/stock_repository.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/expense_repository.dart';
 import 'presentation/cubit/dashboard_cubit.dart';
 
 /// Home feature dependency injection
@@ -23,6 +24,7 @@ class HomeInjection {
         customerRepository: _sl<CustomerRepository>(),
         reportRepository: _sl<ReportRepository>(),
         authRepository: _sl<AuthRepository>(),
+        expenseRepository: _sl<ExpenseRepository>(),
       ),
     );
   }

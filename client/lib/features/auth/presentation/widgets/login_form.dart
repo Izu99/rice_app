@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 
@@ -73,8 +74,8 @@ class LoginForm extends StatelessWidget {
         CustomTextField(
           controller: identifierController,
           focusNode: identifierFocusNode,
-          label: isPhoneLogin ? 'Phone Number' : 'Email',
-          hint: isPhoneLogin ? 'Enter your phone number' : 'Enter your email',
+          label: isPhoneLogin ? SiStrings.phoneNumber : 'Email',
+          hint: isPhoneLogin ? 'ඔබගේ දුරකථන අංකය ඇතුළත් කරන්න' : 'ඔබගේ Email එක ඇතුළත් කරන්න',
           prefixIcon: isPhoneLogin ? Icons.phone_android : Icons.email,
           keyboardType:
               isPhoneLogin ? TextInputType.phone : TextInputType.emailAddress,
@@ -90,20 +91,20 @@ class LoginForm extends StatelessWidget {
           validator: (value) {
             if (value == null || value.isEmpty) {
               return isPhoneLogin
-                  ? 'Phone number is required'
-                  : 'Email is required';
+                  ? 'දුරකථන අංකය අවශ්‍යයි'
+                  : 'Email එක අවශ්‍යයි';
             }
 
             if (isPhoneLogin) {
               final cleanPhone = value.replaceAll(RegExp(r'[^\d]'), '');
               if (cleanPhone.length < 9) {
-                return 'Enter a valid phone number';
+                return 'නිවැරදි දුරකථන අංකයක් ඇතුළත් කරන්න';
               }
             } else {
               // Email validation
               final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
               if (!emailRegex.hasMatch(value)) {
-                return 'Enter a valid email address';
+                return 'නිවැරදි Email එකක් ඇතුළත් කරන්න';
               }
             }
             return null;
@@ -120,7 +121,7 @@ class LoginForm extends StatelessWidget {
           child: TextButton(
             onPressed: onToggleLoginType,
             child: Text(
-              isPhoneLogin ? 'Use Email Instead' : 'Use Phone Instead',
+              isPhoneLogin ? 'Email භාවිතයෙන් ඇතුළු වන්න' : 'දුරකථන අංකය භාවිතයෙන් ඇතුළු වන්න',
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w500,
@@ -136,8 +137,8 @@ class LoginForm extends StatelessWidget {
     return CustomTextField(
       controller: passwordController,
       focusNode: passwordFocusNode,
-      label: 'Password',
-      hint: 'Enter your password',
+      label: SiStrings.password,
+      hint: 'ඔබගේ මුරපදය ඇතුළත් කරන්න',
       prefixIcon: Icons.lock_outline,
       obscureText: !isPasswordVisible,
       textInputAction: TextInputAction.done,
@@ -151,10 +152,10 @@ class LoginForm extends StatelessWidget {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Password is required';
+          return 'මුරපදය අවශ්‍යයි';
         }
         if (value.length < 6) {
-          return 'Password must be at least 6 characters';
+          return 'මුරපදය අවම වශයෙන් අක්ෂර 6ක් විය යුතුය';
         }
         return null;
       },
@@ -189,7 +190,7 @@ class LoginForm extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Remember me',
+                  SiStrings.rememberMe,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -206,7 +207,7 @@ class LoginForm extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           ),
           child: Text(
-            'Forgot Password?',
+            SiStrings.forgotPassword,
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w600,
@@ -219,7 +220,7 @@ class LoginForm extends StatelessWidget {
 
   Widget _buildLoginButton() {
     return CustomButton(
-      label: 'Sign In',
+      label: SiStrings.login,
       onPressed: onLogin,
       icon: Icons.login,
       height: 56,

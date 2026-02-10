@@ -194,7 +194,10 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         (failure) => throw _mapFailureToException(failure),
         (response) {
           if (response.success && response.data != null) {
-            return TransactionModel.fromJson(response.data);
+            // Server returns: { transaction: {...}, customer: {...}, paymentHistory: [...] }
+            // Extract the transaction object
+            final transactionData = response.data['transaction'] ?? response.data;
+            return TransactionModel.fromJson(transactionData);
           }
 
           if (response.statusCode == 404) {

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart';
 import '../../../../data/models/customer_model.dart';
@@ -26,11 +30,12 @@ class _BuyCustomerSelectionScreenState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final cubit = context.read<CustomersCubit>();
-      cubit.loadCustomers().then((_) {
-        cubit.filterByType(CustomerType.seller);
-      });
+      // Clear any existing filters first to ensure a clean state
+      cubit.clearFilters();
+      await cubit.loadCustomers();
+      cubit.filterByType(CustomerType.seller);
     });
   }
 
@@ -45,7 +50,7 @@ class _BuyCustomerSelectionScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Select Customer'),
+        title: Text(SiStrings.selectCustomer),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
@@ -77,7 +82,7 @@ class _BuyCustomerSelectionScreenState
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search by name or phone...',
+                          hintText: SiStrings.searchHint,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
@@ -112,9 +117,9 @@ class _BuyCustomerSelectionScreenState
                           if (state.filteredCustomers.isEmpty) {
                             return EmptyStateWidget(
                               icon: Icons.person_off_outlined,
-                              title: 'No Customers Found',
-                              subtitle: 'Add a new customer to start buying',
-                              actionLabel: 'Add New Customer',
+                              title: SiStrings.noCustomersFound,
+                              subtitle: 'මිලදී ගැනීමක් ආරම්භ කිරීමට නව ගනුදෙනුකරුවෙකු එක් කරන්න',
+                              actionLabel: SiStrings.addNewCustomer,
                               onAction: () =>
                                   context.pushNamed('buyAddCustomer'),
                             );
@@ -138,11 +143,11 @@ class _BuyCustomerSelectionScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed('buyAddCustomer'),
-        icon: const Icon(Icons.person_add),
-        label: const Text('New Customer'),
+        child: const Icon(Icons.add),
         backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -154,12 +159,12 @@ class _BuyCustomerSelectionScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Who are you buying from?',
+            SiStrings.buyingFrom,
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
           ),
           const SizedBox(height: 4),
           Text(
-            'Search or select from list',
+            SiStrings.searchOrSelect,
             style: AppTextStyles.headlineSmall.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -227,7 +232,7 @@ class _BuyCustomerSelectionScreenState
           children: [
             IconButton(
               icon: const Icon(Icons.info_outline, color: AppColors.primary),
-              tooltip: 'View Profile',
+              tooltip: SiStrings.viewProfile,
               onPressed: () {
                 context.pushNamed('customerDetail',
                     pathParameters: {'id': customer.id});
@@ -253,3 +258,4 @@ class _BuyCustomerSelectionScreenState
     );
   }
 }
+

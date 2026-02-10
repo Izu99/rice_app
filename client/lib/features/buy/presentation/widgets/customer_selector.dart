@@ -60,7 +60,7 @@ class CustomerSelector extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title ?? 'Customer',
+              title ?? 'ගනුදෙනුකරු (Customer)',
               style: AppTextStyles.titleMedium.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -77,7 +77,7 @@ class CustomerSelector extends StatelessWidget {
           TextButton.icon(
             onPressed: isEnabled ? onAddNewCustomer : null,
             icon: const Icon(Icons.person_add, size: 18),
-            label: const Text('Add New'),
+            label: const Text('අලුත්'),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
             ),
@@ -124,13 +124,13 @@ class CustomerSelector extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select Customer',
+                    'ගනුදෙනුකරු තෝරන්න',
                     style: AppTextStyles.titleSmall.copyWith(
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'Tap to search or select a customer',
+                    'ගනුදෙනුකරු සෙවීමට හෝ තේරීමට ස්පර්ශ කරන්න',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -248,7 +248,7 @@ class CustomerSelector extends StatelessWidget {
                   color: AppColors.white,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  tooltip: 'Change Customer',
+                  tooltip: 'ගනුදෙනුකරු වෙනස් කරන්න',
                 ),
             ],
           ),
@@ -266,7 +266,7 @@ class CustomerSelector extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    customer.customerOwesUs ? 'Receivable:' : 'Payable:',
+                    customer.customerOwesUs ? 'ලැබිය යුතු:' : 'ගෙවිය යුතු:',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.white.withOpacity(0.8),
                     ),

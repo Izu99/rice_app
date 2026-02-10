@@ -371,7 +371,7 @@ class ErrorHandler {
             const SizedBox(width: AppDimensions.paddingS),
             Expanded(
               child: Text(
-                failure.message,
+                getSinhalaMessage(failure),
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.white,
                 ),
@@ -385,7 +385,7 @@ class ErrorHandler {
           borderRadius: BorderRadius.circular(AppDimensions.radiusS),
         ),
         action: SnackBarAction(
-          label: 'Dismiss',
+          label: 'ඉවත් කරන්න', // Dismiss
           textColor: AppColors.white,
           onPressed: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -395,6 +395,7 @@ class ErrorHandler {
       ),
     );
   }
+
 
   /// Show success snackbar
   static void showSuccessSnackBar(BuildContext context, String message) {

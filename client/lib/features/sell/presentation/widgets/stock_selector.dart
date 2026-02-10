@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../data/models/stock_item_model.dart';
 
 class StockSelector extends StatefulWidget {
@@ -83,7 +84,7 @@ class _StockSelectorState extends State<StockSelector>
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search stock...',
+                    hintText: SiStrings.searchStock,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     border: OutlineInputBorder(
                       borderRadius:
@@ -107,17 +108,17 @@ class _StockSelectorState extends State<StockSelector>
                   });
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'name',
-                    child: Text('Sort by Name'),
+                    child: Text(SiStrings.sortByName),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'quantity',
-                    child: Text('Sort by Quantity'),
+                    child: Text(SiStrings.sortByQuantity),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'recent',
-                    child: Text('Recently Added'),
+                    child: Text(SiStrings.recentlyAdded),
                   ),
                 ],
               ),
@@ -144,7 +145,7 @@ class _StockSelectorState extends State<StockSelector>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('All'),
+                    Text(SiStrings.all),
                     const SizedBox(width: 4),
                     _buildBadge(widget.availableStock.length),
                   ],
@@ -156,7 +157,7 @@ class _StockSelectorState extends State<StockSelector>
                   children: [
                     const Icon(Icons.grass, size: 16),
                     const SizedBox(width: 4),
-                    const Text('Paddy'),
+                    Text(SiStrings.paddy),
                     const SizedBox(width: 4),
                     _buildBadge(
                       widget.availableStock
@@ -172,7 +173,7 @@ class _StockSelectorState extends State<StockSelector>
                   children: [
                     const Icon(Icons.rice_bowl, size: 16),
                     const SizedBox(width: 4),
-                    const Text('Rice'),
+                    Text(SiStrings.rice),
                     const SizedBox(width: 4),
                     _buildBadge(
                       widget.availableStock
@@ -246,7 +247,7 @@ class _StockSelectorState extends State<StockSelector>
           ),
           const SizedBox(height: 16),
           Text(
-            'No stock available',
+            'තොග කිසිවක් හමු නොවීය',
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[600],
@@ -254,7 +255,7 @@ class _StockSelectorState extends State<StockSelector>
           ),
           const SizedBox(height: 8),
           Text(
-            'Add stock to start selling',
+            'විකිණීම ආරම්භ කිරීමට තොග එක් කරන්න',
             style: TextStyle(
               color: Colors.grey[500],
             ),
@@ -344,17 +345,17 @@ class _StockItemCard extends StatelessWidget {
                         color: AppColors.warning.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.warning_amber,
                             size: 12,
                             color: AppColors.warning,
                           ),
-                          SizedBox(width: 2),
+                          const SizedBox(width: 2),
                           Text(
-                            'Low',
+                            SiStrings.low,
                             style: TextStyle(
                               fontSize: 10,
                               color: AppColors.warning,
@@ -398,7 +399,7 @@ class _StockItemCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Available:',
+                    '${SiStrings.available}:',
                     style: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 10,
@@ -424,7 +425,7 @@ class _StockItemCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Selling price:',
+                      '${SiStrings.sellingPrice}:',
                       style: TextStyle(
                         color: Colors.grey[500],
                         fontSize: 10,

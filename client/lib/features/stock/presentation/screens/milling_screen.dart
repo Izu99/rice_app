@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
@@ -57,7 +61,7 @@ class _MillingScreenState extends State<MillingScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Paddy Milling'),
+        title: const Text('වී කෙටීම'), // Paddy Milling
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -78,7 +82,7 @@ class _MillingScreenState extends State<MillingScreen>
               context.read<MillingCubit>().resetMilling();
               _clearControllers();
             },
-            tooltip: 'Reset',
+            tooltip: 'නැවත මුල සිට', // Reset
           ),
         ],
       ),
@@ -88,11 +92,11 @@ class _MillingScreenState extends State<MillingScreen>
           try {
             if (state.status == MillingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('✅ Milling completed successfully!'),
+                const SnackBar(
+                  content: Text('✅ වී කෙටීම සාර්ථකව අවසන් කරන ලදී!'),
                   backgroundColor: AppColors.success,
                   behavior: SnackBarBehavior.fixed,
-                  duration: const Duration(seconds: 3),
+                  duration: Duration(seconds: 3),
                 ),
               );
               // Reset form after showing message and navigate
@@ -113,11 +117,11 @@ class _MillingScreenState extends State<MillingScreen>
               context.read<MillingCubit>().clearError();
             } else if (state.status == MillingStatus.processing) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('⚙️ Processing milling...'),
+                const SnackBar(
+                  content: Text('⚙️ සැකසෙමින් පවතී...'),
                   backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.fixed,
-                  duration: const Duration(seconds: 2),
+                  duration: Duration(seconds: 2),
                 ),
               );
             }
@@ -126,7 +130,7 @@ class _MillingScreenState extends State<MillingScreen>
             print('❌ [MillingScreen] LISTENER STACK: $stack');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('An unexpected error occurred'),
+                content: Text('අනපේක්ෂිත දෝෂයක් සිදු විය'),
                 backgroundColor: AppColors.error,
               ),
             );
@@ -137,7 +141,7 @@ class _MillingScreenState extends State<MillingScreen>
           try {
             return LoadingOverlay(
               isLoading: state.status == MillingStatus.processing,
-              message: 'Processing milling...',
+              message: 'සැකසෙමින් පවතී...',
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDimensions.paddingM),
                 child: Column(
@@ -148,20 +152,20 @@ class _MillingScreenState extends State<MillingScreen>
                     const SizedBox(height: AppDimensions.paddingM),
 
                     // Select Paddy Section
-                    _buildSectionTitle('1. Select Paddy'),
+                    _buildSectionTitle('1. වී වර්ගය තෝරන්න'), // Select Paddy
                     const SizedBox(height: AppDimensions.paddingS),
                     _buildPaddySelector(state),
                     const SizedBox(height: AppDimensions.paddingL),
 
                     // Input Section
                     if (state.selectedPaddy != null) ...[
-                      _buildSectionTitle('2. Input Quantity'),
+                      _buildSectionTitle('2. ප්‍රමාණය ඇතුළත් කරන්න'), // Input Quantity
                       const SizedBox(height: AppDimensions.paddingS),
                       _buildInputSection(state),
                       const SizedBox(height: AppDimensions.paddingL),
 
                       // Milling Calculator
-                      _buildSectionTitle('3. Milling Output'),
+                      _buildSectionTitle('3. ප්‍රතිදානය (සහල්)'), // Milling Output
                       const SizedBox(height: AppDimensions.paddingS),
                       MillingCalculator(
                         inputPaddyKg: state.inputPaddyKg,
@@ -222,14 +226,15 @@ class _MillingScreenState extends State<MillingScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Batch Number',
-                  style: AppTextStyles.bodySmall.copyWith(
+                const Text(
+                  'කාණ්ඩ අංකය', // Batch Number
+                  style: TextStyle(
                     color: AppColors.textSecondary,
+                    fontSize: 12,
                   ),
                 ),
                 Text(
-                  state.batchNumber ?? 'Generating...',
+                  state.batchNumber ?? 'සාදමින් පවතී...',
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -241,10 +246,11 @@ class _MillingScreenState extends State<MillingScreen>
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                'Date',
-                style: AppTextStyles.bodySmall.copyWith(
+              const Text(
+                'දිනය', // Date
+                style: TextStyle(
                   color: AppColors.textSecondary,
+                  fontSize: 12,
                 ),
               ),
               Text(
@@ -289,12 +295,12 @@ class _MillingScreenState extends State<MillingScreen>
                 size: 48, color: AppColors.warning),
             const SizedBox(height: AppDimensions.paddingM),
             const Text(
-              'No paddy available for milling',
+              'කෙටීම සඳහා වී තොග නොමැත', // No paddy available for milling
               style: AppTextStyles.bodyMedium,
             ),
             const SizedBox(height: AppDimensions.paddingM),
             CustomButton(
-              label: 'Buy Paddy',
+              label: 'වී මිලදී ගන්න', // Buy Paddy
               onPressed: () => context.go('/buy'),
               variant: ButtonVariant.outline,
             ),
@@ -358,7 +364,7 @@ class _MillingScreenState extends State<MillingScreen>
                     ),
                   ),
                   Text(
-                    'Available: ${paddy.totalWeightKg.toStringAsFixed(1)} kg (${paddy.totalBags} bags)',
+                    'තොගය: ${paddy.totalWeightKg.toStringAsFixed(1)} kg (මලු ${paddy.totalBags})',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -406,7 +412,7 @@ class _MillingScreenState extends State<MillingScreen>
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Selected: ${state.selectedPaddy!.name} - Available: ${state.selectedPaddy!.totalWeightKg.toStringAsFixed(1)} kg',
+                    'තෝරාගත්: ${state.selectedPaddy!.name} - තොගය: ${state.selectedPaddy!.totalWeightKg.toStringAsFixed(1)} kg',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.paddyColor,
                     ),
@@ -425,7 +431,7 @@ class _MillingScreenState extends State<MillingScreen>
                   controller: _inputWeightController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Weight (kg)',
+                    labelText: 'බර (kg)', // Weight (kg)
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppDimensions.radiusM),
@@ -444,7 +450,7 @@ class _MillingScreenState extends State<MillingScreen>
                   controller: _inputBagsController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'Bags',
+                    labelText: 'මලු ගණන', // Bags
                     border: OutlineInputBorder(
                       borderRadius:
                           BorderRadius.circular(AppDimensions.radiusM),
@@ -497,7 +503,7 @@ class _MillingScreenState extends State<MillingScreen>
             const Icon(Icons.settings_suggest, color: Colors.white),
             const SizedBox(width: 8),
             Text(
-              'Process Milling',
+              'වී කෙටීම ආරම්භ කරන්න', // Process Milling
               style: AppTextStyles.titleMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -516,10 +522,10 @@ class _MillingScreenState extends State<MillingScreen>
       showDialog(
         context: context,
         builder: (dialogContext) => MillingConfirmationDialog(
-          title: 'Confirm Milling',
-          message: 'Are you sure you want to process this milling batch? '
-              'This will deduct paddy and add rice to stock.',
-          confirmLabel: 'Process',
+          title: 'වී කෙටීම තහවුරු කරන්න', // Confirm Milling
+          message: 'මෙම කාණ්ඩය කෙටීම ආරම්භ කිරීමට අවශ්‍යද? '
+              'මෙමඟින් තොගයෙන් වී අඩු වී සහල් එක් වනු ඇත.',
+          confirmLabel: 'තහවුරු කරන්න',
           onConfirm: () {
             Navigator.pop(dialogContext); // Pop the custom dialog
             // Defer the cubit call to the next frame to avoid Navigator locked issues
@@ -542,3 +548,4 @@ class _MillingScreenState extends State<MillingScreen>
     return '${date.day}/${date.month}/${date.year}';
   }
 }
+
