@@ -305,4 +305,3 @@ class InsufficientStockException implements Exception {
 
   String get message => toString();
 }
-

@@ -188,4 +188,3 @@ class AdminDashboardStats extends Equatable {
         companiesPerMonth,
       ];
 }
-

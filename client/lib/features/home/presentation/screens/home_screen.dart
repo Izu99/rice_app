@@ -3,12 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../routes/app_router.dart';
+import '../../../../injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/shared_widgets/sync_status_indicator.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
+import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/sync/sync_status.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
@@ -21,6 +24,7 @@ import '../cubit/dashboard_state.dart';
 import '../widgets/action_card.dart';
 import '../widgets/summary_card.dart';
 import '../widgets/recent_transactions.dart';
+import '../widgets/recent_expenses.dart';
 import '../widgets/weekly_activity_chart.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,14 +34,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver, RouteAware {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -54,9 +60,45 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route observer
+    try {
+      final route = ModalRoute.of(context);
+      if (route != null) {
+        sl<AppRouter>().routeObserver.subscribe(this, route);
+      }
+    } catch (e) {
+      debugPrint('Error subscribing to route observer: $e');
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    try {
+      sl<AppRouter>().routeObserver.unsubscribe(this);
+    } catch (e) {
+      debugPrint('Error unsubscribing from route observer: $e');
+    }
     _animationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when the top route has been popped off, and the current route shows up.
+    if (mounted) {
+      context.read<DashboardCubit>().refreshDashboard();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh data when app comes to foreground
+      context.read<DashboardCubit>().refreshDashboard();
+    }
   }
 
   @override
@@ -65,78 +107,97 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context, state) {
         return Scaffold(
           backgroundColor: AppColors.background,
-          body: RefreshIndicator(
-            onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
-            color: AppColors.primary,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                // App Bar
-                _buildAppBar(state),
+          body: LoadingOverlay(
+            isLoading: state.status == DashboardStatus.loading ||
+                       state.status == DashboardStatus.refreshing,
+            message: 'Loading dashboard data...',
+            child: RefreshIndicator(
+              onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
+              color: AppColors.primary,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // App Bar
+                  _buildAppBar(state),
 
-                // Content
-                SliverPadding(
-                  padding: EdgeInsets.all(
-                    ResponsiveUtils.getResponsivePadding(
-                      context,
-                      mobile: AppDimensions.paddingMedium,
-                      tablet: AppDimensions.paddingL,
-                      desktop: AppDimensions.paddingXL,
+                  // Content
+                  SliverPadding(
+                    padding: EdgeInsets.all(
+                      ResponsiveUtils.getResponsivePadding(
+                        context,
+                        mobile: AppDimensions.paddingMedium,
+                        tablet: AppDimensions.paddingL,
+                        desktop: AppDimensions.paddingXL,
+                      ),
+                    ),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        // Sync Status
+
+                        // Quick Actions - Buy & Sell
+                        _buildQuickActions(),
+                        const SizedBox(height: 20),
+
+                        // Today's Summary
+                        _buildSectionTitle('Today\'s Summary', 'අද දින සාරාංශය'),
+                        const SizedBox(height: 12),
+                        _buildTodaySummary(state),
+                        const SizedBox(height: 20),
+
+                        // Weekly Activity
+                        _buildSectionTitle('Weekly Activity', 'සතිපතා විශ්ලේෂණය'),
+                        const SizedBox(height: 12),
+                        WeeklyActivityChart(
+                          data: state.weeklyActivity,
+                          isLoading: state.isLoading,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Stock Overview
+                        _buildSectionTitle('Stock Overview', 'තොග දළ විශ්ලේෂණය'),
+                        const SizedBox(height: 12),
+                        _buildStockOverview(state),
+                        const SizedBox(height: 20),
+
+                        // Monthly Summary
+                        _buildSectionTitle('This Month', 'මෙම මාසය'),
+                        const SizedBox(height: 12),
+                        _buildMonthlySummary(state),
+                        const SizedBox(height: 20),
+
+                        // Recent Transactions
+                        _buildSectionTitle(
+                          'Recent Transactions',
+                          'මෑත ගනුදෙනු',
+                          onViewAll: () => context.pushNamed('reports'),
+                        ),
+                        const SizedBox(height: 12),
+                        RecentTransactions(
+                          transactions: state.recentTransactions,
+                          isLoading:
+                              state.isLoading && state.recentTransactions.isEmpty,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Recent Expenses
+                        _buildSectionTitle(
+                          'Recent Expenses',
+                          'මෑත වියදම්',
+                          onViewAll: () => context.push('/expenses'),
+                        ),
+                        const SizedBox(height: 12),
+                        RecentExpenses(
+                          expenses: state.recentExpenses,
+                          isLoading: state.isLoading && state.recentExpenses.isEmpty,
+                        ),
+
+                        // Bottom padding
+                        const SizedBox(height: 100),
+                      ]),
                     ),
                   ),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      // Sync Status
-
-                      // Quick Actions - Buy & Sell
-                      _buildQuickActions(),
-                      const SizedBox(height: 20),
-
-                      // Today's Summary
-                      _buildSectionTitle('Today\'s Summary', 'අද දින සාරාංශය'),
-                      const SizedBox(height: 12),
-                      _buildTodaySummary(state),
-                      const SizedBox(height: 20),
-
-                      // Weekly Activity
-                      _buildSectionTitle('Weekly Activity', 'සතිපතා විශ්ලේෂණය'),
-                      const SizedBox(height: 12),
-                      WeeklyActivityChart(
-                        data: state.weeklyActivity,
-                        isLoading: state.isLoading,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Stock Overview
-                      _buildSectionTitle('Stock Overview', 'තොග දළ විශ්ලේෂණය'),
-                      const SizedBox(height: 12),
-                      _buildStockOverview(state),
-                      const SizedBox(height: 20),
-
-                      // Monthly Summary
-                      _buildSectionTitle('This Month', 'මෙම මාසය'),
-                      const SizedBox(height: 12),
-                      _buildMonthlySummary(state),
-                      const SizedBox(height: 20),
-
-                      // Recent Transactions
-                      _buildSectionTitle(
-                        'Recent Transactions',
-                        'මෑත ගනුදෙනු',
-                        onViewAll: () => context.pushNamed('reports'),
-                      ),
-                      const SizedBox(height: 12),
-                      RecentTransactions(
-                        transactions: state.recentTransactions,
-                        isLoading: state.isLoading && state.recentTransactions.isEmpty,
-                      ),
-
-                      // Bottom padding
-                      const SizedBox(height: 100),
-                    ]),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -247,7 +308,21 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: AppColors.white),
+          icon: const Icon(Icons.cloud_sync_outlined, color: AppColors.white),
+          tooltip: 'Force Refresh',
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Synchronizing data with server...'),
+                duration: Duration(seconds: 1),
+              ),
+            );
+            context.read<DashboardCubit>().syncData();
+          },
+        ),
+        IconButton(
+          icon:
+              const Icon(Icons.notifications_outlined, color: AppColors.white),
           onPressed: () {},
         ),
         IconButton(
@@ -417,6 +492,21 @@ class _HomeScreenState extends State<HomeScreen>
             const SizedBox(width: 16),
             Expanded(
               child: SummaryCard(
+                title: 'Expenses',
+                value: state.formattedTodayExpenses,
+                subtitle: 'Op. costs',
+                icon: Icons.receipt_long_rounded,
+                iconColor: AppColors.warning,
+                isLoading: state.isLoading,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: SummaryCard(
                 title: 'Sales',
                 value: state.formattedTodaySales,
                 subtitle: '${state.todaySellCount} orders',
@@ -425,18 +515,20 @@ class _HomeScreenState extends State<HomeScreen>
                 isLoading: state.isLoading,
               ),
             ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: SummaryCard(
+                title: 'Profit',
+                value: state.formattedTodayProfit,
+                subtitle: 'Net from all',
+                icon: Icons.monetization_on_rounded,
+                iconColor: AppColors.primary,
+                isLoading: state.isLoading,
+                trend: state.todayProfit >= 0 ? 'Positive' : 'Loss',
+                trendIsPositive: state.todayProfit >= 0,
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: 16),
-        SummaryCard(
-          title: 'Today\'s Profit',
-          value: state.formattedTodayProfit,
-          subtitle: 'Net from today\'s transactions',
-          icon: Icons.monetization_on_rounded,
-          iconColor: AppColors.primary,
-          isLoading: state.isLoading,
-          trend: state.todayProfit >= 0 ? 'Positive' : 'Loss',
-          trendIsPositive: state.todayProfit >= 0,
         ),
       ],
     );
@@ -604,17 +696,10 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       child: Column(
         children: [
+          // Top Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: _buildMonthlyItem(
-                  'Purchases',
-                  state.formattedMonthlyPurchases,
-                  Icons.shopping_cart_checkout_rounded,
-                  state.isLoading,
-                ),
-              ),
               Expanded(
                 child: _buildMonthlyItem(
                   'Sales',
@@ -633,6 +718,29 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          // Bottom Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildMonthlyItem(
+                  'Purchases',
+                  state.formattedMonthlyPurchases,
+                  Icons.shopping_cart_checkout_rounded,
+                  state.isLoading,
+                ),
+              ),
+              Expanded(
+                child: _buildMonthlyItem(
+                  'Op. Exp',
+                  state.formattedMonthlyExpenses,
+                  Icons.receipt_long_rounded,
+                  state.isLoading,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(16),
@@ -644,9 +752,15 @@ class _HomeScreenState extends State<HomeScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Expanded(child: _buildStatItem('${state.monthlyBuyCount}', 'Purchases')),
-                Expanded(child: _buildStatItem('${state.monthlySellCount}', 'Sales')),
-                Expanded(child: _buildStatItem('${state.totalCustomers}', 'Customers')),
+                Expanded(
+                    child: _buildStatItem(
+                        '${state.monthlyBuyCount}', 'Purchases')),
+                Expanded(
+                    child:
+                        _buildStatItem('${state.monthlySellCount}', 'Sales')),
+                Expanded(
+                    child:
+                        _buildStatItem('${state.totalCustomers}', 'Customers')),
               ],
             ),
           ),
@@ -669,20 +783,23 @@ class _HomeScreenState extends State<HomeScreen>
             color: AppColors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: AppColors.white, size: 20),
+          child: Icon(icon, color: AppColors.white, size: 18),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Text(
           label,
           style: AppTextStyles.labelSmall.copyWith(
             color: AppColors.white.withOpacity(0.8),
+            fontSize: 9,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
         if (isLoading)
           const SizedBox(
-            width: 16,
-            height: 16,
+            width: 14,
+            height: 14,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
@@ -693,7 +810,7 @@ class _HomeScreenState extends State<HomeScreen>
             fit: BoxFit.scaleDown,
             child: Text(
               value,
-              style: AppTextStyles.titleMedium.copyWith(
+              style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.white,
                 fontWeight: FontWeight.bold,
               ),
@@ -705,23 +822,28 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildStatItem(String value, String label) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          value,
-          style: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.white,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: AppTextStyles.titleSmall.copyWith(
+              color: AppColors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Text(
           label,
           style: AppTextStyles.labelSmall.copyWith(
             color: AppColors.white.withOpacity(0.7),
-            fontSize: 10,
+            fontSize: 9,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 }
-

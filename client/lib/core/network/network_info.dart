@@ -313,4 +313,3 @@ class OfflineBanner extends StatelessWidget {
     );
   }
 }
-

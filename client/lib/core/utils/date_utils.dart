@@ -516,4 +516,3 @@ enum DateRangePreset {
   lastYear,
   allTime,
 }
-

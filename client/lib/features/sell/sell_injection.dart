@@ -57,7 +57,7 @@ class SellInjection {
     }
 
     // Cubits
-    _sl.registerFactory<SellCubit>(
+    _sl.registerLazySingleton<SellCubit>(
       () => SellCubit(
         customerRepository: _sl<CustomerRepository>(),
         stockRepository: _sl<StockRepository>(),
@@ -66,4 +66,3 @@ class SellInjection {
     );
   }
 }
-

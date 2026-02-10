@@ -215,4 +215,3 @@ class SellTransactionItem extends Equatable {
         totalPrice,
       ];
 }
-

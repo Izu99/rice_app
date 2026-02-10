@@ -167,4 +167,3 @@ class UpdateCustomerParams extends Equatable {
         notes,
       ];
 }
-

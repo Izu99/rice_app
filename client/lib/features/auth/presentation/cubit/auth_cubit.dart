@@ -11,11 +11,28 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
   })  : _authRepository = authRepository,
-        super(AuthState.initial());
+        super(AuthState.initial()) {
+    checkAuthStatus();
+  }
 
   /// Check if user is already logged in
   Future<void> checkAuthStatus() async {
-    emit(state.copyWith(authStatus: AuthStatus.loading));
+    // Try to load from cache first for immediate UI update
+    final cachedUserResult = await _authRepository.getCurrentUser();
+    final cachedUser = cachedUserResult.fold((l) => null, (r) => r);
+
+    if (cachedUser != null) {
+      final cachedCompanyResult = await _authRepository.getCompany();
+      final cachedCompany = cachedCompanyResult.fold((l) => null, (r) => r);
+
+      emit(state.copyWith(
+        authStatus: AuthStatus.authenticated,
+        user: cachedUser,
+        company: cachedCompany,
+      ));
+    } else {
+      emit(state.copyWith(authStatus: AuthStatus.loading));
+    }
 
     final isLoggedInResult = await _authRepository.isLoggedIn();
 
@@ -23,22 +40,26 @@ class AuthCubit extends Cubit<AuthState> {
       (failure) async {
         emit(state.copyWith(
           authStatus: AuthStatus.unauthenticated,
+          clearUser: true,
           clearError: true,
         ));
       },
       (isLoggedIn) async {
         if (isLoggedIn) {
-          // Get current user
+          // Verify with server in background
           final userResult = await _authRepository.getCurrentUser();
           await userResult.fold(
             (failure) async {
-              emit(state.copyWith(
-                authStatus: AuthStatus.unauthenticated,
-                errorMessage: failure.message,
-              ));
+              // If background check fails but we have cache, keep it
+              // unless it's an AuthFailure (invalid token)
+              if (state.user == null) {
+                emit(state.copyWith(
+                  authStatus: AuthStatus.unauthenticated,
+                  errorMessage: failure.message,
+                ));
+              }
             },
             (user) async {
-              // Get company
               final companyResult = await _authRepository.getCompany();
               final company = companyResult.fold((l) => null, (r) => r);
 
@@ -51,10 +72,11 @@ class AuthCubit extends Cubit<AuthState> {
             },
           );
         } else {
-          // Check for saved credentials
+          // Not logged in
           await _loadSavedCredentials();
           emit(state.copyWith(
             authStatus: AuthStatus.unauthenticated,
+            clearUser: true,
             clearError: true,
           ));
         }
@@ -125,7 +147,8 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (user) async {
         // Get company
-        print('🔐 [AuthCubit] User authenticated: ${user.name}, CompanyID: ${user.companyId}');
+        print(
+            '🔐 [AuthCubit] User authenticated: ${user.name}, CompanyID: ${user.companyId}');
         final companyResult = await _authRepository.getCompany();
         final company = companyResult.fold((l) => null, (r) => r);
 
@@ -476,4 +499,3 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 }
-

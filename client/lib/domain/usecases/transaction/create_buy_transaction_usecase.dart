@@ -193,4 +193,3 @@ class BuyTransactionItem extends Equatable {
         totalPrice,
       ];
 }
-

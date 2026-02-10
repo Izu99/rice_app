@@ -44,9 +44,11 @@ class UserModel extends Equatable {
   /// Create from JSON (API or Local DB)
   factory UserModel.fromJson(Map<String, dynamic> json) {
     print('👤 [UserModel] Parsing JSON: keys=${json.keys.toList()}');
-    if (json.containsKey('companyId')) print('👤 [UserModel] found companyId: ${json['companyId']}');
-    if (json.containsKey('company_id')) print('👤 [UserModel] found company_id: ${json['company_id']}');
-    
+    if (json.containsKey('companyId'))
+      print('👤 [UserModel] found companyId: ${json['companyId']}');
+    if (json.containsKey('company_id'))
+      print('👤 [UserModel] found company_id: ${json['company_id']}');
+
     return UserModel(
       id: json['id']?.toString() ?? '',
       serverId: json['server_id']?.toString(),
@@ -56,7 +58,8 @@ class UserModel extends Equatable {
       avatar: json['avatar']?.toString(),
       role: _parseUserRole(json['role']),
       companyId: _parseCompanyId(json),
-      companyName: json['company_name']?.toString() ?? json['companyName']?.toString(),
+      companyName:
+          json['company_name']?.toString() ?? json['companyName']?.toString(),
       isActive: json['is_active'] == true || json['is_active'] == 1,
       isPhoneVerified:
           json['is_phone_verified'] == true || json['is_phone_verified'] == 1,
@@ -176,8 +179,10 @@ class UserModel extends Equatable {
     final directId = json['companyId'] ?? json['company_id'];
     if (directId != null) {
       if (directId is String) return directId;
-      if (directId is Map && directId.containsKey('_id')) return directId['_id'].toString();
-      if (directId is Map && directId.containsKey('id')) return directId['id'].toString();
+      if (directId is Map && directId.containsKey('_id'))
+        return directId['_id'].toString();
+      if (directId is Map && directId.containsKey('id'))
+        return directId['id'].toString();
       return directId.toString();
     }
 
@@ -274,4 +279,3 @@ class UserModel extends Equatable {
   @override
   String toString() => 'UserModel(id: $id, name: $name, role: $role)';
 }
-

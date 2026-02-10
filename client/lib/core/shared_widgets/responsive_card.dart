@@ -221,4 +221,3 @@ class ResponsiveActionCard extends StatelessWidget {
     );
   }
 }
-

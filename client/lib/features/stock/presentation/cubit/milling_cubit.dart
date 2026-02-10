@@ -160,7 +160,7 @@ class MillingCubit extends Cubit<MillingState> {
           // Reload available paddy and pending millings
           await loadAvailablePaddy();
           await fetchPendingMillings();
-          
+
           emit(state.copyWith(status: MillingStatus.success));
           return true;
         },
@@ -185,7 +185,8 @@ class MillingCubit extends Cubit<MillingState> {
       final result = await _stockRepository.completeMilling(
         id: id,
         riceQuantity: state.outputRiceKg,
-        riceBags: (state.outputRiceKg / 50).floor(), // Estimate bags or add input
+        riceBags:
+            (state.outputRiceKg / 50).floor(), // Estimate bags or add input
         outputRiceName: outputRiceName,
         brokenRiceKg: state.brokenRiceKg,
         huskKg: state.huskKg,
@@ -218,8 +219,8 @@ class MillingCubit extends Cubit<MillingState> {
 
   /// Fetch pending milling records
   Future<void> fetchPendingMillings() async {
-    // Note: Assuming getMillingHistory supports status filtering, 
-    // but repo interface currently doesn't expose it. 
+    // Note: Assuming getMillingHistory supports status filtering,
+    // but repo interface currently doesn't expose it.
     // I'll fetch all and filter client side for now or assume backend returns all and I filter.
     // Wait, I didn't update repo interface to accept status.
     // I'll fetch history and filter client side if the API returns mixed.
@@ -230,7 +231,8 @@ class MillingCubit extends Cubit<MillingState> {
       result.fold(
         (failure) => null, // Ignore error for background fetch
         (history) {
-          final pending = history.where((m) => m['status'] == 'in_progress').toList();
+          final pending =
+              history.where((m) => m['status'] == 'in_progress').toList();
           emit(state.copyWith(pendingMillings: pending));
         },
       );
@@ -244,7 +246,8 @@ class MillingCubit extends Cubit<MillingState> {
       result.fold(
         (failure) => null,
         (history) {
-          final completed = history.where((m) => m['status'] == 'completed').toList();
+          final completed =
+              history.where((m) => m['status'] == 'completed').toList();
           emit(state.copyWith(millingHistory: completed));
         },
       );
@@ -287,12 +290,14 @@ class MillingCubit extends Cubit<MillingState> {
     try {
       final variety = state.selectedPaddy!.variety;
       final riceName = 'Rice - $variety';
-      final outputKg = state.outputRiceKg > 0 ? state.outputRiceKg : state.expectedRiceKg;
+      final outputKg =
+          state.outputRiceKg > 0 ? state.outputRiceKg : state.expectedRiceKg;
       final outputBags = (outputKg / 50).ceil();
 
-      print('🚜 [MillingCubit] Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags');
+      print(
+          '🚜 [MillingCubit] Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags');
 
-      // Perform one-shot milling process
+      // Perform one-shot milling process with timeout
       final result = await _stockRepository.startMilling(
         paddyItemId: state.selectedPaddy!.id,
         paddyQuantity: state.inputPaddyKg,
@@ -303,6 +308,11 @@ class MillingCubit extends Cubit<MillingState> {
         outputRiceBags: outputBags,
         outputRiceName: riceName,
         status: 'completed',
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Milling process timed out. Please try again.');
+        },
       );
 
       print('🚜 [MillingCubit] Repository call returned');
@@ -315,37 +325,12 @@ class MillingCubit extends Cubit<MillingState> {
             errorMessage: failure.message,
           ));
         },
-        (data) async {
-          print('🚜 [MillingCubit] Process succeeded, refreshing data...');
-          // Refresh available paddy and history
-          final stockResult = await _stockRepository.getStockByType(ItemType.paddy);
-          await fetchMillingHistory();
-          
-          print('🚜 [MillingCubit] Data refreshed, emitting success');
-          
-          stockResult.fold(
-            (failure) {
-              print('🚜 [MillingCubit] Refresh failed: ${failure.message}');
-              emit(state.copyWith(
-                status: MillingStatus.error,
-                errorMessage: 'Milling successful, but failed to refresh stock list: ${failure.message}',
-              ));
-            },
-            (paddyItems) {
-              final available = paddyItems
-                  .where((item) => item.currentQuantity > 0)
-                  .map((entity) => StockItemModel.fromEntity(entity, ''))
-                  .toList();
-              
-              emit(state.copyWith(
-                status: MillingStatus.success,
-                availablePaddy: available,
-                clearSelectedPaddy: true,
-                inputPaddyKg: 0.0,
-                inputPaddyBags: 0,
-              ));
-            },
-          );
+        (data) {
+          print('🚜 [MillingCubit] Process succeeded, showing success...');
+          // Show success immediately, refresh in background
+          emit(state.copyWith(status: MillingStatus.success));
+          // Refresh available paddy and history in the background (don't await)
+          _refreshStockAfterMilling();
         },
       );
     } catch (e, stack) {
@@ -354,6 +339,49 @@ class MillingCubit extends Cubit<MillingState> {
       emit(state.copyWith(
         status: MillingStatus.error,
         errorMessage: 'Unexpected error: ${e.toString()}',
+      ));
+    }
+  }
+
+  /// Refresh stock after milling (background operation)
+  Future<void> _refreshStockAfterMilling() async {
+    try {
+      final stockResult = await _stockRepository.getStockByType(ItemType.paddy);
+      await fetchMillingHistory();
+
+      print('🚜 [MillingCubit] Data refreshed, emitting success');
+
+      stockResult.fold(
+        (failure) {
+          print('🚜 [MillingCubit] Refresh failed: ${failure.message}');
+          emit(state.copyWith(
+            status: MillingStatus.error,
+            errorMessage:
+                'Milling successful, but failed to refresh stock list: ${failure.message}',
+          ));
+        },
+        (paddyItems) {
+          final available = paddyItems
+              .where((item) => item.currentQuantity > 0)
+              .map((entity) => StockItemModel.fromEntity(entity, ''))
+              .toList();
+
+          emit(state.copyWith(
+            status: MillingStatus.success,
+            availablePaddy: available,
+            clearSelectedPaddy: true,
+            inputPaddyKg: 0.0,
+            inputPaddyBags: 0,
+          ));
+        },
+      );
+    } catch (e, stack) {
+      print('🚜 [MillingCubit] REFRESH ERROR: $e');
+      print('🚜 [MillingCubit] STACK TRACE: $stack');
+      emit(state.copyWith(
+        status: MillingStatus.error,
+        errorMessage:
+            'Milling successful, but failed to refresh: ${e.toString()}',
       ));
     }
   }

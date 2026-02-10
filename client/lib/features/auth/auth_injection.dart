@@ -22,7 +22,7 @@ class AuthInjection {
 
     // ==================== CUBIT ====================
 
-    _sl.registerFactory<AuthCubit>(
+    _sl.registerLazySingleton<AuthCubit>(
       () => AuthCubit(
         authRepository: _sl<AuthRepository>(),
       ),
@@ -48,4 +48,3 @@ class AuthInjection {
     }
   }
 }
-

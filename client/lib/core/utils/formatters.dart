@@ -485,4 +485,3 @@ class Formatters {
     return '$value $label';
   }
 }
-

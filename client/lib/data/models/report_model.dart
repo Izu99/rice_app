@@ -633,4 +633,3 @@ class ReportItem extends Equatable {
         metadata,
       ];
 }
-

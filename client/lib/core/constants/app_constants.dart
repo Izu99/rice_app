@@ -336,4 +336,3 @@ class AppConstants {
   /// Debug mode (set to false for production)
   static const bool debugMode = true;
 }
-

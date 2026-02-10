@@ -160,4 +160,3 @@ class AuthState extends Equatable {
     return 'AuthState(authStatus: $authStatus, loginStatus: $loginStatus, user: ${user?.name})';
   }
 }
-

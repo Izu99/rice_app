@@ -64,4 +64,3 @@ class DeductStockParams extends Equatable {
   @override
   List<Object?> get props => [itemId, quantity, bags, transactionId];
 }
-

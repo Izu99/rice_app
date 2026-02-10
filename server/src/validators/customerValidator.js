@@ -8,6 +8,7 @@ const validateCustomerCreation = [
   body('address').optional().isString(),
   body('city').optional().isString(),
   body('nic').optional().isString(),
+  body('customer_type').optional().isString().isIn(['buyer', 'seller']).withMessage('Customer type must be either buyer or seller'),
   body('notes').optional().isString(),
   body('clientId').optional().isString()
 ]
@@ -20,6 +21,7 @@ const validateCustomerUpdate = [
   body('address').optional().isString(),
   body('city').optional().isString(),
   body('nic').optional().isString(),
+  body('customer_type').optional().isString().isIn(['buyer', 'seller']).withMessage('Customer type must be either buyer or seller'),
   body('notes').optional().isString(),
   body('isActive').optional().isBoolean()
 ]

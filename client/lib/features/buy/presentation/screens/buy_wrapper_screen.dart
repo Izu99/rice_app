@@ -21,14 +21,29 @@ class BuyWrapperScreen extends StatefulWidget {
   State<BuyWrapperScreen> createState() => _BuyWrapperScreenState();
 }
 
-class _BuyWrapperScreenState extends State<BuyWrapperScreen> {
+class _BuyWrapperScreenState extends State<BuyWrapperScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Initialize buy cubit
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BuyCubit>().initialize();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<BuyCubit>().initialize();
+    }
   }
 
   void _onDestinationSelected(int index) {
@@ -192,4 +207,3 @@ class _BuyWrapperScreenState extends State<BuyWrapperScreen> {
     );
   }
 }
-

@@ -439,4 +439,3 @@ class _QuickPriceButton extends StatelessWidget {
     );
   }
 }
-

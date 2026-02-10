@@ -2,12 +2,14 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/enums.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../domain/repositories/stock_repository.dart';
 import '../../../../domain/repositories/customer_repository.dart';
 import '../../../../domain/repositories/report_repository.dart';
 import '../../../../domain/repositories/auth_repository.dart';
 import '../../../../data/models/transaction_model.dart';
+import '../../../../data/models/expense_model.dart';
 import 'dashboard_state.dart';
 
 /// Dashboard Cubit - Manages dashboard business logic
@@ -39,10 +41,10 @@ class DashboardCubit extends Cubit<DashboardState> {
       // Fetch main dashboard summary from backend which includes weekly trend
       // We'll use ReportRepository for this as it maps to /api/reports/dashboard
       final dashboardResult = await _reportRepository.getDashboardSummary();
-      
+
       dashboardResult.fold(
         (failure) {
-           emit(state.copyWith(
+          emit(state.copyWith(
             status: DashboardStatus.error,
             errorMessage: 'Failed to load dashboard: ${failure.message}',
           ));
@@ -50,42 +52,50 @@ class DashboardCubit extends Cubit<DashboardState> {
         (summary) {
           // Parse Weekly Trend from backend response
           final List<dynamic> trendList = summary['weeklyTrend'] ?? [];
-          final List<Map<String, dynamic>> weeklyTrend = List<Map<String, dynamic>>.from(trendList);
-          
+          final List<Map<String, dynamic>> weeklyTrend =
+              List<Map<String, dynamic>>.from(trendList);
+
           // Map to chart format (0-6 index)
           final Map<int, Map<String, double>> weeklyActivity = {};
           for (int i = 0; i < weeklyTrend.length; i++) {
-             final day = weeklyTrend[i];
-             weeklyActivity[i] = {
-               'buy': (day['buy'] as num?)?.toDouble() ?? 0.0,
-               'sell': (day['sell'] as num?)?.toDouble() ?? 0.0,
-             };
+            final day = weeklyTrend[i];
+            weeklyActivity[i] = {
+              'buy': (day['buy'] as num?)?.toDouble() ?? 0.0,
+              'sell': (day['sell'] as num?)?.toDouble() ?? 0.0,
+            };
           }
 
           // Parse other summaries if available in the same response to avoid parallel calls
           // The backend returns: { today: {...}, thisMonth: {...}, stock: {...}, ... }
-          
+
           final today = summary['today'] ?? {};
           final thisMonth = summary['thisMonth'] ?? {};
           final stock = summary['stock'] ?? {};
           final perf = summary['performance'] ?? {};
-          final recentList = summary['recentTransactions'] ?? summary['recent_transactions'] ?? [];
+          final recentList = summary['recentTransactions'] ??
+              summary['recent_transactions'] ??
+              [];
+          final recentExpenseList = summary['recentExpenses'] ?? [];
 
           // Map recent transactions from summary
           final List<TransactionModel> recentTransactions = [];
           for (final txnJson in recentList) {
             try {
               // Handle potential population of customerId
-              final dynamic customerData = txnJson['customerId'] ?? txnJson['customer_id'];
+              final dynamic customerData =
+                  txnJson['customerId'] ?? txnJson['customer_id'];
               String customerId = '';
               String? customerName;
 
               if (customerData is Map) {
-                customerId = customerData['_id']?.toString() ?? customerData['id']?.toString() ?? '';
+                customerId = customerData['_id']?.toString() ??
+                    customerData['id']?.toString() ??
+                    '';
                 customerName = customerData['name']?.toString();
               } else {
                 customerId = customerData?.toString() ?? '';
-                customerName = txnJson['customer_name']?.toString() ?? txnJson['customerName']?.toString();
+                customerName = txnJson['customer_name']?.toString() ??
+                    txnJson['customerName']?.toString();
               }
 
               recentTransactions.add(TransactionModel.fromJson({
@@ -98,39 +108,60 @@ class DashboardCubit extends Cubit<DashboardState> {
             }
           }
 
+          // Map recent expenses from summary
+          final List<ExpenseModel> recentExpenses = [];
+          for (final expenseJson in recentExpenseList) {
+            try {
+              recentExpenses.add(ExpenseModel.fromJson(expenseJson));
+            } catch (e) {
+              debugPrint('⚠️ Error parsing recent expense: $e');
+            }
+          }
+
           emit(state.copyWith(
             // Today
             todayPurchases: (today['buyAmount'] as num?)?.toDouble() ?? 0,
             todaySales: (today['sellAmount'] as num?)?.toDouble() ?? 0,
-            todayProfit: (today['profit'] as num?)?.toDouble() ?? 0,
+            todayExpenses:
+                (today['operatingExpenses'] as num?)?.toDouble() ?? 0,
+            todayProfit: (today['netAmount'] as num?)?.toDouble() ?? 0,
             todayBuyCount: today['buyTransactions'] as int? ?? 0,
             todaySellCount: today['sellTransactions'] as int? ?? 0,
-            
+
             // Month
             monthlyPurchases: (thisMonth['buyAmount'] as num?)?.toDouble() ?? 0,
             monthlySales: (thisMonth['sellAmount'] as num?)?.toDouble() ?? 0,
+            monthlyExpenses:
+                (thisMonth['operatingExpenses'] as num?)?.toDouble() ?? 0,
             monthlyProfit: (thisMonth['profit'] as num?)?.toDouble() ?? 0,
             monthlyBuyCount: thisMonth['buyTransactions'] as int? ?? 0,
             monthlySellCount: thisMonth['sellTransactions'] as int? ?? 0,
 
-            // Stock
+            // Stock - Will be updated from local source below for consistency
             totalPaddyStock: (stock['totalPaddyKg'] as num?)?.toDouble() ?? 0,
             totalRiceStock: (stock['totalRiceKg'] as num?)?.toDouble() ?? 0,
             lowStockCount: stock['lowStockItems'] as int? ?? 0,
 
             // Performance
-            totalPaddyBoughtKg: (perf['totalPaddyBoughtKg'] as num?)?.toDouble() ?? 0,
+            totalPaddyBoughtKg:
+                (perf['totalPaddyBoughtKg'] as num?)?.toDouble() ?? 0,
             totalRiceSoldKg: (perf['totalRiceSoldKg'] as num?)?.toDouble() ?? 0,
 
-            // Recent Transactions
-            recentTransactions: recentTransactions.isNotEmpty ? recentTransactions : state.recentTransactions,
+            // Recent Transactions & Expenses
+            recentTransactions: recentTransactions.isNotEmpty
+                ? recentTransactions
+                : state.recentTransactions,
+            recentExpenses: recentExpenses.isNotEmpty
+                ? recentExpenses
+                : state.recentExpenses,
 
             // Charts
             weeklyTrend: weeklyTrend,
             weeklyActivity: weeklyActivity,
 
             // Customer summary from dashboard summary if available
-            totalCustomers: summary['totalCustomers'] as int? ?? state.totalCustomers,
+            totalCustomers:
+                summary['totalCustomers'] as int? ?? state.totalCustomers,
           ));
         },
       );
@@ -140,6 +171,7 @@ class DashboardCubit extends Cubit<DashboardState> {
       await Future.wait([
         _loadCustomerSummary(),
         _loadSyncStatus(),
+        _loadLocalStockData(), // Override with local stock data
       ]);
 
       emit(state.copyWith(status: DashboardStatus.loaded));
@@ -151,10 +183,9 @@ class DashboardCubit extends Cubit<DashboardState> {
     }
   }
 
-  /// Refresh dashboard data
+  /// Refresh dashboard data - syncs data then loads
   Future<void> refreshDashboard() async {
-    emit(state.copyWith(status: DashboardStatus.refreshing));
-    await loadDashboard();
+    await syncData();
   }
 
   /// Load customer summary
@@ -243,12 +274,15 @@ class DashboardCubit extends Cubit<DashboardState> {
       await _authRepository.saveLastSyncTime(DateTime.now());
 
       // Reload dashboard
-      await refreshDashboard();
+      await loadDashboard();
     } catch (e) {
       emit(state.copyWith(
-        status: DashboardStatus.loaded,
+        status: DashboardStatus.loaded, // Revert to loaded state
         errorMessage: 'Sync failed: ${e.toString()}',
       ));
+      
+      // Still try to load data even if sync failed (offline mode support)
+      await loadDashboard();
     }
   }
 
@@ -262,5 +296,41 @@ class DashboardCubit extends Cubit<DashboardState> {
   void clearError() {
     emit(state.copyWith(clearError: true));
   }
-}
 
+  /// Load stock data from local database (Source of Truth)
+  Future<void> _loadLocalStockData() async {
+    // We already have stockRepository injected
+    // This ensures that the dashboard shows exactly what the Stock Page shows
+    final result = await _stockRepository.getAllStockItems();
+
+    result.fold(
+      (failure) {
+        debugPrint(
+            '⚠️ [DashboardCubit] Failed to load local stock: ${failure.message}');
+      },
+      (items) {
+        double totalPaddy = 0;
+        double totalRice = 0;
+        int lowStock = 0;
+
+        for (final item in items) {
+          if (item.isLowStock) {
+            lowStock++;
+          }
+
+          if (item.isPaddy) {
+            totalPaddy += item.currentQuantity;
+          } else if (item.isRice) {
+            totalRice += item.currentQuantity;
+          }
+        }
+
+        emit(state.copyWith(
+          totalPaddyStock: totalPaddy,
+          totalRiceStock: totalRice,
+          lowStockCount: lowStock,
+        ));
+      },
+    );
+  }
+}

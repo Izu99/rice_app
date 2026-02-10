@@ -155,13 +155,7 @@ class CustomersCubit extends Cubit<CustomersState> {
     // Customer type filter
     if (state.customerTypeFilter != null) {
       filtered = filtered.where((c) {
-        if (state.customerTypeFilter == CustomerType.buyer) {
-          return c.customerType.canSell;
-        } else if (state.customerTypeFilter == CustomerType.seller) {
-          return c.customerType.canBuy;
-        } else {
-          return c.customerType == state.customerTypeFilter;
-        }
+        return c.customerType == state.customerTypeFilter;
       }).toList();
     }
 
@@ -251,7 +245,7 @@ class CustomersCubit extends Cubit<CustomersState> {
     String? nic,
     String? notes,
     required String companyId,
-    CustomerType customerType = CustomerType.both,
+    CustomerType customerType = CustomerType.seller,
   }) async {
     // Validate
     final errors = _validateCustomerInput(
@@ -539,4 +533,3 @@ class CustomersCubit extends Cubit<CustomersState> {
     emit(state.copyWith(clearSelectedCustomer: true));
   }
 }
-

@@ -16,7 +16,7 @@ class HomeInjection {
   static Future<void> init() async {
     // ==================== CUBIT ====================
 
-    _sl.registerFactory<DashboardCubit>(
+    _sl.registerLazySingleton<DashboardCubit>(
       () => DashboardCubit(
         transactionRepository: _sl<TransactionRepository>(),
         stockRepository: _sl<StockRepository>(),
@@ -37,4 +37,3 @@ class HomeInjection {
     }
   }
 }
-

@@ -52,7 +52,7 @@ class SummaryCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(24),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -60,41 +60,50 @@ class SummaryCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: iconColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         icon,
                         color: iconColor,
-                        size: 22,
+                        size: 18,
                       ),
                     ),
-                    if (trend != null) _buildTrendBadge(),
+                    if (trend != null) 
+                      Flexible(
+                        child: _buildTrendBadge(),
+                      ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 Text(
                   title,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
+                    fontSize: 9,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 if (isLoading)
                   _buildShimmerLoader()
                 else
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      value,
-                      style: AppTextStyles.headlineSmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
+                  SizedBox(
+                    height: 28,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                     ),
                   ),
@@ -132,15 +141,18 @@ class SummaryCard extends StatelessWidget {
           Icon(
             isPositive ? Icons.trending_up : Icons.trending_down,
             color: color,
-            size: 14,
+            size: 12,
           ),
           const SizedBox(width: 4),
-          Text(
-            trend!,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              trend!,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -383,4 +395,3 @@ class SummaryRow extends StatelessWidget {
     );
   }
 }
-

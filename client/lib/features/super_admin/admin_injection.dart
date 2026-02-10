@@ -5,7 +5,7 @@ import 'presentation/cubit/admin_cubit.dart';
 /// Register all super admin feature dependencies
 void initAdminInjection(GetIt sl) {
   // Cubit
-  sl.registerFactory<AdminCubit>(
+  sl.registerLazySingleton<AdminCubit>(
     () => AdminCubit(adminRepository: sl<AdminRepository>()),
   );
 }
@@ -14,4 +14,3 @@ void initAdminInjection(GetIt sl) {
 void disposeAdminInjection(GetIt sl) {
   // Clean up if necessary
 }
-

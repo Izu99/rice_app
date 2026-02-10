@@ -634,4 +634,3 @@ class UnknownFailure extends Failure {
     );
   }
 }
-

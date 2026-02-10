@@ -22,8 +22,28 @@ class SellWrapperScreen extends StatefulWidget {
   State<SellWrapperScreen> createState() => _SellWrapperScreenState();
 }
 
-class _SellWrapperScreenState extends State<SellWrapperScreen> {
+class _SellWrapperScreenState extends State<SellWrapperScreen>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<SellCubit>().initialize();
+    }
+  }
 
   final List<_SellNavItem> _navItems = [
     _SellNavItem(
@@ -496,4 +516,3 @@ class _CartSummarySheet extends StatelessWidget {
     );
   }
 }
-

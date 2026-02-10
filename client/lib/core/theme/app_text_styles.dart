@@ -544,4 +544,3 @@ class AppTextStyles {
     return style.copyWith(fontStyle: FontStyle.italic);
   }
 }
-

@@ -798,4 +798,3 @@ class _RecentItems<T> extends StatelessWidget {
     );
   }
 }
-

@@ -27,17 +27,32 @@ class BuyScreen extends StatefulWidget {
   State<BuyScreen> createState() => _BuyScreenState();
 }
 
-class _BuyScreenState extends State<BuyScreen> {
+class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
   final TextEditingController _bagsController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _bagsController.dispose();
     _weightController.dispose();
     _priceController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh data when app comes to foreground
+      context.read<BuyCubit>().initialize();
+    }
   }
 
   @override
@@ -87,9 +102,23 @@ class _BuyScreenState extends State<BuyScreen> {
           _showPriceInputDialog(context, state);
         }
 
-        // Handle success
-        if (state.status == BuyStatus.success) {
-          _showSuccessDialog(context, state);
+        // Handle success - show snackbar and reset
+        if (state.status == BuyStatus.success && state.successMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✅ ${state.successMessage!}'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.fixed,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          // Reset form after showing message
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<BuyCubit>().resetForNewTransaction();
+            _bagsController.clear();
+            _weightController.clear();
+            _priceController.clear();
+          });
         }
       },
       builder: (context, state) {
@@ -136,35 +165,56 @@ class _BuyScreenState extends State<BuyScreen> {
           const SizedBox(height: 16),
 
           // Modern Styled Dropdown
-          DropdownButtonFormField<String>(
-            initialValue: state.selectedVariety,
-            decoration: InputDecoration(
-              labelText: 'Paddy Variety',
-              prefixIcon: const Icon(Icons.grass, color: AppColors.primary),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
+          GestureDetector(
+            onTap: state.tempItems.isNotEmpty
+                ? () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                            'Please add or clear the current batch before changing paddy variety.'),
+                        backgroundColor: AppColors.warning,
+                        behavior: SnackBarBehavior.fixed,
+                      ),
+                    );
+                  }
+                : null,
+            child: AbsorbPointer(
+              absorbing: state.tempItems.isNotEmpty,
+              child: Opacity(
+                opacity: state.tempItems.isNotEmpty ? 0.6 : 1.0,
+                child: DropdownButtonFormField<String>(
+                  value: state.selectedVariety,
+                  decoration: InputDecoration(
+                    labelText: 'Paddy Variety',
+                    prefixIcon:
+                        const Icon(Icons.grass, color: AppColors.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                  ),
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.primary),
+                  borderRadius: BorderRadius.circular(16),
+                  items: PaddyConstants.paddyVarieties.map((String variety) {
+                    return DropdownMenuItem<String>(
+                      value: variety,
+                      child: Text(variety,
+                          style: const TextStyle(fontWeight: FontWeight.w500)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null && value != state.selectedVariety) {
+                      context.read<BuyCubit>().updateVariety(value);
+                    }
+                  },
+                ),
               ),
-              filled: true,
-              fillColor: Colors.grey.shade50,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                color: AppColors.primary),
-            borderRadius: BorderRadius.circular(16),
-            items: PaddyConstants.paddyVarieties.map((String variety) {
-              return DropdownMenuItem<String>(
-                value: variety,
-                child: Text(variety,
-                    style: const TextStyle(fontWeight: FontWeight.w500)),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                context.read<BuyCubit>().updateVariety(value);
-              }
-            },
           ),
           const SizedBox(height: 16),
 
@@ -1202,11 +1252,11 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
-  void _showPriceInputDialog(BuildContext context, BuyState state) {
+  void _showPriceInputDialog(BuildContext context, BuyState state) async {
     if (state.editingItemIndex == null) return;
     final item = state.tempItems[state.editingItemIndex!];
 
-    showModalBottomSheet(
+    final double? returnedPrice = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -1216,122 +1266,32 @@ class _BuyScreenState extends State<BuyScreen> {
         totalWeight: item.totalWeight,
         bags: item.bagsCount,
         initialPrice: item.pricePerKg,
-        // TODO: Add proper callbacks
       ),
     );
-  }
 
-  void _showSuccessDialog(BuildContext context, BuyState state) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: AppColors.success,
-                size: 64,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Stock Updated!',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.headlineSmall.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Successfully added to stock',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Refresh stock data before navigating
-                    context.read<StockCubit>().loadStock();
-                    Navigator.pop(context);
-                    context.push('/stock');
-                  },
-                  icon: const Icon(Icons.inventory_2_outlined),
-                  label: const Text('VIEW STOCK'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.warning,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    context.read<BuyCubit>().resetForNewTransaction();
-                    _bagsController.clear();
-                    _weightController.clear();
-                  },
-                  icon: const Icon(Icons.add_shopping_cart),
-                  label: const Text('NEW PURCHASE'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    context.go(RouteNames.home);
-                  },
-                  child: const Text('Back to Dashboard'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    if (returnedPrice != null) {
+      context
+          .read<BuyCubit>()
+          .updateItemPrice(state.editingItemIndex!, returnedPrice);
+    } else {
+      // If dialog is dismissed without selecting a price, cancel editing
+      context.read<BuyCubit>().cancelEditing();
+    }
   }
 
   void _showExitConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (dialogContext) => ConfirmationDialog(
         title: 'Discard Transaction?',
         message: 'You have unsaved items. Are you sure you want to go back?',
         confirmLabel: 'Discard',
         cancelLabel: 'Stay',
         isDangerous: true,
         onConfirm: () {
-          Navigator.pop(context);
+          // Dialog closes itself automatically
           context.read<BuyCubit>().resetForNewTransaction();
-          if (GoRouter.of(context).canPop()) {
-            context.pop();
-          } else {
-            context.go(RouteNames.home);
-          }
+          context.go(RouteNames.home); // Always go to home after discarding
         },
       ),
     );
@@ -1347,11 +1307,12 @@ class _BuyScreenState extends State<BuyScreen> {
         cancelLabel: 'Cancel',
         isDangerous: true,
         onConfirm: () {
-          Navigator.pop(context);
+          // Dialog closes itself automatically
           context.read<BuyCubit>().resetForNewTransaction();
         },
       ),
     );
   }
-}
 
+
+}

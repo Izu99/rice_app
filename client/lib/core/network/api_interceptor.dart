@@ -151,16 +151,16 @@ class LoggingInterceptor extends Interceptor {
     this.logResponseBody = true,
     this.logHeaders = false,
   }) : _logger = logger ??
-      Logger(
-        printer: PrettyPrinter(
-          methodCount: 0,
-          errorMethodCount: 5,
-          lineLength: 50,
-          colors: true,
-          printEmojis: true,
-          dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
-        ),
-      );
+            Logger(
+              printer: PrettyPrinter(
+                methodCount: 0,
+                errorMethodCount: 5,
+                lineLength: 50,
+                colors: true,
+                printEmojis: true,
+                dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
+              ),
+            );
 
   @override
   void onRequest(
@@ -649,4 +649,3 @@ class TimingInterceptor extends Interceptor {
     }
   }
 }
-

@@ -565,4 +565,3 @@ class BuyState extends Equatable {
         sessionBatches,
       ];
 }
-

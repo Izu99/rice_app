@@ -713,4 +713,3 @@ class SyncStatusNotifier extends ChangeNotifier {
     notifyListeners();
   }
 }
-

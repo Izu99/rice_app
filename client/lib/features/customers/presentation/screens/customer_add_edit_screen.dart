@@ -53,14 +53,14 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
   bool _isEditing = false;
   String? _currentEditingId;
   String? _originalPhone;
-  CustomerType _selectedType = CustomerType.both;
+  CustomerType _selectedType = CustomerType.seller;
 
   @override
   void initState() {
     super.initState();
     _isEditing = widget.customerId != null;
     _currentEditingId = widget.customerId;
-    _selectedType = widget.initialType ?? CustomerType.both;
+    _selectedType = widget.initialType ?? CustomerType.seller;
 
     _checkAnimController = AnimationController(
       vsync: this,
@@ -299,10 +299,11 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
 
       final authState = context.read<AuthCubit>().state;
       final companyId = authState.user?.companyId ?? '';
-      
+
       if (companyId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Error: Company information not found. Please log in again.')));
+            content: Text(
+                'Error: Company information not found. Please log in again.')));
         return;
       }
 
@@ -424,21 +425,27 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                               controller: _phoneController,
                               focusNode: _phoneFocusNode,
                               decoration: InputDecoration(
-                                labelText: 'Phone Number *',
+                                labelText: 'Phone Number (Required)',
                                 hintText: '07XXXXXXXX',
-                                prefixIcon: const Icon(Icons.phone_outlined),
+                                prefixIcon: const Icon(Icons.phone_outlined,
+                                    color: AppColors.primary),
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      BorderSide(color: Colors.grey.shade300),
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(16),
                                   borderSide: const BorderSide(
                                       color: AppColors.primary, width: 2),
                                 ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
                                 suffixIcon: _isPhoneChecking
                                     ? RotationTransition(
                                         turns: _checkAnimController,
@@ -468,13 +475,13 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                               ],
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return 'Required';
+                                  return 'Please enter a phone number';
                                 }
                                 if (value.length < 9) {
-                                  return 'Too short';
+                                  return 'Phone number is too short';
                                 }
                                 if (!_isPhoneAvailable) {
-                                  return 'Use a unique number';
+                                  return 'This phone number is already in use';
                                 }
                                 return null;
                               },
@@ -485,23 +492,65 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                             const SizedBox(height: 16),
 
                             // Customer Type
-                            DropdownButtonFormField<CustomerType>(
-                              initialValue: _selectedType,
-                              decoration: _inputDecoration(
-                                  'Customer Role / Type',
-                                  Icons.category_outlined),
-                              items: CustomerType.values.map((type) {
-                                return DropdownMenuItem(
-                                  value: type,
-                                  child: Text(
-                                      '${type.displayName} (${type.sinhalaName})'),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() => _selectedType = value);
-                                }
-                              },
+                            Align(
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                child: DropdownButtonFormField<CustomerType>(
+                                  value: _selectedType,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        'Customer Role / Type (Required)',
+                                    prefixIcon: const Icon(
+                                        Icons.category_outlined,
+                                        color: AppColors.primary),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                          color: AppColors.primary, width: 2),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey.shade50,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 16),
+                                  ),
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: AppColors.primary),
+                                  borderRadius: BorderRadius.circular(16),
+                                  items: [
+                                    CustomerType.seller,
+                                    CustomerType.buyer,
+                                  ].map((type) {
+                                    return DropdownMenuItem(
+                                      value: type,
+                                      child: Text(
+                                        '${type.displayName} (${type.sinhalaName})',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w500),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setState(() => _selectedType = value);
+                                    }
+                                  },
+                                  validator: (value) => value == null
+                                      ? 'Please select a type'
+                                      : null,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 16),
 
@@ -509,11 +558,11 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                             TextFormField(
                               controller: _nameController,
                               decoration: _inputDecoration(
-                                  'Full Name *', Icons.person_outline),
+                                  'Full Name (Required)', Icons.person_outline),
                               textCapitalization: TextCapitalization.words,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                      ? 'Required'
+                                      ? 'Please enter the customer name'
                                       : null,
                             ),
                             const SizedBox(height: 16),
@@ -536,41 +585,35 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                             TextFormField(
                               controller: _addressController,
                               decoration: _inputDecoration(
-                                  'Street Address', Icons.location_on_outlined),
+                                  'Street Address (Required)',
+                                  Icons.location_on_outlined),
                               maxLines: 2,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
-                                      ? 'Required'
+                                      ? 'Please enter the street address'
                                       : null,
                             ),
                             const SizedBox(height: 16),
 
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _cityController,
-                                    decoration: _inputDecoration(
-                                        'City', Icons.location_city_outlined),
-                                    textCapitalization:
-                                        TextCapitalization.words,
-                                    validator: (value) =>
-                                        (value == null || value.trim().isEmpty)
-                                            ? 'Required'
-                                            : null,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _nicController,
-                                    decoration: _inputDecoration(
-                                        'NIC (Optional)', Icons.badge_outlined),
-                                    textCapitalization:
-                                        TextCapitalization.characters,
-                                  ),
-                                ),
-                              ],
+                            // City
+                            TextFormField(
+                              controller: _cityController,
+                              decoration: _inputDecoration(
+                                  'City (Required)', Icons.location_city_outlined),
+                              textCapitalization: TextCapitalization.words,
+                              validator: (value) =>
+                                  (value == null || value.trim().isEmpty)
+                                      ? 'Please enter the city'
+                                      : null,
+                            ),
+                            const SizedBox(height: 16),
+
+                            // NIC
+                            TextFormField(
+                              controller: _nicController,
+                              decoration: _inputDecoration(
+                                  'NIC Number (Optional)', Icons.badge_outlined),
+                              textCapitalization: TextCapitalization.characters,
                             ),
                             const SizedBox(height: 16),
 
@@ -578,7 +621,8 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                             TextFormField(
                               controller: _notesController,
                               decoration: _inputDecoration(
-                                  'Internal Notes', Icons.note_alt_outlined),
+                                  'Internal Notes (Optional)',
+                                  Icons.note_alt_outlined),
                               maxLines: 3,
                             ),
                             const SizedBox(height: 40),
@@ -613,6 +657,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                                   style: AppTextStyles.titleMedium.copyWith(
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.2,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -635,18 +680,22 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 22),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      prefixIcon: Icon(icon, size: 22, color: AppColors.primary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
@@ -664,4 +713,3 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     );
   }
 }
-

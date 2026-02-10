@@ -566,4 +566,3 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     return null;
   }
 }
-

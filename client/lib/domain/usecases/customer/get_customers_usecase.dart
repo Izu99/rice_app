@@ -141,4 +141,3 @@ class DeleteCustomerUseCase implements UseCase<bool, String> {
     return await repository.deleteCustomer(customerId);
   }
 }
-

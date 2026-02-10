@@ -81,4 +81,3 @@ class StockState extends Equatable {
         isSynced,
       ];
 }
-

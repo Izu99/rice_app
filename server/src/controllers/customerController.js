@@ -94,7 +94,7 @@ exports.getCustomerById = async (req, res) => {
 
     // Get transaction statistics
     const transactionStats = await Transaction.aggregate([
-      { $match: { customerId: customer._id, companyId: req.companyId } },
+      { $match: { customerId: customer._id, companyId: new mongoose.Types.ObjectId(req.companyId) } },
       {
         $group: {
           _id: '$type',
@@ -175,7 +175,7 @@ exports.createCustomer = async (req, res) => {
       address,
       city,
       nic,
-      customerType,
+      customer_type,
       notes,
       clientId
     } = req.body
@@ -201,7 +201,7 @@ exports.createCustomer = async (req, res) => {
       address,
       city,
       nic,
-      customerType,
+      customerType: customer_type || 'seller',
       notes,
       companyId: req.companyId,
       clientId
@@ -248,7 +248,7 @@ exports.updateCustomer = async (req, res) => {
 
     const allowedUpdates = [
       'name', 'phone', 'email', 'address', 'nic', 'city',
-      'notes', 'isActive'
+      'customerType', 'notes', 'isActive'
     ]
 
     const updates = {}
@@ -257,6 +257,11 @@ exports.updateCustomer = async (req, res) => {
         updates[field] = req.body[field]
       }
     })
+
+    // Map API customer_type to DB customerType
+    if (req.body.customer_type !== undefined) {
+      updates.customerType = req.body.customer_type
+    }
 
     // Prevent phone number conflicts within company
     if (updates.phone) {
@@ -304,7 +309,7 @@ exports.syncCustomers = async (req, res) => {
 
     const synced = []
     for (const customerData of customers) {
-      const { local_id, phone, name, address, city, nic_number, email, notes } = customerData
+      const { local_id, phone, name, address, city, nic_number, email, notes, customer_type } = customerData
 
       // Try to find existing customer by phone or client_id (local_id)
       let customer = await Customer.findOne({
@@ -323,6 +328,7 @@ exports.syncCustomers = async (req, res) => {
         customer.email = email || customer.email
         customer.nic = nic_number || customer.nic
         customer.notes = notes || customer.notes
+        customer.customerType = customer_type || customer.customerType
         await customer.save()
       } else {
         // Create new
@@ -334,6 +340,7 @@ exports.syncCustomers = async (req, res) => {
           email,
           nic: nic_number,
           notes,
+          customerType: customer_type,
           companyId: req.companyId,
           clientId: local_id
         })
@@ -416,7 +423,7 @@ exports.getCustomerTransactions = async (req, res) => {
     // Build transaction query
     const transactionQuery = {
       customerId: customer._id,
-      ...req.companyFilter
+      companyId: new mongoose.Types.ObjectId(req.companyId)
     }
 
     if (type) transactionQuery.type = type

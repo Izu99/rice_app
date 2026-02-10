@@ -272,4 +272,3 @@ class InlineLoading extends StatelessWidget {
     );
   }
 }
-

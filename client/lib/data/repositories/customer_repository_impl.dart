@@ -280,4 +280,3 @@ class CustomerRepositoryImpl implements CustomerRepository {
     return const Right([]);
   }
 }
-

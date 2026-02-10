@@ -434,4 +434,3 @@ class _DecimalInputFormatter extends TextInputFormatter {
     return newValue;
   }
 }
-

@@ -54,4 +54,3 @@ class LoginParams extends Equatable {
   @override
   List<Object?> get props => [identifier, password, rememberMe];
 }
-

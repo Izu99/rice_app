@@ -64,4 +64,3 @@ class SearchStockUseCase implements UseCase<List<StockItemEntity>, String> {
     return await repository.searchStock(query.trim());
   }
 }
-

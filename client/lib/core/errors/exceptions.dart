@@ -663,4 +663,3 @@ class NotFoundException extends AppException {
     );
   }
 }
-

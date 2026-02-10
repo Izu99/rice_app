@@ -17,11 +17,27 @@ class DailyReportScreen extends StatefulWidget {
   State<DailyReportScreen> createState() => _DailyReportScreenState();
 }
 
-class _DailyReportScreenState extends State<DailyReportScreen> {
+class _DailyReportScreenState extends State<DailyReportScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<ReportsCubit>().loadDailyReport();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh daily report data when app comes to foreground
+      context.read<ReportsCubit>().loadDailyReport();
+    }
   }
 
   @override
@@ -195,4 +211,3 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   String _format(double v) =>
       v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}K' : v.toStringAsFixed(0);
 }
-

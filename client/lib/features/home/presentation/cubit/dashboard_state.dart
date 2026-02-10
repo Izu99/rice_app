@@ -3,6 +3,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../../data/models/transaction_model.dart';
 import '../../../../data/models/stock_item_model.dart';
+import '../../../../data/models/expense_model.dart';
 
 /// Dashboard loading status
 enum DashboardStatus {
@@ -21,6 +22,7 @@ class DashboardState extends Equatable {
   // Today's Summary
   final double todayPurchases;
   final double todaySales;
+  final double todayExpenses;
   final double todayProfit;
   final int todayBuyCount;
   final int todaySellCount;
@@ -28,6 +30,7 @@ class DashboardState extends Equatable {
   // Monthly Summary
   final double monthlyPurchases;
   final double monthlySales;
+  final double monthlyExpenses;
   final double monthlyProfit;
   final int monthlyBuyCount;
   final int monthlySellCount;
@@ -50,6 +53,7 @@ class DashboardState extends Equatable {
 
   // Recent Transactions
   final List<TransactionModel> recentTransactions;
+  final List<ExpenseModel> recentExpenses;
 
   // Sync Status
   final bool isSynced;
@@ -65,7 +69,8 @@ class DashboardState extends Equatable {
   final List<Map<String, dynamic>> _weeklyTrend;
 
   // Safe Getters to prevent null errors during hot-reload transitions
-  Map<int, Map<String, double>> get weeklyActivity => _weeklyActivity ?? const {};
+  Map<int, Map<String, double>> get weeklyActivity =>
+      _weeklyActivity ?? const {};
   List<Map<String, dynamic>> get weeklyTrend => _weeklyTrend ?? const [];
 
   DashboardState({
@@ -73,11 +78,13 @@ class DashboardState extends Equatable {
     this.errorMessage,
     this.todayPurchases = 0,
     this.todaySales = 0,
+    this.todayExpenses = 0,
     this.todayProfit = 0,
     this.todayBuyCount = 0,
     this.todaySellCount = 0,
     this.monthlyPurchases = 0,
     this.monthlySales = 0,
+    this.monthlyExpenses = 0,
     this.monthlyProfit = 0,
     this.monthlyBuyCount = 0,
     this.monthlySellCount = 0,
@@ -92,6 +99,7 @@ class DashboardState extends Equatable {
     this.totalReceivables = 0,
     this.totalPayables = 0,
     this.recentTransactions = const [],
+    this.recentExpenses = const [],
     this.isSynced = true,
     this.lastSyncTime,
     this.pendingSyncCount = 0,
@@ -143,6 +151,9 @@ class DashboardState extends Equatable {
   /// Formatted today's sales
   String get formattedTodaySales => 'Rs. ${_formatNumber(todaySales)}';
 
+  /// Formatted today's expenses
+  String get formattedTodayExpenses => 'Rs. ${_formatNumber(todayExpenses)}';
+
   /// Formatted today's profit
   String get formattedTodayProfit => 'Rs. ${_formatNumber(todayProfit)}';
 
@@ -152,6 +163,9 @@ class DashboardState extends Equatable {
 
   /// Formatted monthly sales
   String get formattedMonthlySales => 'Rs. ${_formatNumber(monthlySales)}';
+
+  /// Formatted monthly expenses
+  String get formattedMonthlyExpenses => 'Rs. ${_formatNumber(monthlyExpenses)}';
 
   /// Formatted monthly profit
   String get formattedMonthlyProfit => 'Rs. ${_formatNumber(monthlyProfit)}';
@@ -216,11 +230,13 @@ class DashboardState extends Equatable {
     String? errorMessage,
     double? todayPurchases,
     double? todaySales,
+    double? todayExpenses,
     double? todayProfit,
     int? todayBuyCount,
     int? todaySellCount,
     double? monthlyPurchases,
     double? monthlySales,
+    double? monthlyExpenses,
     double? monthlyProfit,
     int? monthlyBuyCount,
     int? monthlySellCount,
@@ -235,6 +251,7 @@ class DashboardState extends Equatable {
     double? totalReceivables,
     double? totalPayables,
     List<TransactionModel>? recentTransactions,
+    List<ExpenseModel>? recentExpenses,
     bool? isSynced,
     DateTime? lastSyncTime,
     int? pendingSyncCount,
@@ -248,11 +265,13 @@ class DashboardState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       todayPurchases: todayPurchases ?? this.todayPurchases,
       todaySales: todaySales ?? this.todaySales,
+      todayExpenses: todayExpenses ?? this.todayExpenses,
       todayProfit: todayProfit ?? this.todayProfit,
       todayBuyCount: todayBuyCount ?? this.todayBuyCount,
       todaySellCount: todaySellCount ?? this.todaySellCount,
       monthlyPurchases: monthlyPurchases ?? this.monthlyPurchases,
       monthlySales: monthlySales ?? this.monthlySales,
+      monthlyExpenses: monthlyExpenses ?? this.monthlyExpenses,
       monthlyProfit: monthlyProfit ?? this.monthlyProfit,
       monthlyBuyCount: monthlyBuyCount ?? this.monthlyBuyCount,
       monthlySellCount: monthlySellCount ?? this.monthlySellCount,
@@ -267,6 +286,7 @@ class DashboardState extends Equatable {
       totalReceivables: totalReceivables ?? this.totalReceivables,
       totalPayables: totalPayables ?? this.totalPayables,
       recentTransactions: recentTransactions ?? this.recentTransactions,
+      recentExpenses: recentExpenses ?? this.recentExpenses,
       isSynced: isSynced ?? this.isSynced,
       lastSyncTime: lastSyncTime ?? this.lastSyncTime,
       pendingSyncCount: pendingSyncCount ?? this.pendingSyncCount,
@@ -282,11 +302,13 @@ class DashboardState extends Equatable {
         errorMessage,
         todayPurchases,
         todaySales,
+        todayExpenses,
         todayProfit,
         todayBuyCount,
         todaySellCount,
         monthlyPurchases,
         monthlySales,
+        monthlyExpenses,
         monthlyProfit,
         monthlyBuyCount,
         monthlySellCount,
@@ -301,6 +323,7 @@ class DashboardState extends Equatable {
         totalReceivables,
         totalPayables,
         recentTransactions,
+        recentExpenses,
         isSynced,
         lastSyncTime,
         pendingSyncCount,

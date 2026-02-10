@@ -257,4 +257,3 @@ abstract class StockRepository {
     required String reason,
   });
 }
-

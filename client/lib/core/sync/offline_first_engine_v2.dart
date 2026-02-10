@@ -737,4 +737,3 @@ class OfflineFirstEngineV2 extends ChangeNotifier {
 enum SyncEntityType { customer, stock, transaction, payment, milling, user }
 enum SyncOperation { create, update, delete }
 */
-

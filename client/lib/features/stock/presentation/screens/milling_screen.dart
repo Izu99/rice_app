@@ -11,6 +11,7 @@ import '../../../../data/models/stock_item_model.dart';
 import '../cubit/milling_cubit.dart';
 import '../cubit/milling_state.dart';
 import '../widgets/milling_calculator.dart';
+import '../widgets/milling_confirmation_dialog.dart';
 
 class MillingScreen extends StatefulWidget {
   const MillingScreen({super.key});
@@ -19,23 +20,36 @@ class MillingScreen extends StatefulWidget {
   State<MillingScreen> createState() => _MillingScreenState();
 }
 
-class _MillingScreenState extends State<MillingScreen> {
+class _MillingScreenState extends State<MillingScreen>
+    with WidgetsBindingObserver {
   final _inputWeightController = TextEditingController();
   final _inputBagsController = TextEditingController();
   final _outputRiceController = TextEditingController();
 
+
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<MillingCubit>().loadAvailablePaddy();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _inputWeightController.dispose();
     _inputBagsController.dispose();
     _outputRiceController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh milling data when app comes to foreground
+      context.read<MillingCubit>().loadAvailablePaddy();
+    }
   }
 
   @override
@@ -73,20 +87,49 @@ class _MillingScreenState extends State<MillingScreen> {
           print('🖥️ [MillingScreen] State Listener: status=${state.status}');
           try {
             if (state.status == MillingStatus.success) {
-              print('🖥️ [MillingScreen] Showing Success Dialog');
-              _showSuccessDialog();
-            } else if (state.errorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('✅ Milling completed successfully!'),
+                  backgroundColor: AppColors.success,
+                  behavior: SnackBarBehavior.fixed,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+              // Reset form after showing message and navigate
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.read<MillingCubit>().resetMilling();
+                _clearControllers();
+                context.push('/stock'); // Automatically navigate to stock after success
+              });
+            } else if (state.status == MillingStatus.error && state.errorMessage != null) {
               print('🖥️ [MillingScreen] Error detected: ${state.errorMessage}');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage!),
                   backgroundColor: AppColors.error,
+                  duration: const Duration(seconds: 4),
                 ),
               );
               context.read<MillingCubit>().clearError();
+            } else if (state.status == MillingStatus.processing) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('⚙️ Processing milling...'),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.fixed,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
             }
-          } catch (e) {
+          } catch (e, stack) {
             print('❌ [MillingScreen] LISTENER ERROR: $e');
+            print('❌ [MillingScreen] LISTENER STACK: $stack');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('An unexpected error occurred'),
+                backgroundColor: AppColors.error,
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -466,101 +509,28 @@ class _MillingScreenState extends State<MillingScreen> {
     );
   }
 
-  void _confirmAndProcess() {
-    // Capture cubit before showing dialog to avoid context issues
-    final cubit = context.read<MillingCubit>();
-    
-    showDialog(
-      context: context,
-      builder: (dialogContext) => ConfirmationDialog(
-        title: 'Confirm Milling',
-        message: 'Are you sure you want to process this milling batch? '
-            'This will deduct paddy and add rice to stock.',
-        confirmLabel: 'Process',
-        onConfirm: () {
-          Navigator.pop(dialogContext);
-          cubit.processMilling();
-        },
-      ),
-    );
-  }
-
-  void _showSuccessDialog() {
-    try {
+    void _confirmAndProcess() {
+      // Capture cubit before showing dialog to avoid context issues
+      final cubit = context.read<MillingCubit>();
+      
       showDialog(
         context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: AppColors.success,
-                  size: 64,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.paddingL),
-              Text(
-                'Milling Complete!',
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.paddingS),
-              Text(
-                'Rice has been added to stock.',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.read<MillingCubit>().resetMilling();
-                _clearControllers();
-              },
-              child: const Text('New Batch'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-                context.push('/stock'); // Use push to be safer
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child:
-                  const Text('View Stock', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      );
-    } catch (e, stack) {
-      print('❌ [MillingScreen] DIALOG ERROR: $e');
-      print('❌ [MillingScreen] STACK TRACE: $stack');
-      // Fallback or inform user if dialog fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Operation successful, but failed to show confirmation.'),
-            backgroundColor: AppColors.warning,
+        builder: (dialogContext) => MillingConfirmationDialog(
+          title: 'Confirm Milling',
+          message: 'Are you sure you want to process this milling batch? '
+              'This will deduct paddy and add rice to stock.',
+          confirmLabel: 'Process',
+          onConfirm: () {
+            Navigator.pop(dialogContext); // Pop the custom dialog
+            // Defer the cubit call to the next frame to avoid Navigator locked issues
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              cubit.processMilling();
+            });
+          },
         ),
       );
     }
-  }
+
 
   void _clearControllers() {
     _inputWeightController.clear();
@@ -572,4 +542,3 @@ class _MillingScreenState extends State<MillingScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
-

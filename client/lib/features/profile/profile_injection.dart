@@ -10,7 +10,7 @@ class ProfileInjection {
 
   /// Initialize profile dependencies
   static Future<void> init() async {
-    _sl.registerFactory<ProfileCubit>(
+    _sl.registerLazySingleton<ProfileCubit>(
       () => ProfileCubit(authRepository: _sl<AuthRepository>()),
     );
   }
@@ -23,4 +23,3 @@ class ProfileInjection {
     }
   }
 }
-

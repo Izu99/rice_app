@@ -31,7 +31,7 @@ class CustomerEntity extends Equatable {
     this.nic,
     this.notes,
     this.balance = 0,
-    this.customerType = CustomerType.both,
+    this.customerType = CustomerType.seller,
     this.isActive = true,
   });
 
@@ -159,4 +159,3 @@ class CustomerEntity extends Equatable {
         isActive,
       ];
 }
-

@@ -1,4 +1,4 @@
-// lib/data/models/company_model.dart 
+// lib/data/models/company_model.dart
 
 import 'package:equatable/equatable.dart';
 
@@ -324,4 +324,3 @@ class CompanyModel extends Equatable {
   @override
   String toString() => 'CompanyModel(id: $id, name: $name, plan: ${plan.name})';
 }
-

@@ -17,11 +17,27 @@ class MonthlyReportScreen extends StatefulWidget {
   State<MonthlyReportScreen> createState() => _MonthlyReportScreenState();
 }
 
-class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
+class _MonthlyReportScreenState extends State<MonthlyReportScreen>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     context.read<ReportsCubit>().loadMonthlyReport();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Refresh monthly report data when app comes to foreground
+      context.read<ReportsCubit>().loadMonthlyReport();
+    }
   }
 
   static const _months = [
@@ -220,4 +236,3 @@ class _MonthlyReportScreenState extends State<MonthlyReportScreen> {
   String _format(double v) =>
       v >= 1000 ? '${(v / 1000).toStringAsFixed(1)}K' : v.toStringAsFixed(0);
 }
-

@@ -652,4 +652,3 @@ extension ErrorContextExtension on BuildContext {
     return ErrorHandler.showNetworkErrorDialog(this);
   }
 }
-

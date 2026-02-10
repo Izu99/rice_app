@@ -60,6 +60,7 @@ import 'features/stock/stock_injection.dart';
 import 'features/customers/customers_injection.dart';
 import 'features/reports/reports_injection.dart';
 import 'features/profile/profile_injection.dart';
+import 'features/expenses/expenses_injection.dart';
 import 'features/super_admin/admin_injection.dart';
 
 // Routes
@@ -239,6 +240,7 @@ Future<void> _initFeatures() async {
   initStockInjection(sl);
   await CustomersInjection.init();
   await ReportsInjection.init();
+  initExpensesInjection(sl);
   await ProfileInjection.init();
   initAdminInjection(sl);
 }
@@ -291,4 +293,3 @@ Future<void> disposeFeature(String feature) async {
       break;
   }
 }
-

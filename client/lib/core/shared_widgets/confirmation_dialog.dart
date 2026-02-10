@@ -857,4 +857,3 @@ class LoadingDialog extends StatelessWidget {
     );
   }
 }
-

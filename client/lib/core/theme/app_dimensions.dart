@@ -486,4 +486,3 @@ class AppDimensions {
     return MediaQuery.of(context).size.width >= breakpointDesktop;
   }
 }
-

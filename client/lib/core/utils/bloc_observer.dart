@@ -58,4 +58,3 @@ class AppBlocObserver extends BlocObserver {
     }
   }
 }
-

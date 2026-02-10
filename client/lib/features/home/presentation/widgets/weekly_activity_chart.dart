@@ -5,7 +5,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 class WeeklyActivityChart extends StatelessWidget {
-  final Map<int, Map<String, double>> data; // day index -> {'buy': val, 'sell': val}
+  final Map<int, Map<String, double>>
+      data; // day index -> {'buy': val, 'sell': val}
   final bool isLoading;
 
   const WeeklyActivityChart({
@@ -74,9 +75,7 @@ class WeeklyActivityChart extends StatelessWidget {
           const SizedBox(height: 32),
           SizedBox(
             height: 200,
-            child: isLoading
-                ? _buildLoadingState()
-                : _buildBarChart(),
+            child: isLoading ? _buildLoadingState() : _buildBarChart(),
           ),
         ],
       ),
@@ -97,7 +96,10 @@ class WeeklyActivityChart extends StatelessWidget {
               String type = rodIndex == 0 ? 'Purchase' : 'Sale';
               return BarTooltipItem(
                 '$type\nRs.${rod.toY.toStringAsFixed(0)}',
-                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12),
               );
             },
           ),
@@ -115,7 +117,7 @@ class WeeklyActivityChart extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Text(
                     DateFormat('E').format(date),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.textHint,
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
@@ -125,9 +127,12 @@ class WeeklyActivityChart extends StatelessWidget {
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         gridData: FlGridData(
           show: true,
@@ -224,4 +229,3 @@ class WeeklyActivityChart extends StatelessWidget {
     return max == 0 ? 100 : max * 1.2;
   }
 }
-

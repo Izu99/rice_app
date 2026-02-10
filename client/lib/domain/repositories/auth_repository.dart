@@ -155,4 +155,3 @@ abstract class AuthRepository {
     required CompanyModel company,
   });
 }
-

@@ -251,4 +251,3 @@ class _PhoneNumberFormatter extends TextInputFormatter {
     );
   }
 }
-

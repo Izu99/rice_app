@@ -15,4 +15,3 @@ class LogoutUseCase implements UseCase<void, NoParams> {
     return await repository.logout();
   }
 }
-

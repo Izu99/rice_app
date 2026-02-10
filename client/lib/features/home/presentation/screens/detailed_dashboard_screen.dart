@@ -5,13 +5,56 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 
-class DetailedDashboardScreen extends StatelessWidget {
+import '../../../../routes/app_router.dart';
+import '../../../../injection_container.dart';
+
+class DetailedDashboardScreen extends StatefulWidget {
   const DetailedDashboardScreen({super.key});
+
+  @override
+  State<DetailedDashboardScreen> createState() =>
+      _DetailedDashboardScreenState();
+}
+
+class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
+    with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route observer
+    try {
+      final route = ModalRoute.of(context);
+      if (route != null) {
+        sl<AppRouter>().routeObserver.subscribe(this, route);
+      }
+    } catch (e) {
+      debugPrint('Error subscribing to route observer: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    try {
+      sl<AppRouter>().routeObserver.unsubscribe(this);
+    } catch (e) {
+      debugPrint('Error unsubscribing from route observer: $e');
+    }
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when the top route has been popped off, and the current route shows up.
+    if (mounted) {
+      context.read<DashboardCubit>().refreshDashboard();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +66,30 @@ class DetailedDashboardScreen extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: AppColors.background,
-          body: CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context, isDesktop),
-              SliverPadding(
-                padding: EdgeInsets.all(isDesktop ? 24 : 16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildFinancialCards(state, isTablet, isDesktop),
-                    SizedBox(height: isDesktop ? 32 : 24),
-                    
-                    _buildChartSection(state, isTablet, isDesktop),
-                    SizedBox(height: isDesktop ? 32 : 24),
-                    
-                    _buildStockAndPerformance(state, isTablet, isDesktop),
-                    SizedBox(height: isDesktop ? 32 : 24),
-                    
-                    _buildInventorySection(state, isTablet, isDesktop),
-                    const SizedBox(height: 40),
-                  ]),
+          body: LoadingOverlay(
+            isLoading: state.status == DashboardStatus.loading ||
+                state.status == DashboardStatus.refreshing,
+            message: 'Loading dashboard data...',
+            child: CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context, isDesktop),
+                SliverPadding(
+                  padding: EdgeInsets.all(isDesktop ? 24 : 16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      _buildFinancialCards(state, isTablet, isDesktop),
+                      SizedBox(height: isDesktop ? 32 : 24),
+                      _buildChartSection(state, isTablet, isDesktop),
+                      SizedBox(height: isDesktop ? 32 : 24),
+                      _buildStockAndPerformance(state, isTablet, isDesktop),
+                      SizedBox(height: isDesktop ? 32 : 24),
+                      _buildInventorySection(state, isTablet, isDesktop),
+                      const SizedBox(height: 40),
+                    ]),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -76,7 +121,7 @@ class DetailedDashboardScreen extends StatelessWidget {
           ),
         ),
         background: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -104,16 +149,19 @@ class DetailedDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFinancialCards(DashboardState state, bool isTablet, bool isDesktop) {
+  Widget _buildFinancialCards(
+      DashboardState state, bool isTablet, bool isDesktop) {
     final cards = [
-      _StatCardData('Total Revenue', state.formattedMonthlySales, 
-        Icons.account_balance_wallet_rounded, AppColors.success, '+12.5%'),
-      _StatCardData('Total Expense', state.formattedMonthlyPurchases, 
-        Icons.shopping_cart_rounded, AppColors.error, '+8.2%'),
-      _StatCardData('Net Profit', state.formattedMonthlyProfit, 
-        Icons.trending_up_rounded, AppColors.primary, '+4.3%'),
-      _StatCardData('Customer Base', '${state.totalCustomers}', 
-        Icons.people_rounded, AppColors.info, '+5.7%'),
+      _StatCardData('Total Revenue', state.formattedMonthlySales,
+          Icons.account_balance_wallet_rounded, AppColors.success, '+12.5%'),
+      _StatCardData('Paddy Purchases', state.formattedMonthlyPurchases,
+          Icons.shopping_basket_rounded, AppColors.error, '+8.2%'),
+      _StatCardData('Op. Expenses', state.formattedMonthlyExpenses,
+          Icons.receipt_long_rounded, AppColors.warning, '+3.1%'),
+      _StatCardData('Net Profit', state.formattedMonthlyProfit,
+          Icons.trending_up_rounded, AppColors.primary, '+4.3%'),
+      _StatCardData('Customer Base', '${state.totalCustomers}',
+          Icons.people_rounded, AppColors.info, '+5.7%'),
     ];
 
     return LayoutBuilder(
@@ -228,7 +276,8 @@ class DetailedDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChartSection(DashboardState state, bool isTablet, bool isDesktop) {
+  Widget _buildChartSection(
+      DashboardState state, bool isTablet, bool isDesktop) {
     return Container(
       padding: EdgeInsets.all(isDesktop ? 28 : 20),
       decoration: BoxDecoration(
@@ -339,19 +388,19 @@ class DetailedDashboardScreen extends StatelessWidget {
     // Generate spots from weeklyTrend data
     // weeklyTrend is expected to have 7 days of data from backend
     // Format: [{_id: 'YYYY-MM-DD', buy: 100, sell: 200}, ...]
-    
+
     final List<FlSpot> salesSpots = [];
     final List<FlSpot> purchaseSpots = [];
-    
+
     // Defensive check for hot-reload state mismatch
     final trendData = state.weeklyTrend;
-    
+
     if (trendData.isNotEmpty) {
       for (int i = 0; i < trendData.length; i++) {
         final dayData = trendData[i];
         final buy = (dayData['buy'] as num?)?.toDouble() ?? 0.0;
         final sell = (dayData['sell'] as num?)?.toDouble() ?? 0.0;
-        
+
         // Use i as x-axis (0 to 6)
         // Scale down large numbers to 'k' for readability on y-axis
         purchaseSpots.add(FlSpot(i.toDouble(), buy / 1000));
@@ -387,7 +436,7 @@ class DetailedDashboardScreen extends StatelessWidget {
                     fontSize: 12,
                   ),
                   children: [
-                    TextSpan(
+                    const TextSpan(
                       text: 'Click for details',
                       style: TextStyle(
                         color: AppColors.textSecondary,
@@ -447,24 +496,34 @@ class DetailedDashboardScreen extends StatelessWidget {
               showTitles: true,
               interval: 1,
               getTitlesWidget: (value, meta) {
-                // Dynamic labels based on actual dates would be better, 
+                // Dynamic labels based on actual dates would be better,
                 // but for now we map 0-6 to Mon-Sun or relative days
                 // If we have actual dates in weeklyTrend, we could parse them
-                
+
                 String label = '';
-                if (state.weeklyTrend.isNotEmpty && value.toInt() < state.weeklyTrend.length) {
-                   final dateStr = state.weeklyTrend[value.toInt()]['_id'] as String? ?? '';
-                   if (dateStr.isNotEmpty) {
-                     try {
-                       final date = DateTime.parse(dateStr);
-                       // E.g., "Mon", "Tue"
-                       // Need simple date formatter
-                       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                       label = days[date.weekday - 1]; 
-                     } catch (_) {}
-                   }
+                if (state.weeklyTrend.isNotEmpty &&
+                    value.toInt() < state.weeklyTrend.length) {
+                  final dateStr =
+                      state.weeklyTrend[value.toInt()]['_id'] as String? ?? '';
+                  if (dateStr.isNotEmpty) {
+                    try {
+                      final date = DateTime.parse(dateStr);
+                      // E.g., "Mon", "Tue"
+                      // Need simple date formatter
+                      const days = [
+                        'Mon',
+                        'Tue',
+                        'Wed',
+                        'Thu',
+                        'Fri',
+                        'Sat',
+                        'Sun'
+                      ];
+                      label = days[date.weekday - 1];
+                    } catch (_) {}
+                  }
                 }
-                
+
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
@@ -478,8 +537,10 @@ class DetailedDashboardScreen extends StatelessWidget {
               },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(
           show: true,
@@ -535,7 +596,8 @@ class DetailedDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStockAndPerformance(DashboardState state, bool isTablet, bool isDesktop) {
+  Widget _buildStockAndPerformance(
+      DashboardState state, bool isTablet, bool isDesktop) {
     if (isTablet) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -564,7 +626,7 @@ class DetailedDashboardScreen extends StatelessWidget {
 
   Widget _buildStockDistribution(DashboardState state, bool isDesktop) {
     final hasStock = state.totalPaddyStock > 0 || state.totalRiceStock > 0;
-    
+
     return Container(
       padding: EdgeInsets.all(isDesktop ? 28 : 20),
       decoration: BoxDecoration(
@@ -595,46 +657,51 @@ class DetailedDashboardScreen extends StatelessWidget {
               PieChartData(
                 sectionsSpace: 4,
                 centerSpaceRadius: 60,
-                sections: hasStock ? [
-                  PieChartSectionData(
-                    color: AppColors.warning,
-                    value: state.totalPaddyStock,
-                    title: '${state.totalPaddyStock.toStringAsFixed(0)}kg',
-                    radius: 60,
-                    titleStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    badgeWidget: _buildPieBadge('Paddy', AppColors.warning),
-                    badgePositionPercentageOffset: 1.4,
-                  ),
-                  PieChartSectionData(
-                    color: AppColors.primary,
-                    value: state.totalRiceStock,
-                    title: '${state.totalRiceStock.toStringAsFixed(0)}kg',
-                    radius: 60,
-                    titleStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    badgeWidget: _buildPieBadge('Rice', AppColors.primary),
-                    badgePositionPercentageOffset: 1.4,
-                  ),
-                ] : [
-                  PieChartSectionData(
-                    color: AppColors.grey300,
-                    value: 1,
-                    title: 'No Stock',
-                    radius: 60,
-                    titleStyle: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+                sections: hasStock
+                    ? [
+                        PieChartSectionData(
+                          color: AppColors.warning,
+                          value: state.totalPaddyStock,
+                          title:
+                              '${state.totalPaddyStock.toStringAsFixed(0)}kg',
+                          radius: 60,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          badgeWidget:
+                              _buildPieBadge('Paddy', AppColors.warning),
+                          badgePositionPercentageOffset: 1.4,
+                        ),
+                        PieChartSectionData(
+                          color: AppColors.primary,
+                          value: state.totalRiceStock,
+                          title: '${state.totalRiceStock.toStringAsFixed(0)}kg',
+                          radius: 60,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          badgeWidget:
+                              _buildPieBadge('Rice', AppColors.primary),
+                          badgePositionPercentageOffset: 1.4,
+                        ),
+                      ]
+                    : [
+                        PieChartSectionData(
+                          color: AppColors.grey300,
+                          value: 1,
+                          title: 'No Stock',
+                          radius: 60,
+                          titleStyle: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
               ),
             ),
           ),
@@ -693,16 +760,26 @@ class DetailedDashboardScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _buildMetricRow('Paddy Purchased', '${state.totalPaddyBoughtKg.toStringAsFixed(0)} kg', 'Volume', AppColors.success),
-          _buildMetricRow('Rice Sold', '${state.totalRiceSoldKg.toStringAsFixed(0)} kg', 'Volume', AppColors.info),
-          _buildMetricRow('Milling Output', '95%', 'Optimal', AppColors.success),
+          _buildMetricRow(
+              'Paddy Purchased',
+              '${state.totalPaddyBoughtKg.toStringAsFixed(0)} kg',
+              'Volume',
+              AppColors.success),
+          _buildMetricRow(
+              'Rice Sold',
+              '${state.totalRiceSoldKg.toStringAsFixed(0)} kg',
+              'Volume',
+              AppColors.info),
+          _buildMetricRow(
+              'Milling Output', '95%', 'Optimal', AppColors.success),
           _buildMetricRow('Waste Ratio', '2.5%', 'Low', AppColors.warning),
         ],
       ),
     );
   }
 
-  Widget _buildMetricRow(String label, String value, String status, Color statusColor) {
+  Widget _buildMetricRow(
+      String label, String value, String status, Color statusColor) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -745,11 +822,12 @@ class DetailedDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInventorySection(DashboardState state, bool isTablet, bool isDesktop) {
+  Widget _buildInventorySection(
+      DashboardState state, bool isTablet, bool isDesktop) {
     return Container(
       padding: EdgeInsets.all(isDesktop ? 32 : 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [

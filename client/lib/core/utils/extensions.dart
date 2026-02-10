@@ -615,4 +615,3 @@ extension ColorExtensions on Color {
   /// Get contrasting text color
   Color get contrastingColor => isDark ? Colors.white : Colors.black;
 }
-

@@ -472,4 +472,3 @@ class TransactionItemModel extends Equatable {
   double get totalWeight => quantity;
   double get totalPrice => totalAmount;
 }
-

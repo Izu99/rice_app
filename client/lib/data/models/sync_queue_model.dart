@@ -457,4 +457,3 @@ class SyncQueueModel extends Equatable {
 extension SyncOperationValue on SyncOperation {
   String get value => name;
 }
-
