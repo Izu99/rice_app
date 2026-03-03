@@ -88,7 +88,7 @@ class RiceMillApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp.router(
             key: ValueKey(state.language),
-            title: 'Rice Mill ERP',
+            title: 'ricemill',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

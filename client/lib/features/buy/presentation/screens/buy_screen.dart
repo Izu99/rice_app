@@ -464,7 +464,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().addBatchToSession()
                     : null,
                 icon: const Icon(Icons.add_task),
-                label: const Text('සැසියට එක් කරන්න'), // ADD BATCH TO SESSION
+                label: const Text('ලැයිස්තුවට එක් කරන්න'), // ADD BATCH TO SESSION
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -479,7 +479,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
 
           // Session Batches Table (Table 2)
           if (state.sessionBatches.isNotEmpty) ...[
-            _buildSectionHeader('වත්මන් සැසියේ අයිතම', 'තහවුරු නොකළ බර ප්‍රමාණයන්'),
+            _buildSectionHeader('වත්මන් ලැයිස්තුවේ අයිතම', 'තහවුරු නොකළ බර ප්‍රමාණයන්'),
             const SizedBox(height: 12),
             _buildRecentTransactionsSection(state),
             const SizedBox(height: 24),
@@ -492,7 +492,13 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().finalizeSessionToStock()
                     : null,
                 icon: const Icon(Icons.cloud_upload_outlined),
-                label: const Text('තොගයට එක් කර අවසන් කරන්න'), // FINALIZE & SAVE TO STOCK
+                label: SizedBox(
+                  height: 24,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: const Text('තොගයට එක් කර අවසන් කරන්න'),
+                  ),
+                ), // FINALIZE & SAVE TO STOCK
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
@@ -576,39 +582,88 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: displayGroupedItems.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final item = displayGroupedItems[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Row(
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.grey50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.grey200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 3,
-                child: Text(item['variety'] as String,
-                    style: AppTextStyles.bodySmall
-                        .copyWith(fontWeight: FontWeight.w500)),
+              // Variety name
+              Text(
+                item['variety'] as String,
+                style: AppTextStyles.titleSmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              Expanded(
-                flex: 2,
-                child: Text('${item['bags']}',
-                    style: AppTextStyles.bodySmall,
-                    textAlign: TextAlign.center),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                    '${(item['weight'] as double).toStringAsFixed(2)} kg',
-                    style: AppTextStyles.bodySmall,
-                    textAlign: TextAlign.right),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                    'Rs. ${(item['amount'] as double).toStringAsFixed(2)}',
-                    style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.bold, color: AppColors.success),
-                    textAlign: TextAlign.right),
+              const SizedBox(height: 8),
+              // Details row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Bags
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'මලු',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        '${item['bags']}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Weight
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'බර',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        '${(item['weight'] as double).toStringAsFixed(2)} kg',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Amount
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'මුදල',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'Rs. ${(item['amount'] as double).toStringAsFixed(2)}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -690,39 +745,35 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                 borderRadius:
                     const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 5,
-                    child: Text(
-                      '${state.selectedCustomer!.name} හට ගෙවිය යුතු මුළු මුදල', // Total Payable to
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
+                  Text(
+                    '${state.selectedCustomer!.name} හට ගෙවිය යුතු මුළු මුදල',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
                     ),
                   ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      '${totalSessionWeight.toStringAsFixed(2)} kg',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'මුළු බර: ${totalSessionWeight.toStringAsFixed(2)} kg',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      'Rs. ${totalSessionAmount.toStringAsFixed(2)}',
-                      style: AppTextStyles.titleSmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                      Text(
+                        'Rs. ${totalSessionAmount.toStringAsFixed(2)}',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
-                      textAlign: TextAlign.right,
-                    ),
+                    ],
                   ),
                 ],
               ),

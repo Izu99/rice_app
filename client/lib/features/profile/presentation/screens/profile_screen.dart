@@ -469,7 +469,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: Column(
         children: [
           Text(
-            'Rice Mill ERP',
+            'ricemill',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textSecondary,
             ),

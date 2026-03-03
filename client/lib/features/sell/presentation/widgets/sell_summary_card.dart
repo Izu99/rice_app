@@ -102,12 +102,19 @@ class SellSummaryCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Rs. ${totalAmount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                      SizedBox(
+                        height: 28,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Rs. ${totalAmount.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -138,11 +145,17 @@ class SellSummaryCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.shopping_cart_checkout),
                       const SizedBox(width: 8),
-                      Text(
-                        SiStrings.checkout,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(
+                        height: 20,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            SiStrings.checkout,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -188,12 +201,17 @@ class _SummaryItem extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+        SizedBox(
+          height: 20,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
       ],
@@ -251,14 +269,20 @@ class SellSummaryCardCompact extends StatelessWidget {
 
             const SizedBox(width: 16),
 
-            // Total
             Expanded(
-              child: Text(
-                'Rs. ${totalAmount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              child: SizedBox(
+                height: 24,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Rs. ${totalAmount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -274,9 +298,15 @@ class SellSummaryCardCompact extends StatelessWidget {
                   vertical: 12,
                 ),
               ),
-              child: Text(
-                SiStrings.checkout,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+              child: SizedBox(
+                height: 20,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    SiStrings.checkout,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ),
           ],

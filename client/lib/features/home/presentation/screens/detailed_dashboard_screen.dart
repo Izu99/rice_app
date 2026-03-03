@@ -116,9 +116,10 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           SiStrings.analytics,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 22,
+            color: Colors.white,
           ),
         ),
         background: Container(
@@ -255,22 +256,23 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              data.label,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                data.label,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textPrimary.withOpacity(0.7),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15, // Large and clear
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            FittedBox(
-              child: Text(
-                data.value,
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontSize: 28,
-                ),
+            Text(
+              data.value,
+              style: AppTextStyles.titleLarge.copyWith(
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary,
+                fontSize: 26,
               ),
             ),
           ],
@@ -432,7 +434,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               return touchedSpots.map((LineBarSpot touchedSpot) {
                 final isSales = touchedSpot.barIndex == 0;
                 return LineTooltipItem(
-                  '${isSales ? SiStrings.sell : SiStrings.buy}: ${touchedSpot.y.toStringAsFixed(1)}k\n',
+                  '${isSales ? SiStrings.sell : SiStrings.buy}: ${touchedSpot.y.toStringAsFixed(1)}\n',
                   TextStyle(
                     color: isSales ? AppColors.success : AppColors.error,
                     fontWeight: FontWeight.bold,
@@ -483,7 +485,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Text(
-                    '${value.toInt()}k',
+                    '${value.toInt()}',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: 10,
@@ -674,7 +676,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                             fontSize: 12,
                           ),
                           badgeWidget:
-                              _buildPieBadge('වී', AppColors.warning),
+                              _buildPieBadge(SiStrings.paddy, AppColors.warning),
                           badgePositionPercentageOffset: 1.4,
                         ),
                         PieChartSectionData(
@@ -688,7 +690,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                             fontSize: 12,
                           ),
                           badgeWidget:
-                              _buildPieBadge('සහල්', AppColors.primary),
+                              _buildPieBadge(SiStrings.rice, AppColors.primary),
                           badgePositionPercentageOffset: 1.4,
                         ),
                       ]
@@ -764,18 +766,18 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           ),
           const SizedBox(height: 20),
           _buildMetricRow(
-              'මිලදී ගත් වී',
+              SiStrings.paddyPurchases,
               '${state.totalPaddyBoughtKg.toStringAsFixed(0)} kg',
               'ප්‍රමාණය',
               AppColors.success),
           _buildMetricRow(
-              'විකුණූ සහල්',
+              SiStrings.sellRice,
               '${state.totalRiceSoldKg.toStringAsFixed(0)} kg',
               'ප්‍රමාණය',
               AppColors.info),
           _buildMetricRow(
               SiStrings.millingOutput, '95%', 'ඉතා හොඳයි', AppColors.success),
-          _buildMetricRow(SiStrings.wasteRatio, '2.5%', 'අඩු', AppColors.warning),
+          _buildMetricRow(SiStrings.wasteRatio, '2.5%', 'ප්‍රශස්තයි', AppColors.warning),
         ],
       ),
     );
@@ -789,26 +791,39 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
         children: [
           Expanded(
             flex: 4,
-            child: Text(
-              label,
-              style: AppTextStyles.bodyMedium.copyWith(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
+            child: SizedBox(
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                ),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             flex: 3,
-            child: Text(
-              value,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-                fontSize: 13,
+            child: SizedBox(
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  value,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
               ),
-              textAlign: TextAlign.right,
             ),
           ),
           const SizedBox(width: 12),
@@ -819,15 +834,20 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                 color: statusColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                status,
-                style: TextStyle(
-                  color: statusColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+              child: SizedBox(
+                height: 14,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -912,7 +932,7 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                   ),
                   _buildInventoryItem(
                     SiStrings.lowStockAlerts,
-                    '${state.lowStockCount} අයිතම',
+                    '${state.lowStockCount} ${SiStrings.items}',
                     Icons.warning_amber_rounded,
                   ),
                   _buildInventoryItem(
@@ -955,14 +975,21 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  label,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 10,
+                SizedBox(
+                  width: double.infinity,
+                  height: 12,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      label,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 10,
+                      ),
+                      maxLines: 1,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 FittedBox(

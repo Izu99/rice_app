@@ -78,32 +78,33 @@ class SummaryCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  title,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 9,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    title,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13, // Legible
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 if (isLoading)
                   _buildShimmerLoader()
                 else
-                  SizedBox(
-                    height: 28,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        value,
-                        style: AppTextStyles.titleLarge.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.5,
-                        ),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: AppTextStyles.titleLarge.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        fontSize: 22,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ),
@@ -113,8 +114,10 @@ class SummaryCard extends StatelessWidget {
                     subtitle!,
                     style: AppTextStyles.labelSmall.copyWith(
                       color: AppColors.textHint,
-                      fontSize: 11,
+                      fontSize: 12, // Legible
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
@@ -234,17 +237,33 @@ class LargeSummaryCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          title,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.w600,
+                        SizedBox(
+                          width: double.infinity,
+                          height: 22,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              title,
+                              style: AppTextStyles.titleMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                         if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textSecondary,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 16,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                subtitle!,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
                             ),
                           ),
                       ],
@@ -272,11 +291,19 @@ class LargeSummaryCard extends StatelessWidget {
                   ),
                 )
               else
-                Text(
-                  value,
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
+                SizedBox(
+                  width: double.infinity,
+                  height: 42,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      value,
+                      style: AppTextStyles.headlineMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
                   ),
                 ),
 
@@ -367,18 +394,33 @@ class SummaryRow extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+              child: SizedBox(
+                height: 20,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    label,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ),
-            Text(
-              value,
-              style: AppTextStyles.titleSmall.copyWith(
-                fontWeight: FontWeight.w600,
-                color: valueColor ?? AppColors.textPrimary,
+            const SizedBox(width: 8),
+            SizedBox(
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  value,
+                  style: AppTextStyles.titleSmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: valueColor ?? AppColors.textPrimary,
+                  ),
+                ),
               ),
             ),
             if (onTap != null) ...[

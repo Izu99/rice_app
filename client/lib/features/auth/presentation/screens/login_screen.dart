@@ -241,10 +241,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.rice_bowl_rounded,
-            size: 55,
-            color: AppColors.white,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -285,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Copyright
         Text(
-          '© 2024 Rice Mill ERP',
+          '© ${DateTime.now().year} ricemill',
           style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.textHint,
           ),

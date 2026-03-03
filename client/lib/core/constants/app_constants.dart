@@ -7,7 +7,7 @@ class AppConstants {
   // ==================== APP INFO ====================
 
   /// Application name
-  static const String appName = 'Rice Mill ERP';
+  static const String appName = 'ricemill';
 
   /// Application name in Sinhala
   static const String appNameSinhala = 'සහල් මෝල් කළමනාකරණය';
@@ -65,13 +65,13 @@ class AppConstants {
   // ==================== TIMEOUTS ====================
 
   /// Connection timeout duration
-  static const Duration connectionTimeout = Duration(seconds: 10);
+  static const Duration connectionTimeout = Duration(seconds: 30);
 
   /// Receive timeout duration
-  static const Duration receiveTimeout = Duration(seconds: 10);
+  static const Duration receiveTimeout = Duration(seconds: 30);
 
   /// Send timeout duration
-  static const Duration sendTimeout = Duration(seconds: 10);
+  static const Duration sendTimeout = Duration(seconds: 30);
 
   /// Splash screen duration
   static const Duration splashDuration = Duration(seconds: 2);

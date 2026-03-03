@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/enums.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../data/models/transaction_model.dart';
 
 /// Recent transactions list widget
@@ -371,12 +372,7 @@ class TransactionListItem extends StatelessWidget {
   }
 
   String _formatAmount(double amount) {
-    if (amount >= 1000000) {
-      return 'Rs.${(amount / 1000000).toStringAsFixed(1)}M';
-    } else if (amount >= 1000) {
-      return 'Rs.${(amount / 1000).toStringAsFixed(0)}K';
-    }
-    return 'Rs.${amount.toStringAsFixed(0)}';
+    return NumberFormatter.formatCurrency(amount);
   }
 }
 

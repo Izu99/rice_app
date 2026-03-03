@@ -34,7 +34,8 @@ import '../features/customers/presentation/screens/customer_add_edit_screen.dart
 // Features - Reports
 import '../features/reports/presentation/screens/reports_screen.dart';
 import '../features/reports/presentation/screens/daily_report_screen.dart';
-import '../features/reports/presentation/screens/monthly_report_screen.dart';
+import '../features/reports/presentation/screens/stock_report_screen.dart';
+import '../features/reports/presentation/screens/customer_report_screen.dart';
 
 // Features - Transactions
 import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
@@ -183,9 +184,14 @@ class AppRouter {
                     builder: (context, state) => const DailyReportScreen(),
                   ),
                   GoRoute(
-                    path: 'monthly',
-                    name: 'monthlyReport',
-                    builder: (context, state) => const MonthlyReportScreen(),
+                    path: 'stock',
+                    name: 'stockReport',
+                    builder: (context, state) => const StockReportScreen(),
+                  ),
+                  GoRoute(
+                    path: 'customer',
+                    name: 'customerReport',
+                    builder: (context, state) => const CustomerReportScreen(),
                   ),
                 ],
               ),

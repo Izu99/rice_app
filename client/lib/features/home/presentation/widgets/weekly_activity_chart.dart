@@ -74,7 +74,7 @@ class WeeklyActivityChart extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           SizedBox(
-            height: 200,
+            height: 240,
             child: isLoading ? _buildLoadingState() : _buildBarChart(),
           ),
         ],
@@ -109,18 +109,22 @@ class WeeklyActivityChart extends StatelessWidget {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 40,
               getTitlesWidget: (value, meta) {
                 final date = DateTime.now().subtract(
                   Duration(days: 6 - value.toInt()),
                 );
-                return Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    DateFormat('E').format(date),
-                    style: const TextStyle(
-                      color: AppColors.textHint,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
+                return Transform.rotate(
+                  angle: -0.3,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Text(
+                      DateFormat('E').format(date),
+                      style: const TextStyle(
+                        color: AppColors.textHint,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 );

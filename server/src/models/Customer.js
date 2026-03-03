@@ -59,7 +59,7 @@ const CustomerSchema = new mongoose.Schema({
   },
   customerType: {
     type: String,
-    enum: ['buyer', 'seller'],
+    enum: ['buyer', 'seller', 'both'],
     default: 'seller'
   },
   companyId: {

@@ -1,6 +1,7 @@
 // lib/features/customers/presentation/widgets/customer_card.dart
 
 import 'package:flutter/material.dart';
+import '../../../../core/constants/enums.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../domain/entities/customer_entity.dart';
@@ -42,6 +43,12 @@ class CustomerCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
+            border: Border(
+              left: BorderSide(
+                color: customer.customerType.color,
+                width: 4,
+              ),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -56,11 +63,7 @@ class CustomerCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    // Avatar
-                    _buildAvatar(),
-                    const SizedBox(width: 14),
-
-                    // Info
+                    // Info (no avatar)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,15 +71,23 @@ class CustomerCard extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  customer.name,
-                                  style: AppTextStyles.titleMedium.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                child: SizedBox(
+                                  height: 24,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      customer.name,
+                                      style: AppTextStyles.titleMedium.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              _buildTypeBadge(customer.customerType),
                             ],
                           ),
                           const SizedBox(height: 4),
@@ -187,19 +198,33 @@ class CustomerCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                _buildAvatar(size: 40),
-                const SizedBox(width: 12),
+                // Info (no avatar)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        customer.name,
-                        style: AppTextStyles.titleSmall.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 18,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  customer.name,
+                                  style: AppTextStyles.titleSmall.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          _buildTypeBadge(customer.customerType,
+                              compact: true),
+                        ],
                       ),
                       Text(
                         customer.formattedPhone,
@@ -221,21 +246,31 @@ class CustomerCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar({double size = 50}) {
+  Widget _buildTypeBadge(CustomerType type, {bool compact = false}) {
     return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        shape: BoxShape.circle,
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 6 : 8,
+        vertical: compact ? 2 : 4,
       ),
-      child: Center(
-        child: Text(
-          customer.initials,
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: size * 0.36,
+      decoration: BoxDecoration(
+        color: type.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: type.color.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: SizedBox(
+        height: compact ? 16 : 20,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            type.displayName,
+            style: (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
+                .copyWith(
+              color: type.color,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
@@ -261,13 +296,19 @@ class CustomerCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: compact ? 12 : 14),
           const SizedBox(width: 4),
-          Text(
-            customer.formattedBalance,
-            style:
-                (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
-                    .copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
+          SizedBox(
+            height: compact ? 16 : 20,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                customer.formattedBalance,
+                style:
+                    (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
+                        .copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
@@ -275,6 +316,7 @@ class CustomerCard extends StatelessWidget {
     );
   }
 }
+
 
 /// Action button for customer card
 class _ActionButton extends StatelessWidget {
@@ -346,31 +388,7 @@ class SelectableCustomerCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                // Avatar
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: isSelected
-                        ? const Icon(Icons.check, color: AppColors.white)
-                        : Text(
-                            customer.initials,
-                            style: AppTextStyles.titleSmall.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Info
+                // Info (no avatar)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

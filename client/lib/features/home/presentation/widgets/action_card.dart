@@ -112,25 +112,33 @@ class ActionCard extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Title
-                      Text(
-                        title,
-                        style: AppTextStyles.titleMedium.copyWith(
-                          color: isEnabled
-                              ? AppColors.textPrimary
-                              : AppColors.textDisabled,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          title,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            color: isEnabled
+                                ? AppColors.textPrimary
+                                : AppColors.textDisabled,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20, // Premium & Large
+                          ),
                         ),
                       ),
-
                       const SizedBox(height: 4),
 
-                      // Subtitle (Sinhala)
-                      Text(
-                        subtitle,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.2,
+                      // Subtitle (Sinhala/English)
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          subtitle,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
                         ),
                       ),
 
@@ -216,15 +224,19 @@ class SmallActionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                title,
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: isEnabled
-                      ? AppColors.textPrimary
-                      : AppColors.textDisabled,
-                  fontWeight: FontWeight.w600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  title,
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: isEnabled
+                        ? AppColors.textPrimary
+                        : AppColors.textDisabled,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -292,18 +304,34 @@ class HorizontalActionCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.titleSmall.copyWith(
-                        fontWeight: FontWeight.w600,
+                    SizedBox(
+                      width: double.infinity,
+                      height: 22,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          title,
+                          style: AppTextStyles.titleSmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                      SizedBox(
+                        width: double.infinity,
+                        height: 16,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            subtitle!,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ),
                       ),
                     ],

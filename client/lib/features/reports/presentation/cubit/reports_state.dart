@@ -10,6 +10,8 @@ class ReportsState extends Equatable {
   final ReportModel? dailyReport;
   final ReportModel? monthlyReport;
   final Map<String, dynamic>? dashboardSummary;
+  final Map<String, dynamic>? stockReport;
+  final Map<String, dynamic>? customerReport;
   final DateTime selectedDate;
   final int selectedMonth;
   final int selectedYear;
@@ -21,6 +23,8 @@ class ReportsState extends Equatable {
     this.dailyReport,
     this.monthlyReport,
     this.dashboardSummary,
+    this.stockReport,
+    this.customerReport,
     DateTime? selectedDate,
     int? selectedMonth,
     int? selectedYear,
@@ -47,6 +51,8 @@ class ReportsState extends Equatable {
     ReportModel? dailyReport,
     ReportModel? monthlyReport,
     Map<String, dynamic>? dashboardSummary,
+    Map<String, dynamic>? stockReport,
+    Map<String, dynamic>? customerReport,
     DateTime? selectedDate,
     int? selectedMonth,
     int? selectedYear,
@@ -59,6 +65,8 @@ class ReportsState extends Equatable {
       dailyReport: dailyReport ?? this.dailyReport,
       monthlyReport: monthlyReport ?? this.monthlyReport,
       dashboardSummary: dashboardSummary ?? this.dashboardSummary,
+      stockReport: stockReport ?? this.stockReport,
+      customerReport: customerReport ?? this.customerReport,
       selectedDate: selectedDate ?? this.selectedDate,
       selectedMonth: selectedMonth ?? this.selectedMonth,
       selectedYear: selectedYear ?? this.selectedYear,
@@ -73,6 +81,8 @@ class ReportsState extends Equatable {
         dailyReport,
         monthlyReport,
         dashboardSummary,
+        stockReport,
+        customerReport,
         selectedDate,
         selectedMonth,
         selectedYear,

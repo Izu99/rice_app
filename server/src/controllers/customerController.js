@@ -24,7 +24,13 @@ exports.getCustomers = async (req, res) => {
     // Build query with company filter
     const query = { ...req.companyFilter }
 
-    if (type) query.customerType = type
+    if (type) {
+      if (type === 'buyer' || type === 'seller') {
+        query.customerType = { $in: [type, 'both'] }
+      } else {
+        query.customerType = type
+      }
+    }
     if (isActive !== undefined) query.isActive = isActive === 'true'
 
     if (search) {

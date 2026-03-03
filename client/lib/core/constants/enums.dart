@@ -251,15 +251,17 @@ enum MovementType {
 
 /// Customer types
 enum CustomerType {
-  buyer('buyer', 'Buyer', 'පාරිභෝගිකයා (Buyer)'),
-  seller('seller', 'Seller', 'සැපයුම්කරු (Seller)'),
-  both('both', 'Both', 'දෙකම (Both)');
+  buyer('buyer', 'Buyer', 'පාරිභෝගිකයා (Buyer)', Color(0xFF2196F3)),
+  seller('seller', 'Seller', 'සැපයුම්කරු (Seller)', Color(0xFF4CAF50)),
+  both('both', 'Both', 'දෙකම (Both)', Color(0xFFFFC107));
 
   final String value;
   final String displayName;
   final String sinhalaName;
+  final Color color;
 
-  const CustomerType(this.value, this.displayName, this.sinhalaName);
+  const CustomerType(
+      this.value, this.displayName, this.sinhalaName, this.color);
 
   static CustomerType fromString(String value) {
     return CustomerType.values.firstWhere(

@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../domain/entities/transaction_entity.dart';
 import '../../../../domain/entities/expense_entity.dart';
+import 'dart:convert';
+import 'package:printing/printing.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../domain/repositories/expense_repository.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/utils/report_pdf_generator.dart';
+import '../widgets/export_button.dart';
 
 enum ReportPeriod { day, week, month }
 
@@ -25,6 +30,7 @@ class DailyReportScreen extends StatefulWidget {
 class _DailyReportScreenState extends State<DailyReportScreen> {
   ReportPeriod _selectedPeriod = ReportPeriod.day;
   DateTime _selectedDate = DateTime.now();
+  DateTimeRange? _selectedDateRange;
   DateTime? _chartSelectedDate;
   bool _isLoading = false;
   
@@ -61,9 +67,16 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       
       switch (_selectedPeriod) {
         case ReportPeriod.day:
-          startDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-          endDate = startDate.add(const Duration(days: 1));
-          _periodDates = [startDate];
+          if (_selectedDateRange != null) {
+            startDate = DateTime(_selectedDateRange!.start.year, _selectedDateRange!.start.month, _selectedDateRange!.start.day);
+            endDate = DateTime(_selectedDateRange!.end.year, _selectedDateRange!.end.month, _selectedDateRange!.end.day).add(const Duration(days: 1));
+            final int daysInRange = endDate.difference(startDate).inDays;
+            _periodDates = List.generate(daysInRange, (i) => startDate.add(Duration(days: i)));
+          } else {
+            startDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+            endDate = startDate.add(const Duration(days: 1));
+            _periodDates = [startDate];
+          }
           break;
           
         case ReportPeriod.week:
@@ -235,6 +248,11 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             ),
           ],
         ),
+        bottomNavigationBar: ExportButton(
+          onExportPdf: _exportPdf,
+          onExportExcel: _exportExcel,
+          onPrint: _printReport,
+        ),
       ),
     );
   }
@@ -273,6 +291,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
         setState(() {
           _selectedPeriod = period;
           _chartSelectedDate = null; // Reset chart selection
+          _selectedDateRange = null;
         });
         _loadData();
       },
@@ -283,12 +302,19 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          englishLabel,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: isSelected ? AppColors.white : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        child: SizedBox(
+          width: double.infinity,
+          height: 20,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              SiStrings.isSinhala ? label : englishLabel,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: isSelected ? AppColors.white : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ),
         ),
       ),
@@ -306,27 +332,51 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             icon: const Icon(Icons.chevron_left),
             onPressed: () {
               setState(() {
-                _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                if (_selectedDateRange != null) {
+                  final duration = _selectedDateRange!.end.difference(_selectedDateRange!.start) + const Duration(days: 1);
+                  _selectedDateRange = DateTimeRange(
+                    start: _selectedDateRange!.start.subtract(duration),
+                    end: _selectedDateRange!.end.subtract(duration),
+                  );
+                  _selectedDate = _selectedDateRange!.start;
+                } else {
+                  _selectedDate = _selectedDate.subtract(const Duration(days: 1));
+                }
                 _chartSelectedDate = null;
               });
               _loadData();
             },
           ),
           Text(
-            DateFormat('yyyy-MM-dd (EEEE)').format(_selectedDate),
+            _selectedDateRange != null && _selectedDateRange!.start != _selectedDateRange!.end
+                ? '${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start)} to ${DateFormat('MM-dd').format(_selectedDateRange!.end)}'
+                : DateFormat('yyyy-MM-dd (EEEE)').format(_selectedDate),
             style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold),
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
             onPressed: () {
-              final next = _selectedDate.add(const Duration(days: 1));
-              if (next.isBefore(DateTime.now().add(const Duration(days: 1)))) {
-                setState(() {
-                  _selectedDate = next;
-                  _chartSelectedDate = null;
-                });
-                _loadData();
-              }
+              setState(() {
+                if (_selectedDateRange != null) {
+                  final duration = _selectedDateRange!.end.difference(_selectedDateRange!.start) + const Duration(days: 1);
+                  final nextStart = _selectedDateRange!.start.add(duration);
+                  final nextEnd = _selectedDateRange!.end.add(duration);
+                  if (nextStart.isBefore(DateTime.now().add(const Duration(days: 1)))) {
+                    _selectedDateRange = DateTimeRange(
+                      start: nextStart,
+                      end: nextEnd.isAfter(DateTime.now()) ? DateTime.now() : nextEnd,
+                    );
+                    _selectedDate = _selectedDateRange!.start;
+                  }
+                } else {
+                  final next = _selectedDate.add(const Duration(days: 1));
+                  if (next.isBefore(DateTime.now().add(const Duration(days: 1)))) {
+                    _selectedDate = next;
+                  }
+                }
+                _chartSelectedDate = null;
+              });
+              _loadData();
             },
           ),
         ],
@@ -372,7 +422,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           children: [
             Expanded(
               child: _buildSummaryCard(
-                'Total Buy',
+                'මුළු මිලදී ගැනීම්', // Total Buy
                 _totalBuy,
                 AppColors.error,
                 Icons.arrow_downward,
@@ -381,7 +431,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: _buildSummaryCard(
-                'Total Sell',
+                'මුළු විකුණුම්', // Total Sell
                 _totalSell,
                 AppColors.success,
                 Icons.arrow_upward,
@@ -394,7 +444,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           children: [
             Expanded(
               child: _buildSummaryCard(
-                'Expenses',
+                'වියදම්', // Expenses
                 _totalExpenses,
                 AppColors.warning,
                 Icons.money_off,
@@ -403,7 +453,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: _buildSummaryCard(
-                'Net Profit',
+                'ශුද්ධ ලාභය', // Net Profit
                 _profit,
                 _profit >= 0 ? AppColors.primary : AppColors.error,
                 Icons.account_balance_wallet,
@@ -427,17 +477,25 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 8),
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
           ),
-          const SizedBox(height: 4),
           FittedBox(
+            fit: BoxFit.scaleDown,
             child: Text(
               'Rs. ${_formatCurrency(value)}',
-              style: AppTextStyles.titleMedium.copyWith(
+              style: AppTextStyles.titleLarge.copyWith(
                 color: color,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
+                fontSize: 22,
               ),
             ),
           ),
@@ -548,22 +606,38 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 22,
+              interval: 1,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
-                if (index < 0 || index >= _periodDates.length) return const Text('');
+                if (index < 0 || index >= _periodDates.length) return const SizedBox.shrink();
                 
                 final date = _periodDates[index];
-                String label;
                 
-                if (_selectedPeriod == ReportPeriod.week || _selectedPeriod == ReportPeriod.month) {
-                  label = DateFormat('d').format(date);
-                } else {
-                  label = date.day.toString();
+                // Determine if we should show this specific label to avoid overlap
+                bool showLabel = true;
+                if (_periodDates.length > 15) {
+                  // For long periods (~30 days), show every 5th label and the last one
+                  showLabel = (index % 5 == 0) || (index == _periodDates.length - 1);
+                } else if (_periodDates.length > 8) {
+                  // For medium periods (like a week), show every 2nd label
+                  showLabel = (index % 2 == 0) || (index == _periodDates.length - 1);
                 }
                 
-                return Text(
-                  label,
-                  style: AppTextStyles.bodySmall,
+                if (!showLabel) return const SizedBox.shrink();
+
+                final label = DateFormat('d').format(date);
+                
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  space: 4,
+                  child: Text(
+                    label,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontSize: 10,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 );
               },
             ),
@@ -701,11 +775,19 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
                     ],
                   ),
                 ),
-                Text(
-                  'Rs. ${_formatCurrency(txn.totalAmount)}',
-                  style: AppTextStyles.titleSmall.copyWith(
-                    color: isBuy ? AppColors.error : AppColors.success,
-                    fontWeight: FontWeight.bold,
+                SizedBox(
+                  width: 100,
+                  height: 24,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Rs. ${_formatCurrency(txn.totalAmount)}',
+                      style: AppTextStyles.titleSmall.copyWith(
+                        color: isBuy ? AppColors.error : AppColors.success,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -805,28 +887,143 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
   }
 
   Future<void> _selectDate() async {
-    final date = await showDatePicker(
+    final range = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDateRange: _selectedDateRange ?? DateTimeRange(
+        start: _selectedDate,
+        end: _selectedDate,
+      ),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    
-    if (date != null) {
+
+    if (range != null) {
       setState(() {
-        _selectedDate = date;
+        _selectedDateRange = range;
+        _selectedDate = range.start;
         _chartSelectedDate = null;
+        _selectedPeriod = ReportPeriod.day;
       });
       _loadData();
     }
   }
 
-  String _formatCurrency(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(2)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
+  Future<void> _exportPdf() async {
+    DateTime start = _selectedDate;
+    DateTime end = _selectedDate;
+
+    if (_chartSelectedDate != null) {
+      start = _chartSelectedDate!;
+      end = _chartSelectedDate!;
+    } else if (_periodDates.isNotEmpty) {
+      start = _periodDates.first;
+      end = _periodDates.last;
     }
-    return value.toStringAsFixed(0);
+    
+    setState(() => _isLoading = true);
+    try {
+      final String dateRangeLabel = start.isAtSameMomentAs(end)
+          ? DateFormat('yyyy-MM-dd').format(start)
+          : '${DateFormat('yyyy-MM-dd').format(start)} to ${DateFormat('MM-dd').format(end)}';
+
+      final pdfBytes = await ReportPdfGenerator.generatePeriodReport(
+        periodLabel: _selectedPeriod.name.toUpperCase(),
+        dateRange: dateRangeLabel,
+        transactions: _transactions,
+        expenses: _expenses,
+        totalBuy: _totalBuy,
+        totalSell: _totalSell,
+        totalExpenses: _totalExpenses,
+        netProfit: _profit,
+      );
+      
+      await Printing.sharePdf(bytes: pdfBytes, filename: 'Report_${DateFormat('yyyy-MM-dd').format(start)}.pdf');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting PDF: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _exportExcel() async {
+    DateTime start = _selectedDate;
+    if (_chartSelectedDate != null) {
+      start = _chartSelectedDate!;
+    } else if (_periodDates.isNotEmpty) {
+      start = _periodDates.first;
+    }
+    
+    setState(() => _isLoading = true);
+    try {
+      final StringBuffer buffer = StringBuffer();
+      
+      buffer.writeln('Summary');
+      buffer.writeln('Total Buy,${_totalBuy}');
+      buffer.writeln('Total Sell,${_totalSell}');
+      buffer.writeln('Total Expenses,${_totalExpenses}');
+      buffer.writeln('Net Profit,${_profit}');
+      buffer.writeln();
+      
+      buffer.writeln('Transactions');
+      buffer.writeln('Type,Customer,Date,Amount');
+      for (var t in _transactions) {
+        buffer.writeln('${t.isBuyTransaction ? "Buy" : "Sell"},"${t.customerName}",${DateFormat('yyyy-MM-dd HH:mm').format(t.transactionDate)},${t.totalAmount}');
+      }
+      
+      buffer.writeln();
+      buffer.writeln('Expenses');
+      buffer.writeln('Category,Notes,Date,Amount');
+      for (var e in _expenses) {
+        buffer.writeln('"${e.category.name}","${e.notes?.replaceAll('"', '""') ?? ""}",${DateFormat('yyyy-MM-dd HH:mm').format(e.date)},${e.amount}');
+      }
+      
+      final bytes = utf8.encode(buffer.toString());
+      await Printing.sharePdf(bytes: bytes, filename: 'Report_${DateFormat('yyyy-MM-dd').format(start)}.csv');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting Excel: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _printReport() async {
+    DateTime start = _selectedDate;
+    DateTime end = _selectedDate;
+
+    if (_chartSelectedDate != null) {
+      start = _chartSelectedDate!;
+      end = _chartSelectedDate!;
+    } else if (_periodDates.isNotEmpty) {
+      start = _periodDates.first;
+      end = _periodDates.last;
+    }
+    
+    setState(() => _isLoading = true);
+    try {
+      final String dateRangeLabel = start.isAtSameMomentAs(end)
+          ? DateFormat('yyyy-MM-dd').format(start)
+          : '${DateFormat('yyyy-MM-dd').format(start)} to ${DateFormat('MM-dd').format(end)}';
+
+      final pdfBytes = await ReportPdfGenerator.generatePeriodReport(
+        periodLabel: _selectedPeriod.name.toUpperCase(),
+        dateRange: dateRangeLabel,
+        transactions: _transactions,
+        expenses: _expenses,
+        totalBuy: _totalBuy,
+        totalSell: _totalSell,
+        totalExpenses: _totalExpenses,
+        netProfit: _profit,
+      );
+      
+      await Printing.layoutPdf(onLayout: (format) async => pdfBytes, name: 'Report_${DateFormat('yyyy-MM-dd').format(start)}');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error printing report: $e')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  String _formatCurrency(double value) {
+    return NumberFormatter.formatInteger(value);
   }
 }

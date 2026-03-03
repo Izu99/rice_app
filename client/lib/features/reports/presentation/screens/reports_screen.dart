@@ -3,15 +3,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../injection_container.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 import '../widgets/report_card.dart';
+import '../widgets/export_button.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -22,6 +25,12 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen>
     with WidgetsBindingObserver {
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _isLoadingRange = false;
+  double _rangeTotal = 0;
+  int _rangeTransactions = 0;
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +48,6 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      // Refresh reports data when app comes to foreground
       context.read<ReportsCubit>().loadDashboardSummary();
       context.read<ReportsCubit>().loadDailyReport();
     }
@@ -49,71 +57,304 @@ class _ReportsScreenState extends State<ReportsScreen>
   Widget build(BuildContext context) {
     return BlocBuilder<ReportsCubit, ReportsState>(
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: AppBar(
-            title: Text(SiStrings.reports),
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.white,
-          ),
-          body: RefreshIndicator(
-            onRefresh: () =>
-                context.read<ReportsCubit>().loadDashboardSummary(),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Quick stats
-                  _buildQuickStats(state),
-                  const SizedBox(height: 24),
-
-                  // Report types
-                  Text(SiStrings.reports,
-                      style: AppTextStyles.titleMedium
-                          .copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-
-                  ReportCard(
-                    title: 'දෛනික වාර්තාව', // Daily Report
-                    subtitle: 'Daily Report',
-                    icon: Icons.today,
-                    color: AppColors.primary,
-                    onTap: () => context.push('/reports/daily'),
-                  ),
-                  const SizedBox(height: 12),
-
-                  ReportCard(
-                    title: 'මාසික වාර්තාව', // Monthly Report
-                    subtitle: 'Monthly Report',
-                    icon: Icons.calendar_month,
-                    color: AppColors.success,
-                    onTap: () => context.push('/reports/monthly'),
-                  ),
-                  const SizedBox(height: 12),
-
-                  ReportCard(
-                    title: 'තොග වාර්තාව', // Stock Report
-                    subtitle: 'Stock Report',
-                    icon: Icons.inventory,
-                    color: AppColors.warning,
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
-
-                  ReportCard(
-                    title: 'පාරිභෝගික වාර්තාව', // Customer Report
-                    subtitle: 'Customer Report',
-                    icon: Icons.people,
-                    color: AppColors.info,
-                    onTap: () {},
-                  ),
-                ],
+        return LoadingOverlay(
+          isLoading: _isLoadingRange,
+          child: Scaffold(
+            backgroundColor: AppColors.background,
+            appBar: AppBar(
+              title: Text(SiStrings.reports),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.white,
+            ),
+            body: RefreshIndicator(
+              onRefresh: () =>
+                  context.read<ReportsCubit>().loadDashboardSummary(),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDateRangeSelector(),
+                    const SizedBox(height: 20),
+                    if (_startDate != null && _endDate != null)
+                      _buildRangeData(),
+                    const SizedBox(height: 20),
+                    _buildQuickStats(state),
+                    const SizedBox(height: 24),
+                    Text(SiStrings.reports,
+                        style: AppTextStyles.titleMedium
+                            .copyWith(fontWeight: FontWeight.w600, fontSize: 18)),
+                    const SizedBox(height: 12),
+                    ReportCard(
+                      title: 'දෛනික වාර්තාව',
+                      icon: Icons.assessment,
+                      color: AppColors.primary,
+                      onTap: () => context.push('/reports/daily'),
+                    ),
+                    const SizedBox(height: 12),
+                    ReportCard(
+                      title: 'තොග වාර්තාව',
+                      icon: Icons.inventory,
+                      color: AppColors.warning,
+                      onTap: () => context.push('/reports/stock'),
+                    ),
+                    const SizedBox(height: 12),
+                    ReportCard(
+                      title: 'පාරිභෝගික වාර්තාව',
+                      icon: Icons.people,
+                      color: AppColors.info,
+                      onTap: () => context.push('/reports/customer'),
+                    ),
+                  ],
+                ),
               ),
             ),
+            bottomNavigationBar: _startDate != null && _endDate != null
+                ? ExportButton(
+                    onExportPdf: _exportPdf,
+                    onExportExcel: _exportExcel,
+                    onPrint: _printReport,
+                  )
+                : null,
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDateRangeSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'වාර්තා කාල පරිමාණය',
+            style: AppTextStyles.titleSmall
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateField(
+                  label: 'ආරම්භ දිනය',
+                  date: _startDate,
+                  onTap: _selectStartDate,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDateField(
+                  label: 'අවසාන දිනය',
+                  date: _endDate,
+                  onTap: _selectEndDate,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.divider.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.labelSmall,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              date != null
+                  ? '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}'
+                  : 'තෝරන්න',
+              style: AppTextStyles.bodyMedium
+                  .copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRangeData() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+            colors: [AppColors.primary, AppColors.primaryDark]),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'කාල පරිමාණ සාරාංශය',
+            style: AppTextStyles.titleMedium.copyWith(color: AppColors.white),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildRangeStat('මුළු ගණන', '$_rangeTransactions'),
+              _buildRangeStat('මුළු මුදල',
+                  'Rs. ${NumberFormatter.formatInteger(_rangeTotal.toDouble())}'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRangeStat(String label, String value) {
+    return Column(
+      children: [
+        Text(label,
+            style: AppTextStyles.bodySmall
+                .copyWith(color: AppColors.white.withOpacity(0.8))),
+        Text(value,
+            style: AppTextStyles.titleSmall
+                .copyWith(color: AppColors.white, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Future<void> _selectStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _startDate = picked;
+        if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+          _endDate = null;
+        }
+      });
+      if (_endDate != null) {
+        await _loadRangeData();
+      }
+    }
+  }
+
+  Future<void> _selectEndDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _endDate ?? (_startDate ?? DateTime.now()),
+      firstDate: _startDate ?? DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _endDate = picked);
+      await _loadRangeData();
+    }
+  }
+
+  Future<void> _loadRangeData() async {
+    if (_startDate == null || _endDate == null) return;
+
+    setState(() => _isLoadingRange = true);
+
+    try {
+      final txnRepo = sl<TransactionRepository>();
+      final result = await txnRepo.getAllTransactions();
+
+      result.fold(
+        (failure) {
+          setState(() => _isLoadingRange = false);
+        },
+        (transactions) {
+          final filtered = transactions.where((txn) {
+            final txnDate = txn.transactionDate;
+            return txnDate.isAfter(_startDate!) &&
+                txnDate.isBefore(_endDate!.add(const Duration(days: 1)));
+          }).toList();
+
+          double total = 0;
+          for (var txn in filtered) {
+            total += txn.totalAmount;
+          }
+
+          setState(() {
+            _rangeTransactions = filtered.length;
+            _rangeTotal = total;
+            _isLoadingRange = false;
+          });
+        },
+      );
+    } catch (e) {
+      setState(() => _isLoadingRange = false);
+    }
+  }
+
+  void _printReport() {
+    if (_startDate == null || _endDate == null) return;
+
+    final startStr =
+        '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+    final endStr =
+        '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('වාර්තා මුද්‍රණය: $startStr සිට $endStr දක්වා'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _exportPdf() {
+    if (_startDate == null || _endDate == null) return;
+
+    final startStr =
+        '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+    final endStr =
+        '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('PDF බාගත කරමින්: $startStr සිට $endStr දක්වා'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _exportExcel() {
+    if (_startDate == null || _endDate == null) return;
+
+    final startStr =
+        '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}';
+    final endStr =
+        '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Excel බාගත කරමින්: $startStr සිට $endStr දක්වා'),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
@@ -138,12 +379,10 @@ class _ReportsScreenState extends State<ReportsScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatItem(SiStrings.sell, 'Rs. ${_format(today['totalSell'] ?? 0)}',
-                  Icons.trending_up),
-              _buildStatItem(
-                  SiStrings.buy,
-                  'Rs. ${_format(today['totalBuy'] ?? 0)}',
-                  Icons.trending_down),
+              _buildStatItem(SiStrings.sell,
+                  'Rs. ${_format(today['totalSell'] ?? 0)}', Icons.trending_up),
+              _buildStatItem(SiStrings.buy,
+                  'Rs. ${_format(today['totalBuy'] ?? 0)}', Icons.trending_down),
               _buildStatItem('ලාභය', 'Rs. ${_format(today['profit'] ?? 0)}',
                   Icons.account_balance_wallet),
             ],
@@ -170,8 +409,6 @@ class _ReportsScreenState extends State<ReportsScreen>
 
   String _format(dynamic value) {
     final v = (value as num?)?.toDouble() ?? 0;
-    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}K';
-    return v.toStringAsFixed(0);
+    return NumberFormatter.formatInteger(v);
   }
 }
-

@@ -134,18 +134,6 @@ class SellCubit extends Cubit<SellState> {
 
   // Select stock item
   void selectStockItem(StockItemModel item) {
-    // Check if item already exists in sell list
-    final existingItem = state.sellItems.any(
-      (sellItem) => sellItem.stockItemId == item.id,
-    );
-
-    if (existingItem) {
-      emit(state.copyWith(
-        errorMessage: 'This item is already added to the list',
-      ));
-      return;
-    }
-
     emit(state.copyWith(
       selectedStockItem: item,
       inputQuantity: 0.0,

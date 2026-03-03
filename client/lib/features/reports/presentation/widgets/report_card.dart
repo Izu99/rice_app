@@ -44,13 +44,25 @@ class ReportCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: AppTextStyles.titleMedium
-                            .copyWith(fontWeight: FontWeight.w600)),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(title,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                          )),
+                    ),
                     if (subtitle != null)
-                      Text(subtitle!,
-                          style: AppTextStyles.bodySmall
-                              .copyWith(color: AppColors.textSecondary)),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(subtitle!,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            )),
+                      ),
                   ],
                 ),
               ),
