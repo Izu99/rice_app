@@ -49,7 +49,7 @@ class LoginForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Identifier Field (Email or Phone)
+          // Identifier Field (Email or Phone) - Auto-detect
           _buildIdentifierField(),
           const SizedBox(height: 20),
 
@@ -69,67 +69,32 @@ class LoginForm extends StatelessWidget {
   }
 
   Widget _buildIdentifierField() {
-    return Column(
-      children: [
-        CustomTextField(
-          controller: identifierController,
-          focusNode: identifierFocusNode,
-          label: isPhoneLogin ? SiStrings.phoneNumber : 'Email',
-          hint: isPhoneLogin ? 'ඔබගේ දුරකථන අංකය ඇතුළත් කරන්න' : 'ඔබගේ Email එක ඇතුළත් කරන්න',
-          prefixIcon: isPhoneLogin ? Icons.phone_android : Icons.email,
-          keyboardType:
-              isPhoneLogin ? TextInputType.phone : TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          errorText: fieldErrors?['identifier'],
-          inputFormatters: isPhoneLogin
-              ? [
-                  LengthLimitingTextInputFormatter(
-                      12), // Allow country code + phone
-                  _PhoneNumberFormatter(),
-                ]
-              : null,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return isPhoneLogin
-                  ? 'දුරකථන අංකය අවශ්‍යයි'
-                  : 'Email එක අවශ්‍යයි';
-            }
+    return CustomTextField(
+      controller: identifierController,
+      focusNode: identifierFocusNode,
+      label: 'Phone or Email',
+      hint: 'ඔබගේ දුරකථන අංකය හෝ Email එක ඇතුළත් කරන්න',
+      prefixIcon: Icons.person,
+      keyboardType: TextInputType.emailAddress,
+      textInputAction: TextInputAction.next,
+      errorText: fieldErrors?['identifier'],
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'දුරකථන අංකය හෝ Email එක අවශ්‍යයි';
+        }
 
-            if (isPhoneLogin) {
-              final cleanPhone = value.replaceAll(RegExp(r'[^\d]'), '');
-              if (cleanPhone.length < 9) {
-                return 'නිවැරදි දුරකථන අංකයක් ඇතුළත් කරන්න';
-              }
-            } else {
-              // Email validation
-              final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-              if (!emailRegex.hasMatch(value)) {
-                return 'නිවැරදි Email එකක් ඇතුළත් කරන්න';
-              }
-            }
-            return null;
-          },
-          onSubmitted: (_) {
-            FocusScope.of(identifierFocusNode.context!)
-                .requestFocus(passwordFocusNode);
-          },
-        ),
-        const SizedBox(height: 8),
-        // Toggle between phone and email login
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: onToggleLoginType,
-            child: Text(
-              isPhoneLogin ? 'Email භාවිතයෙන් ඇතුළු වන්න' : 'දුරකථන අංකය භාවිතයෙන් ඇතුළු වන්න',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-      ],
+        final isEmail = value.contains('@');
+        final isPhone = value.replaceAll(RegExp(r'[^\d]'), '').length >= 9;
+
+        if (!isEmail && !isPhone) {
+          return 'නිවැරදි දුරකථන අංකයක් හෝ Email එකක් ඇතුළත් කරන්න';
+        }
+        return null;
+      },
+      onSubmitted: (_) {
+        FocusScope.of(identifierFocusNode.context!)
+            .requestFocus(passwordFocusNode);
+      },
     );
   }
 
@@ -168,49 +133,57 @@ class LoginForm extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Remember Me Checkbox
-        InkWell(
-          onTap: () => onToggleRememberMe(!rememberMe),
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Checkbox(
-                    value: rememberMe,
-                    onChanged: (value) => onToggleRememberMe(value ?? false),
-                    activeColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+        Flexible(
+          child: InkWell(
+            onTap: () => onToggleRememberMe(!rememberMe),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: rememberMe,
+                      onChanged: (value) => onToggleRememberMe(value ?? false),
+                      activeColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  SiStrings.rememberMe,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      SiStrings.rememberMe,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
 
         // Forgot Password
-        TextButton(
-          onPressed: onForgotPassword,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          ),
-          child: Text(
-            SiStrings.forgotPassword,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
+        Flexible(
+          child: TextButton(
+            onPressed: onForgotPassword,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            ),
+            child: Text(
+              SiStrings.forgotPassword,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),

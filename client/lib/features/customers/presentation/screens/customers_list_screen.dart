@@ -3,15 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart'; // Added import
 import '../../../../core/constants/enums.dart';
 import '../cubit/customers_cubit.dart';
 import '../cubit/customers_state.dart';
+import '../widgets/customer_card.dart';
 import '../widgets/customer_search.dart';
 
 class CustomersListScreen extends StatefulWidget {
@@ -22,17 +24,14 @@ class CustomersListScreen extends StatefulWidget {
 }
 
 class _CustomersListScreenState extends State<CustomersListScreen>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _tabController = TabController(length: 1, vsync: this);
-
-    // Load customers
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_handleTabSelection);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CustomersCubit>().loadCustomers();
     });
@@ -40,15 +39,25 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) {
-      context.read<CustomersCubit>().loadCustomers();
+  void _handleTabSelection() {
+    if (!_tabController.indexIsChanging) {
+      final cubit = context.read<CustomersCubit>();
+      switch (_tabController.index) {
+        case 0:
+          cubit.filterByType(null);
+          break;
+        case 1:
+          cubit.filterByType(CustomerType.seller);
+          break;
+        case 2:
+          cubit.filterByType(CustomerType.buyer);
+          break;
+      }
     }
   }
 
@@ -71,15 +80,33 @@ class _CustomersListScreenState extends State<CustomersListScreen>
         }
       },
       builder: (context, state) {
+        final buyerCount = state.customers
+            .where((c) =>
+                c.customerType == CustomerType.buyer ||
+                c.customerType == CustomerType.both)
+            .length;
+        final sellerCount = state.customers
+            .where((c) =>
+                c.customerType == CustomerType.seller ||
+                c.customerType == CustomerType.both)
+            .length;
+
         return Scaffold(
           backgroundColor: AppColors.background,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               _buildAppBar(state, innerBoxIsScrolled),
               _buildSearchAndFilter(state),
-              _buildTabBar(state),
+              _buildTabBar(state, buyerCount, sellerCount),
             ],
-            body: _buildBody(state),
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildBody(state, null),
+                _buildBody(state, CustomerType.seller),
+                _buildBody(state, CustomerType.buyer),
+              ],
+            ),
           ),
           floatingActionButton: _buildFab(),
         );
@@ -230,7 +257,8 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     );
   }
 
-  Widget _buildTabBar(CustomersState state) {
+  Widget _buildTabBar(
+      CustomersState state, int buyerCount, int sellerCount) {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _TabBarDelegate(
@@ -247,16 +275,30 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               fontWeight: FontWeight.w600,
             ),
             tabs: [
-              Tab(text: 'සියල්ල (${state.filteredCustomers.length})'), // All
+              Tab(text: 'සියල්ල (${state.customers.length})'), // All
+              Tab(text: 'සැපයුම්කරුවන් ($sellerCount)'), // Sellers
+              Tab(text: 'ගැනුම්කරුවන් ($buyerCount)'), // Buyers
             ],
-            onTap: (index) {},
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBody(CustomersState state) {
+  Widget _buildBody(CustomersState state, CustomerType? type) {
+    final customers = state.filteredCustomers.where((c) {
+      if (type == null) return true;
+      if (type == CustomerType.buyer) {
+        return c.customerType == CustomerType.buyer ||
+            c.customerType == CustomerType.both;
+      }
+      if (type == CustomerType.seller) {
+        return c.customerType == CustomerType.seller ||
+            c.customerType == CustomerType.both;
+      }
+      return false;
+    }).toList();
+
     if (state.isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -275,7 +317,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       );
     }
 
-    if (!state.hasFilteredResults) {
+    if (customers.isEmpty) {
       if (state.isSearchActive || state.hasActiveFilters) {
         return Center(
           child: EmptyStateWidget(
@@ -301,21 +343,24 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
     return RefreshIndicator(
       onRefresh: () => context.read<CustomersCubit>().refreshCustomers(),
-      child: SingleChildScrollView(
-        child: PaginatedDataTable(
-          columns: const [
-            DataColumn(label: Text('නම')), // Name
-            DataColumn(label: Text('දුරකථන අංකය')), // Phone
-            DataColumn(label: Text('ශේෂය')), // Balance
-          ],
-          source: _CustomerDataSource(state.filteredCustomers, context),
-          rowsPerPage: _rowsPerPage,
-          onRowsPerPageChanged: (value) {
-            setState(() {
-              _rowsPerPage = value ?? PaginatedDataTable.defaultRowsPerPage;
-            });
-          },
-        ),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(8.0),
+        itemCount: customers.length,
+        itemBuilder: (context, index) {
+          final customer = customers[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: CustomerCard(
+              customer: customer,
+              onTap: () {
+                context.pushNamed(
+                  'customerDetail',
+                  pathParameters: {'id': customer.id},
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -547,47 +592,8 @@ class _CustomersListScreenState extends State<CustomersListScreen>
   }
 
   String _formatNumber(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
-    }
-    return value.toStringAsFixed(0);
+    return NumberFormatter.formatInteger(value);
   }
-}
-
-class _CustomerDataSource extends DataTableSource {
-  final List<CustomerEntity> _customers;
-  final BuildContext context;
-
-  _CustomerDataSource(this._customers, this.context);
-
-  @override
-  DataRow getRow(int index) {
-    final customer = _customers[index];
-    return DataRow(
-      cells: [
-        DataCell(Text(customer.name)),
-        DataCell(Text(customer.phone)),
-        DataCell(Text(customer.balance.toString())),
-      ],
-      onSelectChanged: (selected) {
-        if (selected ?? false) {
-          context
-              .pushNamed('customerDetail', pathParameters: {'id': customer.id});
-        }
-      },
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => _customers.length;
-
-  @override
-  int get selectedRowCount => 0;
 }
 
 /// Tab bar delegate for persistent header
@@ -658,4 +664,3 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
-

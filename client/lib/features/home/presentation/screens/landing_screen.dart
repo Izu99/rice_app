@@ -52,7 +52,7 @@ class LandingScreen extends StatelessWidget {
 
                   // Welcome Text
                   Text(
-                    'Rice Mill ERP',
+                    'ricemill',
                     style: AppTextStyles.headlineLarge.copyWith(
                       color: AppColors.white,
                       fontWeight: FontWeight.bold,

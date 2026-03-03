@@ -457,14 +457,15 @@ class ReportRepositoryImpl implements ReportRepository {
           'paddy': totals[ItemType.paddy] ?? 0,
           'rice': totals[ItemType.rice] ?? 0,
         },
-        'total_value': totalValue,
+        'totalValue': totalValue,
+        'lowStockCount': items.where((i) => i.currentQuantity < 500).length, // Example threshold
         'items_count': items.length,
         'items': items
             .map((i) => {
                   'id': i.id,
-                  'name': i.displayName,
+                  'variety': i.displayName,
                   'type': i.type.name,
-                  'quantity': i.currentQuantity,
+                  'weight': i.currentQuantity,
                   'bags': i.currentBags,
                   'average_price': i.averagePricePerKg,
                   'value': i.currentQuantity * (i.averagePricePerKg ?? 0),
@@ -485,9 +486,37 @@ class ReportRepositoryImpl implements ReportRepository {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    // Requires efficient backend query or heavy client side processing
-    // For now, doing lighter version
-    return const Right({});
+    try {
+      final customers = await customerRemoteDataSource.getAllCustomers();
+      
+      double totalReceivable = 0;
+      double totalPayable = 0;
+      
+      for (var c in customers) {
+        if (c.balance > 0) {
+          totalReceivable += c.balance;
+        } else {
+          totalPayable += c.balance.abs();
+        }
+      }
+
+      return Right({
+        'customerCount': customers.length,
+        'totalReceivable': totalReceivable,
+        'totalPayable': totalPayable,
+        'customers': customers.map((c) => {
+          'id': c.id,
+          'name': c.name,
+          'balance': c.balance,
+          'phone': c.phone,
+        }).toList(),
+      });
+    } catch (e) {
+      if (e is ServerException) {
+        return Left(ServerFailure(message: e.message, code: e.statusCode));
+      }
+      return Left(UnknownFailure(message: e.toString()));
+    }
   }
 
   @override

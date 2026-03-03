@@ -334,8 +334,14 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                     borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
-              child: Text(SiStrings.completeSale,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              child: SizedBox(
+                height: 24,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(SiStrings.completeSale,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ),
             ),
           ),
         ],
@@ -363,13 +369,26 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(SiStrings.total,
-                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                  Text('Rs. ${state.grandTotal.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: AppColors.cardSell)),
+                  SizedBox(
+                    height: 14,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(SiStrings.total,
+                          style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 28,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text('Rs. ${state.grandTotal.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: AppColors.cardSell)),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -383,9 +402,15 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(SiStrings.confirm,
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                child: SizedBox(
+                  height: 24,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(SiStrings.confirm,
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
               ),
             ),
           ],
@@ -421,6 +446,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 context.read<SellCubit>().resetForNewSale();
                 _priceController.clear();
                 _weightController.clear();
+                // Navigate to sell customer selection page
+                context.goNamed('sellCustomerSelection');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.cardSell,
@@ -432,7 +459,10 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                   Text(SiStrings.newSale, style: const TextStyle(color: Colors.white)),
             ),
             TextButton(
-              onPressed: () => context.goNamed('dashboard'),
+              onPressed: () {
+                Navigator.pop(context);
+                context.go('/');
+              },
               child: Text(SiStrings.backToHome),
             ),
           ],

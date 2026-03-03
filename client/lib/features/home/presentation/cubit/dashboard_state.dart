@@ -1,6 +1,7 @@
 // lib/features/home/presentation/cubit/dashboard_state.dart
 
 import 'package:equatable/equatable.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../data/models/transaction_model.dart';
 import '../../../../data/models/stock_item_model.dart';
 import '../../../../data/models/expense_model.dart';
@@ -185,14 +186,9 @@ class DashboardState extends Equatable {
   /// Formatted payables
   String get formattedPayables => 'Rs. ${_formatNumber(totalPayables)}';
 
-  /// Format number with commas
+  /// Format number with thousand separators
   String _formatNumber(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(2)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
-    }
-    return value.toStringAsFixed(2);
+    return NumberFormatter.formatWithSpaces(value);
   }
 
   /// Get greeting based on time of day

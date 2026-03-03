@@ -314,7 +314,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
         const SizedBox(width: 8),
         Text(
           title,
-          style: AppTextStyles.bodySmall.copyWith(
+          style: AppTextStyles.bodyMedium.copyWith(
             fontWeight: FontWeight.bold,
             color: AppColors.textSecondary,
             letterSpacing: 1.1,
@@ -372,7 +372,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text('වර්ගය', // VARIETY
+                  child: Text(SiStrings.variety, // VARIETY
                       style: AppTextStyles.labelSmall.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textSecondary,
@@ -423,10 +423,11 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.variety,
+                              item.variety.replaceAll('Rice - ', '').replaceAll('Paddy - ', ''),
                               style: AppTextStyles.bodyLarge.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
+                                fontSize: 18, // Increased for clarity
                               ),
                             ),
                             if (item.isLowStock)
@@ -456,6 +457,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodyLarge.copyWith(
                             fontWeight: FontWeight.w600,
+                            fontSize: 18, // Increased
                           ),
                         ),
                       ),
@@ -467,6 +469,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                           style: AppTextStyles.bodyLarge.copyWith(
                             fontWeight: FontWeight.bold,
                             color: accentColor,
+                            fontSize: 18, // Increased
                           ),
                         ),
                       ),

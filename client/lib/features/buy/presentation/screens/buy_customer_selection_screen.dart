@@ -191,17 +191,6 @@ class _BuyCustomerSelectionScreenState
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          radius: 28,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
-          child: Text(
-            customer.initials,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
         title: Text(
           customer.name,
           style:

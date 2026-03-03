@@ -91,6 +91,36 @@ class ReportsCubit extends Cubit<ReportsState> {
     );
   }
 
+  Future<void> loadStockReport() async {
+    emit(state.copyWith(status: ReportsStatus.loading));
+
+    final result = await _reportRepository.getStockReport();
+
+    result.fold(
+      (failure) => emit(state.copyWith(
+          status: ReportsStatus.error, errorMessage: failure.message)),
+      (report) => emit(
+          state.copyWith(status: ReportsStatus.loaded, stockReport: report)),
+    );
+  }
+
+  Future<void> loadCustomerReport({String? customerId, DateTime? startDate, DateTime? endDate}) async {
+    emit(state.copyWith(status: ReportsStatus.loading));
+
+    final result = await _reportRepository.getCustomerReport(
+      customerId: customerId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    result.fold(
+      (failure) => emit(state.copyWith(
+          status: ReportsStatus.error, errorMessage: failure.message)),
+      (report) => emit(
+          state.copyWith(status: ReportsStatus.loaded, customerReport: report)),
+    );
+  }
+
   void changeDate(DateTime date) {
     emit(state.copyWith(selectedDate: date));
     loadDailyReport(date);

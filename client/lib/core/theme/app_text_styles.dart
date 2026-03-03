@@ -157,30 +157,30 @@ class AppTextStyles {
 
   // ==================== TITLE STYLES ====================
 
-  /// Title Large - 22sp
+  /// Title Large - 20sp
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: weightMedium,
     letterSpacing: 0,
     height: 1.27,
     color: AppColors.textPrimary,
   );
 
-  /// Title Medium - 16sp
+  /// Title Medium - 14sp
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: weightMedium,
     letterSpacing: 0.15,
     height: 1.5,
     color: AppColors.textPrimary,
   );
 
-  /// Title Small - 14sp
+  /// Title Small - 12sp
   static const TextStyle titleSmall = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: weightMedium,
     letterSpacing: 0.1,
     height: 1.43,
@@ -189,30 +189,30 @@ class AppTextStyles {
 
   // ==================== BODY STYLES ====================
 
-  /// Body Large - 16sp
+  /// Body Large - 14sp
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: weightRegular,
     letterSpacing: 0.5,
     height: 1.5,
     color: AppColors.textPrimary,
   );
 
-  /// Body Medium - 14sp (Default body text)
+  /// Body Medium - 12sp (Default body text)
   static const TextStyle bodyMedium = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: weightRegular,
     letterSpacing: 0.25,
     height: 1.5,
     color: AppColors.textPrimary,
   );
 
-  /// Body Small - 12sp
+  /// Body Small - 10sp
   static const TextStyle bodySmall = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: weightRegular,
     letterSpacing: 0.4,
     height: 1.5,
@@ -221,30 +221,30 @@ class AppTextStyles {
 
   // ==================== LABEL STYLES ====================
 
-  /// Label Large - 14sp Medium
+  /// Label Large - 12sp Medium
   static const TextStyle labelLarge = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: weightMedium,
     letterSpacing: 0.1,
     height: 1.43,
     color: AppColors.textPrimary,
   );
 
-  /// Label Medium - 12sp Medium
+  /// Label Medium - 10sp Medium
   static const TextStyle labelMedium = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: weightMedium,
     letterSpacing: 0.5,
     height: 1.33,
     color: AppColors.textPrimary,
   );
 
-  /// Label Small - 10sp Medium
+  /// Label Small - 8sp Medium
   static const TextStyle labelSmall = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: weightMedium,
     letterSpacing: 0.5,
     height: 1.6,

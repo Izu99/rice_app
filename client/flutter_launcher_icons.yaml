@@ -1,0 +1,12 @@
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#2E7D32" # Darker green to match the logo usually, or #4CAF50. Going with a safe standard green or trying to match.
+  adaptive_icon_foreground: "assets/images/logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
+    background_color: "#4CAF50" # Assuming a green background based on the image description (green leaf)
+    theme_color: "#4CAF50"

@@ -22,7 +22,7 @@ class ApiEndpoints {
 
   /// Current base URL (change based on environment)
   // For Android Emulator, use 10.0.2.2 to reach your local machine
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  static const String baseUrl = 'http://82.25.180.20/rice/api';
 
   // ==================== AUTH ====================
 

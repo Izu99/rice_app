@@ -49,7 +49,7 @@ class SiStrings {
   static String get todaySummary => _get('අද දින සාරාංශය', EnStrings.todaySummary);
   static String get quickActions => _get('කඩිනම් ක්‍රියාකාරකම්', EnStrings.quickActions);
   static String get weeklyActivity => _get('සතිපතා විශ්ලේෂණය', EnStrings.weeklyActivity);
-  static String get stockOverview => _get('තොග දළ විශ්ලේෂණය', EnStrings.stockOverview);
+  static String get stockOverview => _get('තොග විශ්ලේෂණය', EnStrings.stockOverview);
   static String get thisMonth => _get('මෙම මාසය', EnStrings.thisMonth);
   static String get recentTransactions => _get('මෑත ගනුදෙනු', EnStrings.recentTransactions);
   static String get recentExpenses => _get('මෑත වියදම්', EnStrings.recentExpenses);
@@ -92,7 +92,7 @@ class SiStrings {
   static String get salesVsPurchases => _get('විකිණීම් සහ මිලදී ගැනීම්', EnStrings.salesVsPurchases);
   static String get last7Days => _get('පසුගිය දින 7', EnStrings.last7Days);
   static String get stockDistribution => _get('තොග බෙදා හැරීම', EnStrings.stockDistribution);
-  static String get performanceMetrics => _get('කාර්ය සාධන දර්ශක', EnStrings.performanceMetrics);
+  static String get performanceMetrics => _get('කාර්ය දර්ශක', EnStrings.performanceMetrics);
   static String get millingOutput => _get('කෙටීමේ ප්‍රතිදානය', EnStrings.millingOutput);
   static String get wasteRatio => _get('අපතේ යාමේ අනුපාතය', EnStrings.wasteRatio);
   static String get inventoryValue => _get('මුළු තොගයේ වටිනාකම', EnStrings.inventoryValue);
@@ -110,6 +110,7 @@ class SiStrings {
   static String get quantity => _get('ප්‍රමාණය', EnStrings.quantity);
   static String get price => _get('මිල', EnStrings.price);
   static String get total => _get('එකතුව', EnStrings.total);
+  static String get variety => _get('වර්ගය', EnStrings.variety);
   static String get date => _get('දිනය', EnStrings.date);
   static String get searchHint => _get('නම හෝ දුරකථන අංකයෙන් සොයන්න...', EnStrings.searchHint);
   static String get noCustomersFound => _get('ගනුදෙනුකරුවන් හමු නොවීය', EnStrings.noCustomersFound);
@@ -117,6 +118,10 @@ class SiStrings {
   static String get buyingFrom => _get('මිලදී ගන්නේ කාගෙන්ද?', EnStrings.buyingFrom);
   static String get searchOrSelect => _get('සොයන්න හෝ ලැයිස්තුවෙන් තෝරන්න', EnStrings.searchOrSelect);
   static String get viewProfile => _get('ගිණුම බලන්න', EnStrings.viewProfile);
+  static String get name => _get('නම', EnStrings.name);
+  static String get balance => _get('ශේෂය', EnStrings.balance);
+  static String get totalReceivable => _get('මුළු ලැබිය යුතු මුදල', EnStrings.totalReceivable);
+  static String get totalPayable => _get('මුළු ගෙවිය යුතු මුදල', EnStrings.totalPayable);
 
   // ==================== STATUS / NOTIFICATIONS ====================
   static String get success => _get('සාර්ථකයි', EnStrings.success);

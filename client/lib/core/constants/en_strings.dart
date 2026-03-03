@@ -97,6 +97,7 @@ class EnStrings {
   static const String quantity = 'Quantity';
   static const String price = 'Price';
   static const String total = 'Total';
+  static const String variety = 'Variety';
   static const String date = 'Date';
   static const String searchHint = 'Search by name or phone...';
   static const String noCustomersFound = 'No customers found';
@@ -104,6 +105,10 @@ class EnStrings {
   static const String buyingFrom = 'Buying from whom?';
   static const String searchOrSelect = 'Search or select from list';
   static const String viewProfile = 'View Profile';
+  static const String name = 'Name';
+  static const String balance = 'Balance';
+  static const String totalReceivable = 'Total Receivable';
+  static const String totalPayable = 'Total Payable';
 
   // ==================== STATUS / NOTIFICATIONS ====================
   static const String success = 'Success';
