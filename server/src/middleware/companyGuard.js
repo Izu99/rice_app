@@ -15,7 +15,7 @@ const companyGuard = (req, res, next) => {
   const { role, companyId: rawCompanyId } = req.user
 
   // Super admin logic
-  if (role === 'super_admin') {
+  if (role === 'admin') {
     // If companyId provided in query params, filter by that company
     if (req.query.companyId) {
       const companyId = new mongoose.Types.ObjectId(req.query.companyId)

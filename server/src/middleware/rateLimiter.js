@@ -17,7 +17,7 @@ const generalLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip rate limiting for super admin users
   skip: (req, res) => {
-    return req.user && req.user.role === 'super_admin'
+    return req.user && req.user.role === 'admin'
   },
   handler: (req, res) => {
     res.status(429).json({
@@ -114,7 +114,7 @@ const createCustomLimiter = (options) => {
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req, res) => {
-      return req.user && req.user.role === 'super_admin'
+      return req.user && req.user.role === 'admin'
     }
   }
 
