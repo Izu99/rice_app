@@ -35,6 +35,11 @@ const UserSchema = new mongoose.Schema({
     sparse: true,
     maxlength: [20, 'NIC cannot exceed 20 characters']
   },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   password: {
     type: String,
     required: [true, 'Password is required'],

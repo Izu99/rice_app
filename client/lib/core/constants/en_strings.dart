@@ -109,6 +109,7 @@ class EnStrings {
   static const String balance = 'Balance';
   static const String totalReceivable = 'Total Receivable';
   static const String totalPayable = 'Total Payable';
+  static const String accountNotFound = 'Account not found. Please contact administrator to register.';
 
   // ==================== STATUS / NOTIFICATIONS ====================
   static const String success = 'Success';

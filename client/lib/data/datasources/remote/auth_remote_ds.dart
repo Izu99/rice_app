@@ -16,6 +16,11 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
+  /// Login with Google OAuth
+  Future<AuthResponse> googleLogin({
+    required String idToken,
+  });
+
   /// Register new user
   Future<AuthResponse> register({
     required String name,
@@ -240,6 +245,41 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       rethrow;
     } catch (e) {
       throw ServerException(message: 'Login failed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<AuthResponse> googleLogin({
+    required String idToken,
+  }) async {
+    try {
+      final either = await apiService.post(
+        ApiEndpoints.googleLogin,
+        data: {'idToken': idToken},
+        requiresAuth: false,
+      );
+
+      return either.fold(
+        (failure) => throw _mapFailureToException(failure),
+        (response) {
+          if (response.success && response.data != null) {
+            return AuthResponse.fromJson(response.data);
+          }
+
+          throw ServerException(
+            message: response.message ?? 'Google login failed',
+            statusCode: response.statusCode,
+          );
+        },
+      );
+    } on SocketException {
+      throw NetworkException();
+    } on AuthException {
+      rethrow;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(message: 'Google login failed: ${e.toString()}');
     }
   }
 

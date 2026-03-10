@@ -4,6 +4,7 @@ const helmet = require('helmet')
 const compression = require('compression')
 const mongoSanitize = require('express-mongo-sanitize')
 const hpp = require('hpp')
+const cookieParser = require('cookie-parser')
 
 // Import routes
 const routes = require('./routes')
@@ -22,6 +23,9 @@ app.disable('x-powered-by') // Hide Express version
 
 // Performance middleware
 app.use(compression()) // Compress all responses
+
+// Cookie parser
+app.use(cookieParser(process.env.COOKIE_SECRET))
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }))

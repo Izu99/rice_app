@@ -33,6 +33,13 @@ router.post('/create-admin', ...createAdminValidation, authController.createAdmi
 router.post('/login', ...loginValidation, authController.login)
 
 /**
+ * @route   POST /api/auth/google
+ * @desc    Login with Google OAuth
+ * @access  Public
+ */
+router.post('/google', authController.googleLogin)
+
+/**
  * @route   POST /api/auth/refresh-token
  * @desc    Refresh JWT token
  * @access  Private

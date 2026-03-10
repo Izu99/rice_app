@@ -209,70 +209,131 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.white,
-              AppColors.white.withOpacity(0.95),
-            ],
-          ),
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: data.color.withOpacity(0.15),
+              color: Colors.black.withOpacity(0.04), // Cleaner, more subtle shadow
+              blurRadius: 15,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: data.color.withOpacity(0.08), // Color-tinted accent shadow
               blurRadius: 20,
-              offset: const Offset(0, 8),
+              offset: const Offset(0, 5),
             ),
           ],
+          border: Border.all(
+            color: AppColors.divider.withOpacity(0.05),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Keep it compact
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [data.color, data.color.withOpacity(0.7)],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [data.color, data.color.withOpacity(0.8)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: data.color.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(data.icon, color: Colors.white, size: 22),
                 ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(data.icon, color: Colors.white, size: 24),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: data.color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                data.trend,
-                style: TextStyle(
-                  color: data.color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: data.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        data.trend.startsWith('+')
+                            ? Icons.trending_up
+                            : Icons.trending_down,
+                        size: 14,
+                        color: data.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        data.trend,
+                        style: TextStyle(
+                          color: data.color,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+            const SizedBox(height: 20),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
               child: Text(
                 data.label,
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary.withOpacity(0.7),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15, // Large and clear
+                  color: AppColors.textPrimary.withOpacity(0.6),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
               ),
             ),
-            Text(
-              data.value,
-              style: AppTextStyles.titleLarge.copyWith(
-                fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary,
-                fontSize: 26,
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: data.value.contains('Rs.')
+                    ? RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Rs. ',
+                              style: AppTextStyles.titleLarge.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary.withOpacity(0.4),
+                                fontSize: 16, // Smaller currency prefix
+                              ),
+                            ),
+                            TextSpan(
+                              text: data.value.replaceAll('Rs. ', ''),
+                              style: AppTextStyles.titleLarge.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textPrimary,
+                                fontSize: 28, // Slightly larger amount
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Text(
+                        data.value,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                          fontSize: 28,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
               ),
             ),
           ],

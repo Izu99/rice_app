@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app.dart';
+import 'core/constants/si_strings.dart';
 import 'injection_container.dart' as di;
 import 'core/utils/bloc_observer.dart';
 
@@ -27,6 +28,9 @@ void main() async {
 
   // Initialize dependencies
   await di.initDependencies();
+
+  // Initialize Language
+  await SiStrings.initialize();
 
   // Set up Bloc observer for debugging
   Bloc.observer = AppBlocObserver();
