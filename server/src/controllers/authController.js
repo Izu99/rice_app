@@ -111,41 +111,16 @@ exports.googleLogin = async (req, res) => {
     // Find user by email
     let user = await User.findOne({ email }).populate('companyId', 'name status')
 
-    // User lookup or Admin auto-provisioning
+    // If user doesn't exist, deny access (no auto-registration)
     if (!user) {
-      // Check if it's the admin gmail
-      const isAdmin = email === process.env.ADMIN_GMAIL
+      console.log('Google login attempt for non-existent account:', email)
+      return errorResponse(res, 'Account not found. Please register manually first.', 401)
+    }
 
-      if (!isAdmin) {
-        console.log('Unauthorized Google login attempt:', email)
-        return errorResponse(res, 'Account not found. Please contact your administrator to register.', 401)
-      }
-
-      console.log('Auto-provisioning new Admin Google user:', email)
-
-      // Find or Create Default Company
-      let company = await Company.findOne({ name: process.env.DEFAULT_COMPANY_NAME || 'Default Company' })
-      if (!company) {
-        company = await Company.create({
-          name: process.env.DEFAULT_COMPANY_NAME || 'Default Company',
-          ownerName: name,
-          email: email,
-          status: 'active'
-        })
-      }
-
-      user = await User.create({
-        email,
-        name,
-        googleId,
-        role: 'super_admin',
-        companyId: company._id,
-        isActive: true,
-        isEmailVerified: true,
-        password: crypto.randomBytes(16).toString('hex') // Random password for OAuth users
-      })
-
-      user = await user.populate('companyId', 'name status')
+    // Link Google ID if it's not already set
+    if (!user.googleId) {
+      console.log('Linking Google ID to existing user account:', email)
+      user.googleId = googleId
     }
 
     // Update last login

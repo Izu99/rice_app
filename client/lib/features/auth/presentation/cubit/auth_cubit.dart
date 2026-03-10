@@ -3,6 +3,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../domain/repositories/auth_repository.dart';
+import '../../../../core/constants/si_strings.dart';
 import 'auth_state.dart';
 
 /// Auth Cubit - Manages authentication business logic
@@ -24,7 +25,7 @@ class AuthCubit extends Cubit<AuthState> {
     // Note: Use the 'Web Client ID' from Google Cloud Console here as serverClientId.
     // This is required to obtain an idToken for backend verification.
     await _googleSignIn.initialize(
-      serverClientId: '816656670559-u3s9379tpdniolcrcgjej4tqm7skb9o2.apps.googleusercontent.com',
+      serverClientId: '816656670559-ucfdqo2gn4h9gst50rtfi9sjlm8428ja.apps.googleusercontent.com',
     );
     
     // Listen to authentication events for reactive UI/State updates
