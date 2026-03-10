@@ -23,6 +23,11 @@ abstract class AuthRepository {
     bool rememberMe = false,
   });
 
+  /// Login with Google OAuth
+  Future<Either<Failure, UserEntity>> googleLogin({
+    required String idToken,
+  });
+
   /// Register a new user
   ///
   /// Returns [UserEntity] on success or [Failure] on error

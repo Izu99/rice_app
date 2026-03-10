@@ -143,9 +143,14 @@ class _LoginScreenState extends State<LoginScreen> {
             state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage!),
+              content: Text(
+                state.errorMessage!,
+                maxLines: 5,
+                overflow: TextOverflow.visible,
+              ),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
             ),
           );
         }
@@ -177,11 +182,76 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 40),
+                    // Language Toggle
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          await SiStrings.toggleLanguage();
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.language, size: 20, color: AppColors.primary),
+                        label: Text(
+                          SiStrings.isSinhala ? 'English' : 'සිංහල',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
                     // Logo and Title
                     _buildHeader(),
                     const SizedBox(height: 48),
+
+                    // Google Login Button
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        context.read<AuthCubit>().googleLogin();
+                      },
+                      icon: Image.asset(
+                        'assets/icons/google_logo.png',
+                        height: 24,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.account_circle_outlined, color: AppColors.textHint, size: 24),
+                      ),
+                      label: const Text('Google සමඟින් ඇතුල් වන්න'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppColors.divider),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Divider
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            'හෝ',
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
+                          ),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
 
                     // Login Form
                     LoginForm(

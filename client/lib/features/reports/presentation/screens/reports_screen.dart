@@ -393,17 +393,42 @@ class _ReportsScreenState extends State<ReportsScreen>
   }
 
   Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: AppColors.white.withOpacity(0.8), size: 20),
-        const SizedBox(height: 4),
-        Text(label,
-            style: AppTextStyles.bodySmall
-                .copyWith(color: AppColors.white.withOpacity(0.8))),
-        Text(value,
-            style: AppTextStyles.titleSmall
-                .copyWith(color: AppColors.white, fontWeight: FontWeight.bold)),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: AppColors.white, size: 20),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.white.withOpacity(0.8),
+              fontSize: 10,
+            ),
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: AppTextStyles.titleSmall.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

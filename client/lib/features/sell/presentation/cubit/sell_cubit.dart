@@ -1,8 +1,8 @@
 // lib/features/sell/presentation/cubit/sell_cubit.dart
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rice_mill_erp/core/constants/enums.dart';
-import 'package:rice_mill_erp/data/models/transaction_item_model.dart';
+import '../../../../core/constants/enums.dart';
+import '../../../../data/models/transaction_item_model.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../data/models/stock_item_model.dart';

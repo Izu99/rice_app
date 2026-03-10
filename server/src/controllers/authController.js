@@ -1,5 +1,7 @@
 const User = require('../models/User')
 const Company = require('../models/Company')
+const { OAuth2Client } = require('google-auth-library')
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 const { validationResult } = require('express-validator')
 const { errorResponse, successResponse } = require('../utils/responseHandler')
 const crypto = require('crypto')
@@ -81,6 +83,110 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error('Login Error:', error)
     return errorResponse(res, 'Error logging in', 500, error.message)
+  }
+}
+
+/**
+ * @desc    Login with Google OAuth
+ * @route   POST /api/auth/google
+ * @access  Public
+ */
+exports.googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body
+
+    if (!idToken) {
+      return errorResponse(res, 'Google ID Token is required', 400)
+    }
+
+    // Verify Google ID Token
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+    const { email, name, sub: googleId } = payload
+
+    // Find user by email
+    let user = await User.findOne({ email }).populate('companyId', 'name status')
+
+    // User lookup or Admin auto-provisioning
+    if (!user) {
+      // Check if it's the admin gmail
+      const isAdmin = email === process.env.ADMIN_GMAIL
+
+      if (!isAdmin) {
+        console.log('Unauthorized Google login attempt:', email)
+        return errorResponse(res, 'Account not found. Please contact your administrator to register.', 401)
+      }
+
+      console.log('Auto-provisioning new Admin Google user:', email)
+
+      // Find or Create Default Company
+      let company = await Company.findOne({ name: process.env.DEFAULT_COMPANY_NAME || 'Default Company' })
+      if (!company) {
+        company = await Company.create({
+          name: process.env.DEFAULT_COMPANY_NAME || 'Default Company',
+          ownerName: name,
+          email: email,
+          status: 'active'
+        })
+      }
+
+      user = await User.create({
+        email,
+        name,
+        googleId,
+        role: 'super_admin',
+        companyId: company._id,
+        isActive: true,
+        isEmailVerified: true,
+        password: crypto.randomBytes(16).toString('hex') // Random password for OAuth users
+      })
+
+      user = await user.populate('companyId', 'name status')
+    }
+
+    // Update last login
+    user.lastLoginAt = new Date()
+    await user.save({ validateBeforeSave: false })
+
+    // Generate JWT
+    const token = user.generateAuthToken()
+
+    // Set HTTP-Only Cookie
+    const cookieOptions = {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict'
+    }
+
+    res.cookie('token', token, cookieOptions)
+
+    const userData = {
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      companyId: user.companyId?._id || null,
+      company: user.companyId
+        ? {
+            id: user.companyId._id,
+            name: user.companyId.name,
+            status: user.companyId.status
+          }
+        : null
+    }
+
+    return successResponse(res, 'Google login successful', {
+      user: userData,
+      token // Still returning token for mobile clients that don't auto-handle cookies
+    })
+  } catch (error) {
+    console.error('Google Login Error:', error)
+    return errorResponse(res, 'Authentication failed', 401, error.message)
   }
 }
 

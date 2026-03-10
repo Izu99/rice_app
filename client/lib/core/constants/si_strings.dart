@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'en_strings.dart';
 
 /// Strings for the application with dynamic language support
@@ -5,9 +6,25 @@ class SiStrings {
   SiStrings._();
 
   static String _languageCode = 'si';
+  static const String _langKey = 'app_language';
 
-  static void setLanguage(String code) {
+  /// Initialize language from shared preferences
+  static Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languageCode = prefs.getString(_langKey) ?? 'si';
+  }
+
+  /// Change language and persist to disk
+  static Future<void> setLanguage(String code) async {
     _languageCode = code;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_langKey, code);
+  }
+
+  /// Toggle between English and Sinhala
+  static Future<void> toggleLanguage() async {
+    final nextLang = isSinhala ? 'en' : 'si';
+    await setLanguage(nextLang);
   }
 
   static bool get isSinhala => _languageCode == 'si';
@@ -138,4 +155,5 @@ class SiStrings {
   static String get update => _get('යාවත්කාලීන කරන්න', EnStrings.update);
   static String get yes => _get('ඔව්', EnStrings.yes);
   static String get no => _get('නැත', EnStrings.no);
+  static String get accountNotFound => _get('ගිණුමක් හමු නොවීය. ලියාපදිංචි වීමට කරුණාකර පරිපාලක අමතන්න.', EnStrings.accountNotFound);
 }

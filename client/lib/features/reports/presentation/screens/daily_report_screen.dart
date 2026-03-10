@@ -103,13 +103,25 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       List<ExpenseEntity> allExpenses = [];
       
       allTxnsResult.fold(
-        (l) => null,
-        (r) => allTxns = r,
+        (l) {
+          // Handle failure silently, list remains empty
+          return const [];
+        },
+        (r) {
+          allTxns = r;
+          return r;
+        },
       );
       
       allExpensesResult.fold(
-        (l) => null,
-        (r) => allExpenses = r,
+        (l) {
+          // Handle failure silently, list remains empty
+          return const [];
+        },
+        (r) {
+          allExpenses = r;
+          return r;
+        },
       );
       
       // Filter for the period or specific chart-selected date
@@ -469,33 +481,54 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: color.withOpacity(0.1)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
             child: Text(
               label,
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              'Rs. ${_formatCurrency(value)}',
-              style: AppTextStyles.titleLarge.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-                fontSize: 22,
+          const SizedBox(height: 4),
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Rs. ${_formatCurrency(value)}',
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22,
+                  letterSpacing: -0.5,
+                ),
               ),
             ),
           ),
