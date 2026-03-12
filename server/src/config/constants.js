@@ -1,5 +1,5 @@
 // Application Constants
-const constants = {
+const constants = { 
   // User Roles
   ROLES: {
     ADMIN: 'admin',
