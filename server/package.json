@@ -12,7 +12,7 @@
     "lint:fix": "eslint src/**/*.js --fix",
     "seed:admin": "node src/seeders/superAdminSeeder.js",
     "db:seed": "npm run seed:admin",
-    "build": "echo 'No build step required for Node.js'",
+    "build": "echo 'Building... No transpilation required for Node.js. Ready for deployment.'",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:restart": "pm2 restart ecosystem.config.js",
