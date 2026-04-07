@@ -8,6 +8,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart'; // Added import
 import '../../../../core/constants/enums.dart';
@@ -15,6 +16,7 @@ import '../cubit/customers_cubit.dart';
 import '../cubit/customers_state.dart';
 import '../widgets/customer_card.dart';
 import '../widgets/customer_search.dart';
+import '../../../../routes/route_names.dart';
 
 class CustomersListScreen extends StatefulWidget {
   const CustomersListScreen({super.key});
@@ -92,10 +94,11 @@ class _CustomersListScreenState extends State<CustomersListScreen>
             .length;
 
         return Scaffold(
-          backgroundColor: AppColors.background,
+          backgroundColor: const Color(0xFFF4F6FA),
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               _buildAppBar(state, innerBoxIsScrolled),
+              _buildStatsSection(state),
               _buildSearchAndFilter(state),
               _buildTabBar(state, buyerCount, sellerCount),
             ],
@@ -108,7 +111,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               ],
             ),
           ),
+          bottomNavigationBar: _buildBottomToolbar(state),
           floatingActionButton: _buildFab(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         );
       },
     );
@@ -116,124 +121,241 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
   Widget _buildAppBar(CustomersState state, bool innerBoxIsScrolled) {
     return SliverAppBar(
-      expandedHeight: 120,
-      floating: true,
       pinned: true,
-      snap: false,
-      forceElevated: innerBoxIsScrolled,
-      backgroundColor: AppColors.primary,
-      foregroundColor: AppColors.white,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.primaryDark],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${state.totalCustomers}',
-                        style: AppTextStyles.headlineMedium.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Text(
-                        'මුළු ගනුදෙනුකරුවන්', // Total Customers
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _buildHeaderStat(
-                        'ලැබිය යුතු', // Receivable
-                        'Rs.${_formatNumber(state.totalReceivables)}',
-                        AppColors.success,
-                      ),
-                      const SizedBox(width: 16),
-                      _buildHeaderStat(
-                        'ගෙවිය යුතු', // Payable
-                        'Rs.${_formatNumber(state.totalPayables)}',
-                        AppColors.error,
-                      ),
-                    ],
-                  ),
-                ],
+      floating: false,
+      expandedHeight: 120,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      automaticallyImplyLeading: false,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+        ),
+        child: FlexibleSpaceBar(
+          background: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Icon(
+                  Icons.people_rounded,
+                  size: 140,
+                  color: Colors.white.withOpacity(0.1),
+                ),
               ),
-            ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                                color: Colors.white, size: 20),
+                            onPressed: () => context.pop(),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  SiStrings.customers,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 22,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                Text(
+                                  'මුළු ${state.totalCustomers} යි',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-      title: Text(SiStrings.customers),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.sort),
-          onPressed: () => _showSortOptions(context),
-          tooltip: 'පිළිවෙල සකසන්න', // Sort
-        ),
-        IconButton(
-          icon: Stack(
-            children: [
-              const Icon(Icons.filter_list),
-              if (state.hasActiveFilters)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.warning,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          onPressed: () => _showFilterOptions(context, state),
-          tooltip: 'පෙරහන්', // Filter
-        ),
-      ],
     );
   }
 
-  Widget _buildHeaderStat(String label, String value, Color color) {
+  Widget _buildBottomToolbar(CustomersState state) {
+    return BottomAppBar(
+      height: 70,
+      color: Colors.white,
+      notchMargin: 8,
+      shape: const CircularNotchedRectangle(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            _buildToolbarAction(
+              icon: Icons.sort_rounded,
+              label: 'Sort',
+              onTap: () => _showSortOptions(context),
+            ),
+            const SizedBox(width: 16),
+            _buildToolbarAction(
+              icon: Icons.filter_list_rounded,
+              label: 'Filter',
+              hasBadge: state.hasActiveFilters,
+              onTap: () => _showFilterOptions(context, state),
+            ),
+            const Spacer(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToolbarAction({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool hasBadge = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, color: AppColors.textPrimary, size: 24),
+                if (hasBadge)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFC107),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsSection(CustomersState state) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildModernStatCard(
+                'ලැබිය යුතු (Receivable)',
+                'Rs.${_formatNumber(state.totalReceivables)}',
+                const Color(0xFF2E7D32),
+                Icons.call_received_rounded,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildModernStatCard(
+                'ගෙවිය යුතු (Payable)',
+                'Rs.${_formatNumber(state.totalPayables)}',
+                const Color(0xFFE53935),
+                Icons.call_made_rounded,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernStatCard(
+      String label, String value, Color color, IconData icon) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFE8E8EE), width: 1),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
           Text(
             value,
-            style: AppTextStyles.titleSmall.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              color: const Color(0xFF1C1C2E),
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: 4),
           Text(
             label,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.white.withOpacity(0.8),
+            style: const TextStyle(
+              color: Color(0xFF8E8E93),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -263,21 +385,41 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       pinned: true,
       delegate: _TabBarDelegate(
         tabBar: Container(
-          color: AppColors.background,
+          color: const Color(0xFFF4F6FA),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: TabBar(
             controller: _tabController,
             isScrollable: true,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: AppTextStyles.labelLarge.copyWith(
+            labelColor: Colors.white,
+            unselectedLabelColor: const Color(0xFF8E8E93),
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: AppColors.primary,
+            ),
+            dividerColor: Colors.transparent,
+            labelStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
             tabs: [
-              Tab(text: 'සියල්ල (${state.customers.length})'), // All
-              Tab(text: 'සැපයුම්කරුවන් ($sellerCount)'), // Sellers
-              Tab(text: 'ගැනුම්කරුවන් ($buyerCount)'), // Buyers
+              Tab(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('සියල්ල (${state.customers.length})'),
+              )), // All
+              Tab(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('සැපයුම්කරුවන් ($sellerCount)'),
+              )), // Sellers
+              Tab(child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text('ගැනුම්කරුවන් ($buyerCount)'),
+              )), // Buyers
             ],
           ),
         ),
@@ -353,10 +495,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
             child: CustomerCard(
               customer: customer,
               onTap: () {
-                context.pushNamed(
-                  'customerDetail',
-                  pathParameters: {'id': customer.id},
-                );
+                context.push(RouteNames.customerDetailById(customer.id));
               },
             ),
           );
@@ -366,11 +505,15 @@ class _CustomersListScreenState extends State<CustomersListScreen>
   }
 
   Widget _buildFab() {
-    return FloatingActionButton.extended(
-      onPressed: () => context.pushNamed('customerAdd'),
-      backgroundColor: AppColors.primary,
-      icon: const Icon(Icons.person_add),
-      label: Text(SiStrings.addNewCustomer),
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: FloatingActionButton(
+        onPressed: () => context.pushNamed('customerAdd'),
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.person_add_rounded, color: Colors.white),
+      ),
     );
   }
 

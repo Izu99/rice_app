@@ -13,7 +13,9 @@ abstract class AdminRepository {
     required String password,
     String? address,
     String? registrationNumber,
+    String? district,
   });
+
   Future<Either<Failure, CompanyModel>> updateCompany(CompanyModel company);
   Future<Either<Failure, bool>> updateCompanyStatus(
       String companyId, String status);

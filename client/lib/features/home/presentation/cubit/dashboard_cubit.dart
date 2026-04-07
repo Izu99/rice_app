@@ -196,6 +196,11 @@ class DashboardCubit extends Cubit<DashboardState> {
     await syncData();
   }
 
+  /// Reset dashboard state (on logout)
+  void reset() {
+    emit(DashboardState.initial());
+  }
+
   /// Load customer summary
   Future<void> _loadCustomerSummary() async {
     // Get customer count

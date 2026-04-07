@@ -129,4 +129,9 @@ class ReportsCubit extends Cubit<ReportsState> {
   void changeMonth(int year, int month) {
     loadMonthlyReport(year: year, month: month);
   }
+
+  /// Reset reports state (on logout)
+  void reset() {
+    emit(ReportsState.initial());
+  }
 }

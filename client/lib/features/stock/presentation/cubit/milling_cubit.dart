@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../data/models/stock_item_model.dart';
 import '../../../../domain/repositories/stock_repository.dart';
+import '../../../../core/utils/logger_utils.dart';
 import 'milling_state.dart';
 
 class MillingCubit extends Cubit<MillingState> {
@@ -274,9 +275,9 @@ class MillingCubit extends Cubit<MillingState> {
 
   /// Process full milling cycle (Start + Complete)
   Future<void> processMilling() async {
-    print('🚜 [MillingCubit] Starting processMilling...');
+    Log.i('Starting processMilling', tag: 'MILLING');
     if (!state.canProcess) {
-      print('🚜 [MillingCubit] Validation failed: canProcess is false');
+      Log.w('Validation failed: canProcess is false', tag: 'MILLING');
       emit(state.copyWith(
         status: MillingStatus.error,
         errorMessage: 'Invalid milling parameters',
@@ -285,7 +286,6 @@ class MillingCubit extends Cubit<MillingState> {
     }
 
     emit(state.copyWith(status: MillingStatus.processing));
-    print('🚜 [MillingCubit] Status set to processing');
 
     try {
       final variety = state.selectedPaddy!.variety;
@@ -294,8 +294,7 @@ class MillingCubit extends Cubit<MillingState> {
           state.outputRiceKg > 0 ? state.outputRiceKg : state.expectedRiceKg;
       final outputBags = (outputKg / 50).ceil();
 
-      print(
-          '🚜 [MillingCubit] Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags');
+      Log.i('Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags', tag: 'MILLING');
 
       // Perform one-shot milling process with timeout
       final result = await _stockRepository.startMilling(
@@ -315,18 +314,16 @@ class MillingCubit extends Cubit<MillingState> {
         },
       );
 
-      print('🚜 [MillingCubit] Repository call returned');
-
       result.fold(
         (failure) {
-          print('🚜 [MillingCubit] Process failed: ${failure.message}');
+          Log.e('Process failed: ${failure.message}', tag: 'MILLING');
           emit(state.copyWith(
             status: MillingStatus.error,
             errorMessage: failure.message,
           ));
         },
         (data) {
-          print('🚜 [MillingCubit] Process succeeded, showing success...');
+          Log.s('Process succeeded', tag: 'MILLING');
           // Show success immediately, refresh in background
           emit(state.copyWith(status: MillingStatus.success));
           // Refresh available paddy and history in the background (don't await)
@@ -334,8 +331,7 @@ class MillingCubit extends Cubit<MillingState> {
         },
       );
     } catch (e, stack) {
-      print('🚜 [MillingCubit] UNEXPECTED ERROR: $e');
-      print('🚜 [MillingCubit] STACK TRACE: $stack');
+      Log.e('Unexpected error: $e', tag: 'MILLING', error: stack);
       emit(state.copyWith(
         status: MillingStatus.error,
         errorMessage: 'Unexpected error: ${e.toString()}',
@@ -349,11 +345,9 @@ class MillingCubit extends Cubit<MillingState> {
       final stockResult = await _stockRepository.getStockByType(ItemType.paddy);
       await fetchMillingHistory();
 
-      print('🚜 [MillingCubit] Data refreshed, emitting success');
-
       stockResult.fold(
         (failure) {
-          print('🚜 [MillingCubit] Refresh failed: ${failure.message}');
+          Log.w('Stock refresh failed: ${failure.message}', tag: 'MILLING');
           emit(state.copyWith(
             status: MillingStatus.error,
             errorMessage:
@@ -376,8 +370,7 @@ class MillingCubit extends Cubit<MillingState> {
         },
       );
     } catch (e, stack) {
-      print('🚜 [MillingCubit] REFRESH ERROR: $e');
-      print('🚜 [MillingCubit] STACK TRACE: $stack');
+      Log.e('Refresh error: $e', tag: 'MILLING', error: stack);
       emit(state.copyWith(
         status: MillingStatus.error,
         errorMessage:
@@ -400,5 +393,10 @@ class MillingCubit extends Cubit<MillingState> {
   /// Clear error
   void clearError() {
     emit(state.copyWith(errorMessage: null));
+  }
+
+  /// Reset milling state (on logout)
+  void reset() {
+    emit(MillingState.initial());
   }
 }

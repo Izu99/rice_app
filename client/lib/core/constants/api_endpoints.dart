@@ -22,7 +22,9 @@ class ApiEndpoints {
 
   /// Current base URL (change based on environment)
   // For production, we use the Live VPS IP.
-  static const String baseUrl = 'http://82.25.180.20/rice/api';
+  // For local development, we use devBaseUrl.
+  // Note: For Android emulator, use 'http://10.0.2.2:5000/api'
+  static const String baseUrl = devBaseUrl;
 
   // ==================== AUTH ====================
 
@@ -34,6 +36,9 @@ class ApiEndpoints {
 
   /// Register endpoint
   static const String register = '/auth/register';
+
+  /// Register company endpoint
+  static const String registerCompany = '/auth/register-company';
 
   /// Logout endpoint
   static const String logout = '/auth/logout';

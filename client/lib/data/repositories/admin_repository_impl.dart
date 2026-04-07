@@ -56,6 +56,7 @@ class AdminRepositoryImpl implements AdminRepository {
     required String password,
     String? address,
     String? registrationNumber,
+    String? district,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -67,6 +68,7 @@ class AdminRepositoryImpl implements AdminRepository {
           password: password,
           address: address,
           registrationNumber: registrationNumber,
+          district: district,
         );
         return Right(company);
       } on ServerException catch (e) {

@@ -68,6 +68,7 @@ FutureOr<String?> authRedirect(
   final publicRoutes = [
     RouteNames.splash,
     RouteNames.login,
+    RouteNames.register,
     RouteNames.forgotPassword,
     RouteNames.resetPassword,
   ];

@@ -19,6 +19,7 @@ import 'features/expenses/presentation/cubit/expenses_cubit.dart';
 import 'features/profile/presentation/cubit/profile_cubit.dart';
 import 'features/profile/presentation/cubit/profile_state.dart';
 import 'features/super_admin/presentation/cubit/admin_cubit.dart';
+import 'features/price_management/presentation/cubit/price_management_cubit.dart';
 
 class RiceMillApp extends StatelessWidget {
   const RiceMillApp({super.key});
@@ -81,6 +82,11 @@ class RiceMillApp extends StatelessWidget {
         // Super Admin
         BlocProvider<AdminCubit>(
           create: (_) => sl<AdminCubit>(),
+        ),
+
+        // Price Management
+        BlocProvider<PriceManagementCubit>(
+          create: (_) => sl<PriceManagementCubit>(),
         ),
       ],
       child: BlocBuilder<ProfileCubit, ProfileState>(

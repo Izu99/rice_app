@@ -10,18 +10,12 @@ import '../../../../domain/entities/customer_entity.dart';
 class CustomerCard extends StatelessWidget {
   final CustomerEntity customer;
   final VoidCallback? onTap;
-  final VoidCallback? onCall;
-  final VoidCallback? onMessage;
-  final bool showActions;
   final bool compact;
 
   const CustomerCard({
     super.key,
     required this.customer,
     this.onTap,
-    this.onCall,
-    this.onMessage,
-    this.showActions = true,
     this.compact = false,
   });
 
@@ -34,36 +28,51 @@ class CustomerCard extends StatelessWidget {
   }
 
   Widget _buildFullCard() {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border(
-              left: BorderSide(
-                color: customer.customerType.color,
-                width: 4,
-              ),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    final themeColor = customer.customerType.color;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
+        ],
+        border: Border.all(color: const Color(0xFFE8E8EE), width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 Row(
                   children: [
-                    // Info (no avatar)
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: themeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          customer.initials,
+                          style: TextStyle(
+                            color: themeColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,106 +80,78 @@ class CustomerCard extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: SizedBox(
-                                  height: 24,
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      customer.name,
-                                      style: AppTextStyles.titleMedium.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      maxLines: 1,
-                                    ),
+                                child: Text(
+                                  customer.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary,
+                                    letterSpacing: -0.3,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               _buildTypeBadge(customer.customerType),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               const Icon(
-                                Icons.phone,
+                                Icons.phone_rounded,
                                 size: 14,
-                                color: AppColors.textSecondary,
+                                color: Color(0xFF8E8E93),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 customer.formattedPhone,
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textSecondary,
+                                style: const TextStyle(
+                                  color: Color(0xFF8E8E93),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ],
-                          ),
-                          if (customer.address != null &&
-                              customer.address!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Row(
-                              children: [
+                              if (customer.address != null &&
+                                  customer.address!.isNotEmpty) ...[
+                                const SizedBox(width: 12),
                                 const Icon(
-                                  Icons.location_on,
+                                  Icons.location_on_rounded,
                                   size: 14,
-                                  color: AppColors.textHint,
+                                  color: Color(0xFF8E8E93),
                                 ),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
                                     customer.shortAddress,
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: AppColors.textHint,
+                                    style: const TextStyle(
+                                      color: Color(0xFF8E8E93),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-
-                // Balance and actions row
-                if (customer.hasOutstandingBalance || showActions) ...[
-                  const SizedBox(height: 12),
-                  const Divider(height: 1),
-                  const SizedBox(height: 12),
+                if (customer.hasOutstandingBalance) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Color(0xFFF0F0F5)),
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Balance
-                      if (customer.hasOutstandingBalance)
-                        _buildBalanceChip()
-                      else
-                        const SizedBox(),
-
-                      // Actions
-                      if (showActions)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _ActionButton(
-                              icon: Icons.call,
-                              color: AppColors.success,
-                              onTap: onCall,
-                              tooltip: 'Call',
-                            ),
-                            const SizedBox(width: 8),
-                            _ActionButton(
-                              icon: Icons.message,
-                              color: AppColors.info,
-                              onTap: onMessage,
-                              tooltip: 'Message',
-                            ),
-                          ],
-                        ),
+                      _buildBalanceChip(),
+                      const SizedBox(),
                     ],
                   ),
                 ],
@@ -324,12 +305,14 @@ class _ActionButton extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
   final String tooltip;
+  final double size;
 
   const _ActionButton({
     required this.icon,
     required this.color,
     this.onTap,
     required this.tooltip,
+    this.size = 20,
   });
 
   @override
@@ -337,14 +320,14 @@ class _ActionButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Icon(icon, color: color, size: 20),
+            padding: const EdgeInsets.all(10),
+            child: Icon(icon, color: color, size: size),
           ),
         ),
       ),

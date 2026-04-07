@@ -459,6 +459,11 @@ class BuyCubit extends Cubit<BuyState> {
     emit(state.copyWith(clearError: true));
   }
 
+  /// Reset buy state (on logout)
+  void reset() {
+    emit(BuyState.initial());
+  }
+
   // Add current batches (Table 1) to Session (Table 2) - LOCAL ONLY
   Future<void> addBatchToSession() async {
     if (!state.canAddBatch) {

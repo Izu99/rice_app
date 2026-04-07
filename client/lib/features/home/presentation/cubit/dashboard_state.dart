@@ -111,10 +111,7 @@ class DashboardState extends Equatable {
         _weeklyTrend = weeklyTrend,
         selectedDate = selectedDate ?? DateTime.now();
 
-  /// Initial state
-  factory DashboardState.initial() {
-    return DashboardState(selectedDate: DateTime.now());
-  }
+  factory DashboardState.initial() => DashboardState();
 
   /// Check if loading
   bool get isLoading => status == DashboardStatus.loading;

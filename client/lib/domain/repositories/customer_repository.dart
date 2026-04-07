@@ -104,6 +104,16 @@ abstract class CustomerRepository {
     String? type,
   });
 
+  /// Get unsynced customers
+  ///
+  /// Returns list of customers that have not been synced to the server
+  Future<Either<Failure, List<CustomerModel>>> getUnsyncedCustomers();
+
+  /// Sync customers
+  ///
+  /// Performs manual synchronization of customer data
+  Future<Either<Failure, void>> syncCustomers();
+
   /// Get customer transaction history
   ///
   /// Parameters:

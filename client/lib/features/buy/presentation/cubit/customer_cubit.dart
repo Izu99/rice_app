@@ -167,6 +167,11 @@ class CustomerCubit extends Cubit<CustomerState> {
     emit(state.copyWith(clearSelectedCustomer: true));
   }
 
+  /// Reset customer state (on logout)
+  void reset() {
+    emit(CustomerState.initial());
+  }
+
   /// Update name
   void updateName(String name) {
     emit(state.copyWith(name: name, clearError: true));

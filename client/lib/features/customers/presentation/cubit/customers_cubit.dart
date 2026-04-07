@@ -5,16 +5,20 @@ import '../../../../core/constants/enums.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../domain/entities/customer_entity.dart';
 import '../../../../domain/repositories/customer_repository.dart';
+import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../core/utils/logger_utils.dart';
 import 'customers_state.dart';
 
 /// Customers Cubit - Manages customers business logic
 class CustomersCubit extends Cubit<CustomersState> {
   final CustomerRepository _customerRepository;
+  final TransactionRepository _transactionRepository;
 
   CustomersCubit({
     required CustomerRepository customerRepository,
+    required TransactionRepository transactionRepository,
   })  : _customerRepository = customerRepository,
+        _transactionRepository = transactionRepository,
         super(CustomersState.initial());
 
   /// Load all customers
@@ -439,35 +443,39 @@ class CustomersCubit extends Cubit<CustomersState> {
     );
   }
 
-  /// Delete customer
+  /// Delete customer (optimistic)
   Future<void> deleteCustomer(String id) async {
-    emit(state.copyWith(formStatus: CustomerFormStatus.submitting));
+    final previousCustomers = state.customers;
+
+    // Remove from UI immediately
+    final optimisticList = previousCustomers.where((c) => c.id != id).toList();
+    emit(state.copyWith(
+      customers: optimisticList,
+      filteredCustomers: _applyFilters(optimisticList),
+      totalCustomers: optimisticList.length,
+      clearSelectedCustomer: true,
+    ));
 
     final result = await _customerRepository.deleteCustomer(id);
 
     result.fold(
       (failure) {
+        // Revert on failure
         Log.e('Failed to delete customer $id',
             error: failure.message, tag: 'CUSTOMER');
         emit(state.copyWith(
           formStatus: CustomerFormStatus.failure,
+          customers: previousCustomers,
+          filteredCustomers: _applyFilters(previousCustomers),
+          totalCustomers: previousCustomers.length,
           formErrorMessage: failure.message,
         ));
       },
       (_) {
         Log.s('Customer $id deleted successfully', tag: 'CUSTOMER');
-        // Remove from list
-        final updatedCustomers =
-            state.customers.where((c) => c.id != id).toList();
-        final filtered = _applyFilters(updatedCustomers);
-
         emit(state.copyWith(
           formStatus: CustomerFormStatus.success,
           formSuccessMessage: 'Customer deleted successfully',
-          customers: updatedCustomers,
-          filteredCustomers: filtered,
-          totalCustomers: updatedCustomers.length,
-          clearSelectedCustomer: true,
         ));
       },
     );
@@ -522,6 +530,43 @@ class CustomersCubit extends Cubit<CustomersState> {
     return result.fold((l) => null, (r) => r);
   }
 
+  /// Add payment to a transaction
+  Future<void> addPayment({
+    required String transactionId,
+    required double amount,
+    required PaymentMethod method,
+    String? notes,
+  }) async {
+    emit(state.copyWith(formStatus: CustomerFormStatus.submitting));
+
+    final result = await _transactionRepository.addPayment(
+      transactionId: transactionId,
+      amount: amount,
+      method: method,
+      notes: notes,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(
+          formStatus: CustomerFormStatus.failure,
+          formErrorMessage: failure.message,
+        ));
+      },
+      (transaction) async {
+        // Reload customer detail to get updated balance and transactions
+        if (state.selectedCustomer != null) {
+          await loadCustomerDetail(state.selectedCustomer!.id);
+        }
+        
+        emit(state.copyWith(
+          formStatus: CustomerFormStatus.success,
+          formSuccessMessage: 'ගෙවීම සාර්ථකව සිදු කරන ලදී', // Payment successful
+        ));
+      },
+    );
+  }
+
   /// Reset form status
   void resetFormStatus() {
     emit(state.copyWith(
@@ -538,5 +583,10 @@ class CustomersCubit extends Cubit<CustomersState> {
   /// Clear selected customer
   void clearSelectedCustomer() {
     emit(state.copyWith(clearSelectedCustomer: true));
+  }
+
+  /// Reset cubit state (on logout)
+  void reset() {
+    emit(CustomersState.initial());
   }
 }

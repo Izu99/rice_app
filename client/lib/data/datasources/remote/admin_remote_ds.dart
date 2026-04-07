@@ -15,6 +15,7 @@ abstract class AdminRemoteDataSource {
     required String password,
     String? address,
     String? registrationNumber,
+    String? district,
   });
   Future<CompanyModel> updateCompany(CompanyModel company);
   Future<bool> updateCompanyStatus(String companyId, String status);
@@ -70,6 +71,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
     required String password,
     String? address,
     String? registrationNumber,
+    String? district,
   }) async {
     final either = await apiService.post(
       ApiEndpoints.companies,
@@ -81,12 +83,14 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
         'password': password,
         'address': address,
         'registrationNumber': registrationNumber,
+        'district': district,
       },
     );
     return either.fold(
       (failure) => throw _mapFailureToException(failure),
       (response) {
         if (response.success && response.data != null) {
+          _clearCompanyCache();
           return CompanyModel.fromJson(response.data['company']);
         }
         throw ServerException(
@@ -99,12 +103,13 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   Future<CompanyModel> updateCompany(CompanyModel company) async {
     final either = await apiService.put(
       '${ApiEndpoints.companies}/${company.id}',
-      data: company.toJson(),
+      data: company.toJsonForApi(),
     );
     return either.fold(
       (failure) => throw _mapFailureToException(failure),
       (response) {
         if (response.success && response.data != null) {
+          _clearCompanyCache();
           return CompanyModel.fromJson(response.data['company']);
         }
         throw ServerException(
@@ -121,7 +126,10 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
     );
     return either.fold(
       (failure) => throw _mapFailureToException(failure),
-      (response) => response.success,
+      (response) {
+        if (response.success) _clearCompanyCache();
+        return response.success;
+      },
     );
   }
 
@@ -131,7 +139,12 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
         await apiService.delete('${ApiEndpoints.companies}/$companyId');
     return either.fold(
       (failure) => throw _mapFailureToException(failure),
-      (response) => response.success,
+      (response) {
+        if (response.success) {
+          _clearCompanyCache();
+        }
+        return response.success;
+      },
     );
   }
 
@@ -146,6 +159,11 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
       (failure) => throw _mapFailureToException(failure),
       (response) => response.success,
     );
+  }
+
+  void _clearCompanyCache() {
+    apiService.clearCacheForPath(ApiEndpoints.companies);
+    apiService.clearCacheForPath(ApiEndpoints.dashboardStats);
   }
 
   Exception _mapFailureToException(Failure failure) {

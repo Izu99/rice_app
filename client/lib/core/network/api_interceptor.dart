@@ -29,8 +29,15 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Skip auth for certain endpoints
+    // Check if auth is explicitly skipped via extra
+    if (options.extra['skipAuth'] == true) {
+      debugPrint('AuthInterceptor: Skipping auth for ${options.path} (explicitly requested)');
+      return handler.next(options);
+    }
+
+    // Skip auth for certain endpoints based on path
     if (_isPublicEndpoint(options.path)) {
+      debugPrint('AuthInterceptor: Skipping auth for ${options.path} (public endpoint)');
       return handler.next(options);
     }
 

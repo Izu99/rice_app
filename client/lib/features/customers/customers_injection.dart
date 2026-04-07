@@ -7,6 +7,7 @@ import '../../core/network/network_info.dart';
 import '../../data/datasources/remote/customer_remote_ds.dart';
 import '../../data/repositories/customer_repository_impl.dart';
 import '../../domain/repositories/customer_repository.dart';
+import '../../domain/repositories/transaction_repository.dart';
 import 'presentation/cubit/customers_cubit.dart';
 
 /// Customers feature dependency injection
@@ -42,6 +43,7 @@ class CustomersInjection {
     _sl.registerLazySingleton<CustomersCubit>(
       () => CustomersCubit(
         customerRepository: _sl<CustomerRepository>(),
+        transactionRepository: _sl<TransactionRepository>(),
       ),
     );
   }

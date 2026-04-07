@@ -19,6 +19,15 @@ class CompaniesScreen extends StatefulWidget {
   State<CompaniesScreen> createState() => _CompaniesScreenState();
 }
 
+class _StatGridItem {
+  final String label;
+  final String value;
+  final Color color;
+  final IconData icon;
+
+  _StatGridItem(this.label, this.value, this.color, this.icon);
+}
+
 class _CompaniesScreenState extends State<CompaniesScreen> {
   final _searchController = TextEditingController();
 
@@ -37,8 +46,7 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
+      backgroundColor: const Color(0xFFF4F6FA),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
@@ -62,28 +70,66 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
         },
         builder: (context, state) {
           return LoadingOverlay(
-            isLoading: state.status == AdminStatus.loading ||
-                state.status == AdminStatus.deleting,
-            child: Column(
-              children: [
-                // Search & Filter Section
-                _buildSearchAndFilter(state),
-
-                // Stats Bar
-                _buildStatsBar(state),
-
-                // Companies List
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () =>
-                        context.read<AdminCubit>().refreshCompanies(),
-                    color: AppColors.adminPrimary,
-                    child: state.filteredCompanies.isEmpty
-                        ? _buildEmptyState(state)
-                        : _buildCompaniesList(state),
+            isLoading: state.status == AdminStatus.loading,
+            child: RefreshIndicator(
+              onRefresh: () => context.read<AdminCubit>().refreshCompanies(),
+              color: AppColors.adminPrimary,
+              child: CustomScrollView(
+                slivers: [
+                  _buildStickyHeader(context),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          _buildSearchAndFilter(state),
+                          const SizedBox(height: 24),
+                          _buildSectionChip('Company Statistics'),
+                          const SizedBox(height: 14),
+                          _buildStatsGrid(state),
+                          const SizedBox(height: 24),
+                          _buildSectionHeader(
+                            'Company List',
+                            subtitle:
+                                '${state.filteredCompanies.length} showing',
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  if (state.filteredCompanies.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildEmptyState(state),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final company = state.filteredCompanies[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: CompanyCard(
+                                company: company,
+                                onTap: () => _showCompanyDetails(company),
+                                onStatusChange: (status) =>
+                                    _updateCompanyStatus(company, status),
+                                onEdit: () => _editCompany(company),
+                                onDelete: () => _deleteCompany(company),
+                              ),
+                            );
+                          },
+                          childCount: state.filteredCompanies.length,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
         },
@@ -91,25 +137,47 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/admin/companies/add'),
         backgroundColor: AppColors.adminPrimary,
-        child: const Icon(Icons.add, color: Colors.white),
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(
+          Icons.add_rounded,
+          color: Colors.white,
+          size: 28,
+        ),
       ),
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: const Text('Companies'),
-      backgroundColor: AppColors.adminPrimary,
-      foregroundColor: Colors.white,
+  Widget _buildStickyHeader(BuildContext context) {
+    return SliverAppBar(
+      pinned: true,
+      floating: false,
+      backgroundColor: Colors.white,
       elevation: 0,
+      scrolledUnderElevation: 2,
+      shadowColor: Colors.black12,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Color(0xFF1C1C2E)),
+        onPressed: () => context.pop(),
+      ),
+      title: const Text(
+        'Companies',
+        style: TextStyle(
+          color: Color(0xFF1C1C2E),
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
+      ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.sort),
+          icon: const Icon(Icons.sort, color: Color(0xFF1C1C2E)),
           onPressed: _showSortOptions,
           tooltip: 'Sort',
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_vert, color: Color(0xFF1C1C2E)),
           onSelected: (value) {
             switch (value) {
               case 'export':
@@ -147,20 +215,81 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
     );
   }
 
-  Widget _buildSearchAndFilter(AdminState state) {
+  Widget _buildSectionChip(String label) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
-      child: Column(
-        children: [
-          // Search Field
-          TextField(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8E8EE),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF444466),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String label, {String? subtitle, VoidCallback? onViewAll}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _buildSectionChip(label),
+        if (subtitle != null)
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        if (onViewAll != null)
+          GestureDetector(
+            onTap: onViewAll,
+            child: const Text(
+              'View All →',
+              style: TextStyle(
+                color: AppColors.adminPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSearchAndFilter(AdminState state) {
+    return Column(
+      children: [
+        // Search Field
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
             controller: _searchController,
             onChanged: (value) =>
                 context.read<AdminCubit>().searchCompanies(value),
             decoration: InputDecoration(
-              hintText: 'Search by name, owner, email, phone...',
-              prefixIcon: const Icon(Icons.search),
+              hintText: 'Search by name, owner, email...',
+              hintStyle:
+                  TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF444466)),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear),
@@ -170,34 +299,29 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
                       },
                     )
                   : null,
-              filled: true,
-              fillColor: AppColors.grey100,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-                borderSide: BorderSide.none,
-              ),
+              border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingM,
-                vertical: AppDimensions.paddingS,
+                horizontal: 16,
+                vertical: 14,
               ),
             ),
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+        ),
+        const SizedBox(height: 16),
 
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: CompanyFilter.values.map((filter) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _buildFilterChip(filter, state.currentFilter),
-                );
-              }).toList(),
-            ),
+        // Filter Chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: CompanyFilter.values.map((filter) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildFilterChip(filter, state.currentFilter),
+              );
+            }).toList(),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -205,52 +329,134 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
     final isSelected = filter == currentFilter;
     final color = _getFilterColor(filter);
 
-    return FilterChip(
-      label: Text(
-        _getFilterLabel(filter),
-        style: TextStyle(
-          color: isSelected ? Colors.white : color,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return GestureDetector(
+      onTap: () => context.read<AdminCubit>().filterCompanies(filter),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? color : const Color(0xFFE8E8EE),
+            width: 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _getFilterIcon(filter),
+              size: 16,
+              color: isSelected ? Colors.white : color,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              _getFilterLabel(filter),
+              style: TextStyle(
+                color: isSelected ? Colors.white : const Color(0xFF444466),
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
-      selected: isSelected,
-      onSelected: (_) => context.read<AdminCubit>().filterCompanies(filter),
-      backgroundColor: color.withOpacity(0.1),
-      selectedColor: color,
-      checkmarkColor: Colors.white,
-      side: BorderSide(color: color.withOpacity(0.3)),
-      avatar: isSelected
-          ? null
-          : Icon(_getFilterIcon(filter), size: 18, color: color),
     );
   }
 
-  Widget _buildStatsBar(AdminState state) {
+  Widget _buildStatsGrid(AdminState state) {
+    final stats = state.currentStats;
+    final items = [
+      _StatGridItem('Total', '${stats.totalCompanies}', AppColors.adminPrimary,
+          Icons.business_rounded),
+      _StatGridItem('Active', '${stats.activeCompanies}', AppColors.success,
+          Icons.check_circle_rounded),
+      _StatGridItem('Inactive', '${stats.inactiveCompanies}', AppColors.warning,
+          Icons.pause_circle_rounded),
+      _StatGridItem('Pending', '${stats.pendingCompanies}', Colors.orange,
+          Icons.pending_rounded),
+    ];
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildStatCard(items[0])),
+            const SizedBox(width: 12),
+            Expanded(child: _buildStatCard(items[1])),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _buildStatCard(items[2])),
+            const SizedBox(width: 12),
+            Expanded(child: _buildStatCard(items[3])),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(_StatGridItem item) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.paddingM,
-        vertical: AppDimensions.paddingS,
-      ),
-      color: AppColors.grey100,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '${state.filteredCompanies.length} of ${state.allCompanies.length} companies',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
+      height: 70,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          if (state.searchQuery.isNotEmpty ||
-              state.currentFilter != CompanyFilter.all)
-            TextButton(
-              onPressed: () {
-                _searchController.clear();
-                context.read<AdminCubit>().searchCompanies('');
-                context.read<AdminCubit>().filterCompanies(CompanyFilter.all);
-              },
-              child: const Text('Clear Filters'),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: item.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
             ),
+            child: Icon(item.icon, color: item.color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                item.value,
+                style: const TextStyle(
+                  color: Color(0xFF1C1C2E),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                item.label,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -374,76 +580,103 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   void _showResetPasswordDialog(CompanyModel company) {
     final passwordController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Password'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Reset password for ${company.name}'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'New Password',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
+    ConfirmationDialog.show(
+      context,
+      title: 'Reset Password',
+      message: 'Set a new password for ${company.name}',
+      confirmLabel: 'Reset',
+      confirmColor: AppColors.adminPrimary,
+      icon: Icons.lock_reset_rounded,
+      customContent: TextField(
+        controller: passwordController,
+        obscureText: true,
+        decoration: InputDecoration(
+          labelText: 'New Password',
+          prefixIcon: const Icon(Icons.lock_outline),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (passwordController.text.isNotEmpty) {
-                Navigator.pop(context);
-                context.read<AdminCubit>().resetCompanyPassword(
-                      company.id,
-                      passwordController.text,
-                    );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.adminPrimary),
-            child: const Text('Reset', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
-    );
+    ).then((confirmed) {
+      if (confirmed && mounted && passwordController.text.isNotEmpty) {
+        context.read<AdminCubit>().resetCompanyPassword(
+              company.id,
+              passwordController.text,
+            );
+      }
+    });
   }
 
   void _showSortOptions() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(AppDimensions.paddingL),
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Sort By', style: AppTextStyles.titleLarge),
-            const SizedBox(height: AppDimensions.paddingM),
-            ListTile(
-              leading: const Icon(Icons.sort_by_alpha),
-              title: const Text('Name (A-Z)'),
-              onTap: () => Navigator.pop(context),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8E8EE),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: const Text('Recently Added'),
-              onTap: () => Navigator.pop(context),
+            const SizedBox(height: 16),
+            const Text(
+              'Sort By',
+              style: TextStyle(
+                color: Color(0xFF1C1C2E),
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.circle),
-              title: const Text('Status'),
-              onTap: () => Navigator.pop(context),
+            const SizedBox(height: 12),
+            _buildSortTile(Icons.sort_by_alpha, 'Name (A-Z)', () => Navigator.pop(context)),
+            _buildSortTile(Icons.access_time, 'Recently Added', () => Navigator.pop(context)),
+            _buildSortTile(Icons.circle_outlined, 'Status', () => Navigator.pop(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortTile(IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8E8EE),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: const Color(0xFF444466)),
             ),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Color(0xFF1C1C2E),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: Color(0xFFB0B0C0), size: 20),
           ],
         ),
       ),
@@ -530,112 +763,143 @@ class _CompanyDetailsSheet extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: DraggableScrollableSheet(
-        initialChildSize: 0.6,
+        initialChildSize: 0.65,
         minChildSize: 0.4,
-        maxChildSize: 0.9,
+        maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) {
           return SingleChildScrollView(
             controller: scrollController,
-            padding: const EdgeInsets.all(AppDimensions.paddingL),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Handle
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: 36,
+                    height: 5,
                     decoration: BoxDecoration(
-                      color: AppColors.grey300,
-                      borderRadius: BorderRadius.circular(2),
+                      color: const Color(0xFFE8E8EE),
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
                   ),
                 ),
-                const SizedBox(height: AppDimensions.paddingL),
+                const SizedBox(height: 24),
 
                 // Company Header
                 Row(
                   children: [
                     _buildCompanyAvatar(),
-                    const SizedBox(width: AppDimensions.paddingM),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             company.name,
-                            style: AppTextStyles.headlineSmall.copyWith(
+                            style: const TextStyle(
+                              color: Color(0xFF1C1C2E),
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           _buildStatusBadge(),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppDimensions.paddingL),
+                const SizedBox(height: 28),
 
                 // Details
                 _buildDetailSection('Company Information', [
                   _buildDetailRow(
-                      Icons.person, 'Owner', company.ownerName ?? 'N/A'),
-                  _buildDetailRow(Icons.email, 'Email', company.email ?? 'N/A'),
-                  _buildDetailRow(Icons.phone, 'Phone', company.phone),
+                      Icons.person_outline_rounded, 'Owner', company.ownerName ?? 'N/A'),
+                  _buildDetailRow(Icons.email_outlined, 'Email', company.email ?? 'N/A'),
+                  _buildDetailRow(Icons.phone_outlined, 'Phone', company.phone),
                   _buildDetailRow(
-                      Icons.location_on, 'Address', company.address),
+                      Icons.location_on_outlined, 'Address', company.address),
                   if (company.registrationNumber != null)
                     _buildDetailRow(
-                        Icons.numbers, 'Reg. No', company.registrationNumber!),
+                        Icons.numbers_rounded, 'Reg. No', company.registrationNumber!),
                 ]),
 
-                const SizedBox(height: AppDimensions.paddingM),
+                const SizedBox(height: 20),
 
                 _buildDetailSection('Account Information', [
                   _buildDetailRow(
-                    Icons.calendar_today,
+                    Icons.calendar_today_rounded,
                     'Created',
                     _formatDate(company.createdAt),
                   ),
                   _buildDetailRow(
-                    Icons.people,
+                    Icons.people_outline_rounded,
                     'Users',
                     '${company.currentUsers}/${company.maxUsers}',
                   ),
                   _buildDetailRow(
-                    Icons.verified,
+                    Icons.verified_outlined,
                     'Email Verified',
                     company.isEmailVerified ? 'Yes' : 'No',
                   ),
                 ]),
 
-                const SizedBox(height: AppDimensions.paddingL),
+                const SizedBox(height: 28),
 
                 // Status Change Options
-                Text(
+                const Text(
                   'Change Status',
-                  style: AppTextStyles.titleMedium
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Color(0xFF1C1C2E),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: AppDimensions.paddingS),
+                const SizedBox(height: 12),
                 Wrap(
-                  spacing: 8,
+                  spacing: 10,
+                  runSpacing: 10,
                   children: CompanyStatus.values
                       .where((s) => s != company.status)
-                      .map((status) => ActionChip(
-                            label: Text(status.displayName),
-                            avatar: Icon(_getStatusIcon(status), size: 18),
-                            onPressed: () => onStatusChange(status),
+                      .map((status) => InkWell(
+                            onTap: () => onStatusChange(status),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(status).withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _getStatusColor(status).withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(_getStatusIcon(status),
+                                      size: 16, color: _getStatusColor(status)),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    status.displayName,
+                                    style: TextStyle(
+                                      color: _getStatusColor(status),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ))
                       .toList(),
                 ),
 
-                const SizedBox(height: AppDimensions.paddingL),
+                const SizedBox(height: 32),
 
                 // Action Buttons
                 Row(
@@ -643,34 +907,49 @@ class _CompanyDetailsSheet extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: onEdit,
-                        icon: const Icon(Icons.edit),
+                        icon: const Icon(Icons.edit_rounded, size: 18),
                         label: const Text('Edit'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF444466),
+                          side: const BorderSide(color: Color(0xFFE8E8EE)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: AppDimensions.paddingS),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: onResetPassword,
-                        icon: const Icon(Icons.lock_reset),
-                        label: const Text('Reset Password'),
+                        icon: const Icon(Icons.lock_reset_rounded, size: 18),
+                        label: const Text('Password'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF444466),
+                          side: const BorderSide(color: Color(0xFFE8E8EE)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppDimensions.paddingS),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: onDelete,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
+                      backgroundColor: AppColors.error.withValues(alpha: 0.08),
+                      foregroundColor: AppColors.error,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
                     ),
-                    icon: const Icon(Icons.delete, color: Colors.white),
+                    icon: const Icon(Icons.delete_outline_rounded, size: 18),
                     label: const Text('Delete Company',
-                        style: TextStyle(color: Colors.white)),
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
-                const SizedBox(height: AppDimensions.paddingL),
               ],
             ),
           );
@@ -681,23 +960,24 @@ class _CompanyDetailsSheet extends StatelessWidget {
 
   Widget _buildCompanyAvatar() {
     return Container(
-      width: 70,
-      height: 70,
+      width: 72,
+      height: 72,
       decoration: BoxDecoration(
-        color: AppColors.adminPrimary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        border: Border.all(color: AppColors.adminPrimary.withOpacity(0.3)),
+        color: const Color(0xFFF4F6FA),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE8E8EE)),
       ),
       child: company.logoUrl != null
           ? ClipRRect(
-              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              borderRadius: BorderRadius.circular(20),
               child: Image.network(company.logoUrl!, fit: BoxFit.cover),
             )
           : Center(
               child: Text(
                 company.name.substring(0, 1).toUpperCase(),
-                style: AppTextStyles.headlineMedium.copyWith(
-                  color: AppColors.adminPrimary,
+                style: const TextStyle(
+                  color: Color(0xFF1C1C2E),
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/constants/enums.dart';
@@ -46,20 +47,17 @@ class _SellCustomerSelectionScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(SiStrings.selectCustomer),
-        backgroundColor: AppColors.cardSell,
-        foregroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: true,
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: HAppBar(
+        title: SiStrings.selectCustomer,
+        subtitle: 'Select a buyer to sell to',
       ),
       body: Column(
         children: [
-          // Full width header background
+          // Light info banner
           Container(
             width: double.infinity,
-            color: AppColors.cardSell,
+            color: Colors.white,
             child: Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 800),
@@ -143,30 +141,38 @@ class _SellCustomerSelectionScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed('sellAddCustomer'),
-        child: const Icon(Icons.add),
-        backgroundColor: AppColors.cardSell,
+        backgroundColor: AppColors.info,
         foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+      child: Row(
         children: [
-          Text(
-            'ඔබ විකුණන්නේ කාටද?',
-            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            SiStrings.searchOrSelect,
-            style: AppTextStyles.headlineSmall.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.info.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.sell_rounded,
+                color: AppColors.info, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('ඔබ විකුණන්නේ කාටද?',
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.textSecondary)),
+              Text(SiStrings.searchOrSelect,
+                  style: AppTextStyles.titleSmall
+                      .copyWith(fontWeight: FontWeight.bold)),
+            ],
           ),
         ],
       ),
@@ -212,20 +218,6 @@ class _SellCustomerSelectionScreenState
                 ),
               ],
             ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.info_outline, color: AppColors.cardSell),
-              tooltip: SiStrings.viewProfile,
-              onPressed: () {
-                context.pushNamed('customerDetail',
-                    pathParameters: {'id': customer.id});
-              },
-            ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
         onTap: () {

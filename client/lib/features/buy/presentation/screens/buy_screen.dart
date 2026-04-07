@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -129,7 +127,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
           isLoading: state.isProcessing,
           message: 'Processing transaction...',
           child: Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: const Color(0xFFF4F6FA),
             appBar: _buildAppBar(state),
             body: _buildBody(state),
             bottomNavigationBar: state.status == BuyStatus.reviewing
@@ -368,36 +366,26 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         subtitle = 'Buy Paddy';
     }
 
-    return AppBar(
-      backgroundColor: AppColors.primary,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.white),
-        onPressed: () {
-          if (state.status == BuyStatus.reviewing) {
-            context.read<BuyCubit>().backToAddingItems();
-          } else if (state.hasItems) {
-            _showExitConfirmation(context);
+    return HAppBar(
+      title: 'Buy Paddy',
+      subtitle: title,
+      onBack: () {
+        if (state.status == BuyStatus.reviewing) {
+          context.read<BuyCubit>().backToAddingItems();
+        } else if (state.hasItems) {
+          _showExitConfirmation(context);
+        } else {
+          if (GoRouter.of(context).canPop()) {
+            context.pop(true);
           } else {
-            if (GoRouter.of(context).canPop()) {
-              context.pop(true);
-            } else {
-              context.go(RouteNames.home);
-            }
+            context.go(RouteNames.home);
           }
-        },
-      ),
-      title: Text(
-            title,
-            style: AppTextStyles.titleMedium.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        }
+      },
       actions: [
         if (state.hasItems && state.status != BuyStatus.reviewing)
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.white),
+            icon: const Icon(Icons.delete_outline, color: Color(0xFF1C1C2E)),
             onPressed: () => _showClearConfirmation(context),
             tooltip: 'සියල්ල ඉවත් කරන්න',
           ),

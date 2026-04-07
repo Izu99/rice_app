@@ -62,6 +62,8 @@ class SellState extends Equatable {
     this.totalBags = 0,
   });
 
+  factory SellState.initial() => const SellState();
+
   // Calculated getters
   double get currentItemTotal => inputQuantity * inputPrice;
 

@@ -6,26 +6,55 @@ import '../../../../data/models/transaction_item_model.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../data/models/stock_item_model.dart';
+import '../../../../domain/repositories/auth_repository.dart';
 import '../../../../domain/repositories/customer_repository.dart';
 import '../../../../domain/repositories/stock_repository.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
+import '../../../../core/utils/logger_utils.dart';
 import 'sell_state.dart';
 
 class SellCubit extends Cubit<SellState> {
   final CustomerRepository customerRepository;
   final StockRepository stockRepository;
   final TransactionRepository transactionRepository;
+  final AuthRepository _authRepository;
   final Uuid _uuid = const Uuid();
+
+  String _companyId = '';
+  String _userId = '';
 
   SellCubit({
     required this.customerRepository,
     required this.stockRepository,
     required this.transactionRepository,
-  }) : super(const SellState());
+    required AuthRepository authRepository,
+  })  : _authRepository = authRepository,
+        super(const SellState());
 
   // Initialize sell screen
   Future<void> initialize() async {
     emit(state.copyWith(status: SellStatus.loading));
+
+    // Resolve company ID and user ID from auth
+    if (_companyId.isEmpty || _userId.isEmpty) {
+      final companyResult = await _authRepository.getCompany();
+      companyResult.fold((_) => null, (company) {
+        if (company != null) _companyId = company.id;
+      });
+
+      final userResult = await _authRepository.getCurrentUser();
+      userResult.fold(
+        (failure) => Log.w('Could not get user: ${failure.message}', tag: 'SELL'),
+        (user) {
+          _userId = user.id;
+          if (_companyId.isEmpty) _companyId = user.companyId;
+        },
+      );
+    }
+
+    if (_companyId.isEmpty) {
+      Log.w('No company ID resolved — continuing anyway', tag: 'SELL');
+    }
 
     try {
       await Future.wait([
@@ -51,11 +80,8 @@ class SellCubit extends Cubit<SellState> {
           errorMessage: 'Failed to load customers: ${failure.message}',
         )),
         (customers) {
-          // Convert CustomerEntity to CustomerModel
-          // TODO: Get companyId from auth state
           final customerModels = customers
-              .map((entity) =>
-                  CustomerModel.fromEntity(entity, 'TEMP_COMPANY_ID'))
+              .map((entity) => CustomerModel.fromEntity(entity, _companyId))
               .toList();
           emit(state.copyWith(customers: customerModels));
         },
@@ -94,7 +120,7 @@ class SellCubit extends Cubit<SellState> {
                   item.currentQuantity > 0 &&
                   item.type == state.selectedItemType)
               .map((entity) =>
-                  StockItemModel.fromEntity(entity, 'TEMP_COMPANY_ID'))
+                  StockItemModel.fromEntity(entity, _companyId))
               .toList();
           emit(state.copyWith(availableStock: availableStock));
         },
@@ -371,8 +397,8 @@ class SellCubit extends Cubit<SellState> {
       // Save transaction
       final result = await transactionRepository.createSellTransaction(
         customerId: state.selectedCustomer!.id,
-        companyId: 'TEMP_COMPANY_ID', // TODO: Get from auth state
-        createdById: 'TEMP_USER_ID', // TODO: Get from auth state
+        companyId: _companyId,
+        createdById: _userId,
         items: transactionItems,
       );
 
@@ -415,6 +441,11 @@ class SellCubit extends Cubit<SellState> {
   // Clear error message
   void clearError() {
     emit(state.copyWith(clearError: true));
+  }
+
+  /// Reset sell state (on logout)
+  void reset() {
+    emit(SellState.initial());
   }
 
   // Clear success message

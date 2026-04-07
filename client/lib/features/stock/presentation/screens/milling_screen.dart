@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/utils/logger_utils.dart';
 import '../../../../data/models/stock_item_model.dart';
 import '../cubit/milling_cubit.dart';
 import '../cubit/milling_state.dart';
@@ -59,25 +58,13 @@ class _MillingScreenState extends State<MillingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('වී කෙටීම'), // Paddy Milling
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/stock');
-            }
-          },
-        ),
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: HAppBar(
+        title: 'Milling',
+        subtitle: 'වී කෙටීම',
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Color(0xFF1C1C2E)),
             onPressed: () {
               context.read<MillingCubit>().resetMilling();
               _clearControllers();
@@ -88,7 +75,6 @@ class _MillingScreenState extends State<MillingScreen>
       ),
       body: BlocConsumer<MillingCubit, MillingState>(
         listener: (context, state) {
-          print('🖥️ [MillingScreen] State Listener: status=${state.status}');
           try {
             if (state.status == MillingStatus.success) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +92,6 @@ class _MillingScreenState extends State<MillingScreen>
                 context.push('/stock'); // Automatically navigate to stock after success
               });
             } else if (state.status == MillingStatus.error && state.errorMessage != null) {
-              print('🖥️ [MillingScreen] Error detected: ${state.errorMessage}');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage!),
@@ -126,8 +111,7 @@ class _MillingScreenState extends State<MillingScreen>
               );
             }
           } catch (e, stack) {
-            print('❌ [MillingScreen] LISTENER ERROR: $e');
-            print('❌ [MillingScreen] LISTENER STACK: $stack');
+            Log.e('Listener error: $e', tag: 'MILLING_SCREEN', error: stack);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('අනපේක්ෂිත දෝෂයක් සිදු විය'),
@@ -137,7 +121,6 @@ class _MillingScreenState extends State<MillingScreen>
           }
         },
         builder: (context, state) {
-          print('🖥️ [MillingScreen] State Builder: status=${state.status}');
           try {
             return LoadingOverlay(
               isLoading: state.status == MillingStatus.processing,
@@ -197,8 +180,7 @@ class _MillingScreenState extends State<MillingScreen>
               ),
             );
           } catch (e, stack) {
-            print('❌ [MillingScreen] RENDER ERROR: $e');
-            print('❌ [MillingScreen] STACK TRACE: $stack');
+            Log.e('Render error: $e', tag: 'MILLING_SCREEN', error: stack);
             return Scaffold(
               body: Center(
                 child: Text('Rendering Error: $e'),

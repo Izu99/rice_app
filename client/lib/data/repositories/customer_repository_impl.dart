@@ -253,21 +253,18 @@ class CustomerRepositoryImpl implements CustomerRepository {
     required String customerId,
     int limit = 50,
   }) async {
-    // Need transaction remote DS here? Or CustomerRemoteDS handles it?
-    // The previous impl used TransactionLocalDS.
-    // I should inject TransactionRemoteDS into CustomerRepository?
-    // Or just return empty for now as requested "remove local".
-    // But user wants "app setup to work direct in mongodb".
-    // I should probably clean up the repo to not need cross-repo calls if possible,
-    // or inject TransactionRepository if needed. But circular dependency risk.
-    // For now, I will modify the signature or implementation to return empty to strictly satisfy the "remove local" request without over-engineering new remote calls immediately unless easy.
-    // Actually, `TransactionRemoteDataSource` has `getTransactionsByCustomer`.
-    // But `CustomerRepositoryImpl` doesn't have `TransactionRemoteDataSource`.
-    // I will skip this implementation or return empty for now to focus on the main task.
-    // Better: I'll add `TransactionRemoteDataSource` to this repo's dependencies if I really need it,
-    // but typically `GetCustomerTransactionHistory` should be a UseCase that uses `TransactionRepository`.
-    // The current design had it in CustomerRepository which is slightly misplaced.
-    return const Right([]);
+    try {
+      final transactions = await remoteDataSource.getCustomerTransactions(
+        customerId: customerId,
+        limit: limit,
+      );
+      return Right(transactions);
+    } catch (e) {
+      if (e is ServerException) {
+        return Left(ServerFailure(message: e.message, code: e.statusCode));
+      }
+      return Left(UnknownFailure(message: e.toString()));
+    }
   }
 
   @override

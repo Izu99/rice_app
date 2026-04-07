@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../data/models/company_model.dart';
 import '../../../../domain/repositories/admin_repository.dart';
 import '../../../../core/utils/logger_utils.dart';
@@ -15,21 +17,36 @@ class AdminCubit extends Cubit<AdminState> {
   Future<void> loadDashboard() async {
     emit(state.copyWith(status: AdminStatus.loading));
 
-    final result = await _adminRepository.getDashboardStats();
+    // Load both stats and companies list in parallel
+    final results = await Future.wait([
+      _adminRepository.getDashboardStats(),
+      _adminRepository.getAllCompanies(),
+    ]);
 
-    result.fold(
+    // Cast results to their specific types
+    final statsResult = results[0] as Either<Failure, Map<String, dynamic>>;
+    final companiesResult = results[1] as Either<Failure, List<CompanyModel>>;
+
+    statsResult.fold(
       (failure) => emit(state.copyWith(
         status: AdminStatus.error,
         errorMessage: failure.message,
       )),
       (statsMap) {
         final stats = AdminDashboardStats.fromJson(statsMap);
-        emit(state.copyWith(
-          status: AdminStatus.loaded,
-          dashboardStats: stats,
-          allCompanies: stats.recentCompanies,
-          filteredCompanies: stats.recentCompanies,
-        ));
+        
+        companiesResult.fold(
+          (failure) => emit(state.copyWith(
+            status: AdminStatus.loaded,
+            dashboardStats: stats,
+          )),
+          (companies) => emit(state.copyWith(
+            status: AdminStatus.loaded,
+            dashboardStats: stats,
+            allCompanies: companies,
+            filteredCompanies: _applyFilters(companies, state.currentFilter, state.searchQuery),
+          )),
+        );
       },
     );
   }
@@ -57,7 +74,7 @@ class AdminCubit extends Cubit<AdminState> {
   /// Refresh companies
   Future<void> refreshCompanies() async {
     emit(state.copyWith(isRefreshing: true));
-    await loadCompanies();
+    await loadDashboard();
     emit(state.copyWith(isRefreshing: false));
   }
 
@@ -142,6 +159,7 @@ class AdminCubit extends Cubit<AdminState> {
     String? address,
     String? registrationNumber,
     String? logoUrl,
+    String? district,
   }) async {
     Log.company('Creating new company: $name');
     emit(state.copyWith(status: AdminStatus.creating));
@@ -154,6 +172,7 @@ class AdminCubit extends Cubit<AdminState> {
       password: password,
       address: address,
       registrationNumber: registrationNumber,
+      district: district,
     );
 
     return result.fold(
@@ -188,30 +207,45 @@ class AdminCubit extends Cubit<AdminState> {
     );
   }
 
-  /// Update company details
+  /// Update company details (optimistic)
   Future<bool> updateCompany(CompanyModel company) async {
-    emit(state.copyWith(status: AdminStatus.updating));
+    final previousList = state.allCompanies;
+
+    // Update UI immediately
+    final optimisticList = previousList
+        .map((c) => c.id == company.id ? company : c)
+        .toList();
+    emit(state.copyWith(
+      allCompanies: optimisticList,
+      filteredCompanies:
+          _applyFilters(optimisticList, state.currentFilter, state.searchQuery),
+      selectedCompany: company,
+    ));
 
     final result = await _adminRepository.updateCompany(company);
 
     return result.fold(
       (failure) {
+        // Revert on failure
         emit(state.copyWith(
           status: AdminStatus.error,
+          allCompanies: previousList,
+          filteredCompanies: _applyFilters(
+              previousList, state.currentFilter, state.searchQuery),
           errorMessage: failure.message,
         ));
         return false;
       },
       (updatedCompany) {
-        final List<CompanyModel> updatedList = state.allCompanies.map((c) {
-          return c.id == company.id ? updatedCompany : c;
-        }).toList();
-
+        // Replace optimistic copy with server-confirmed version
+        final confirmedList = state.allCompanies
+            .map((c) => c.id == company.id ? updatedCompany : c)
+            .toList();
         emit(state.copyWith(
           status: AdminStatus.success,
-          allCompanies: updatedList,
+          allCompanies: confirmedList,
           filteredCompanies: _applyFilters(
-              updatedList, state.currentFilter, state.searchQuery),
+              confirmedList, state.currentFilter, state.searchQuery),
           selectedCompany: updatedCompany,
           successMessage: 'Company updated successfully!',
         ));
@@ -220,20 +254,36 @@ class AdminCubit extends Cubit<AdminState> {
     );
   }
 
-  /// Update company status
+  /// Update company status (optimistic)
   Future<bool> updateCompanyStatus(
       String companyId, CompanyStatus newStatus) async {
-    emit(state.copyWith(status: AdminStatus.updating));
+    final previousList = state.allCompanies;
+
+    // Update UI immediately
+    final optimisticList = previousList
+        .map((c) => c.id == companyId
+            ? c.copyWith(status: newStatus, updatedAt: DateTime.now())
+            : c)
+        .toList();
+    emit(state.copyWith(
+      allCompanies: optimisticList,
+      filteredCompanies:
+          _applyFilters(optimisticList, state.currentFilter, state.searchQuery),
+    ));
 
     final result =
         await _adminRepository.updateCompanyStatus(companyId, newStatus.name);
 
     return result.fold(
       (failure) {
+        // Revert on failure
         Log.e('Failed to update status for $companyId',
             error: failure.message, tag: 'COMPANY');
         emit(state.copyWith(
           status: AdminStatus.error,
+          allCompanies: previousList,
+          filteredCompanies: _applyFilters(
+              previousList, state.currentFilter, state.searchQuery),
           errorMessage: failure.message,
         ));
         return false;
@@ -241,17 +291,8 @@ class AdminCubit extends Cubit<AdminState> {
       (success) {
         Log.s('Status updated for $companyId to ${newStatus.name}',
             tag: 'COMPANY');
-        final List<CompanyModel> updatedList = state.allCompanies.map((c) {
-          return c.id == companyId
-              ? c.copyWith(status: newStatus, updatedAt: DateTime.now())
-              : c;
-        }).toList();
-
         emit(state.copyWith(
           status: AdminStatus.success,
-          allCompanies: updatedList,
-          filteredCompanies: _applyFilters(
-              updatedList, state.currentFilter, state.searchQuery),
           successMessage: 'Company status updated to ${newStatus.displayName}!',
         ));
         return true;
@@ -259,30 +300,37 @@ class AdminCubit extends Cubit<AdminState> {
     );
   }
 
-  /// Delete company
+  /// Delete company (optimistic)
   Future<bool> deleteCompany(String companyId) async {
-    emit(state.copyWith(status: AdminStatus.deleting));
+    final previousList = state.allCompanies;
+
+    // Remove from UI immediately
+    final optimisticList =
+        previousList.where((c) => c.id != companyId).toList();
+    emit(state.copyWith(
+      allCompanies: optimisticList,
+      filteredCompanies:
+          _applyFilters(optimisticList, state.currentFilter, state.searchQuery),
+      clearSelectedCompany: true,
+    ));
 
     final result = await _adminRepository.deleteCompany(companyId);
 
     return result.fold(
       (failure) {
+        // Revert on failure
         emit(state.copyWith(
           status: AdminStatus.error,
+          allCompanies: previousList,
+          filteredCompanies: _applyFilters(
+              previousList, state.currentFilter, state.searchQuery),
           errorMessage: failure.message,
         ));
         return false;
       },
       (success) {
-        final List<CompanyModel> updatedList =
-            state.allCompanies.where((c) => c.id != companyId).toList();
-
         emit(state.copyWith(
           status: AdminStatus.success,
-          allCompanies: updatedList,
-          filteredCompanies: _applyFilters(
-              updatedList, state.currentFilter, state.searchQuery),
-          clearSelectedCompany: true,
           successMessage: 'Company deleted successfully!',
         ));
         return true;
@@ -325,5 +373,10 @@ class AdminCubit extends Cubit<AdminState> {
   /// Clear error
   void clearError() {
     emit(state.copyWith(clearMessages: true));
+  }
+
+  /// Reset admin state (on logout)
+  void reset() {
+    emit(AdminState.initial());
   }
 }

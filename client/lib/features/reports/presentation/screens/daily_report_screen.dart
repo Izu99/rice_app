@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/transaction_entity.dart';
 import '../../../../domain/entities/expense_entity.dart';
 import 'dart:convert';
@@ -210,13 +211,12 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       isLoading: _isLoading,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text('වාර්තා'), // Reports
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
+        appBar: HAppBar(
+          title: 'Daily Report',
+          subtitle: 'වාර්තා',
           actions: [
             IconButton(
-              icon: const Icon(Icons.calendar_today),
+              icon: const Icon(Icons.calendar_today_rounded, color: Color(0xFF1C1C2E)),
               onPressed: _selectDate,
             ),
           ],

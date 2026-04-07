@@ -38,28 +38,30 @@ class RecentTransactions extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 20,
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 24,
             offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+        border: Border.all(color: const Color(0xFFE8E8EE), width: 1.2),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           // Transaction list
           ListView.separated(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: displayTransactions.length,
-            separatorBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child:
-                  Divider(height: 1, color: AppColors.divider.withOpacity(0.5)),
+            separatorBuilder: (context, index) => Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              height: 1,
+              color: const Color(0xFFF0F0F5),
             ),
             itemBuilder: (context, index) {
               return TransactionListItem(
@@ -76,29 +78,35 @@ class RecentTransactions extends StatelessWidget {
 
           // View all button
           if (transactions.length > maxItems) ...[
-            const Divider(height: 1),
+            Container(
+              height: 1,
+              color: const Color(0xFFF0F0F5),
+            ),
             InkWell(
               onTap: onViewAll ?? () => context.push('/reports'),
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(24),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF9FAFC),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'View All History',
-                      style: AppTextStyles.labelMedium.copyWith(
+                      style: TextStyle(
                         color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        letterSpacing: 0.3,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.arrow_forward_rounded,
                       color: AppColors.primary,
-                      size: 14,
+                      size: 16,
                     ),
                   ],
                 ),
@@ -227,30 +235,37 @@ class TransactionListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isBuy = transaction.type == TransactionType.buy;
     final color = isBuy ? AppColors.error : AppColors.success;
-    final icon =
-        isBuy ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
-    final typeLabel = isBuy ? 'Purchase' : 'Sale';
+    final icon = isBuy ? Icons.call_received_rounded : Icons.call_made_rounded;
+    final typeLabel = isBuy ? 'Buy' : 'Sell';
 
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.all(compact ? 10 : 16),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: compact ? 12 : 16,
+        ),
         child: Row(
           children: [
-            // Icon
+            // Icon with subtle background
             Container(
-              padding: EdgeInsets.all(compact ? 8 : 10),
+              width: compact ? 40 : 48,
+              height: compact ? 40 : 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: color.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: color.withOpacity(0.12),
+                  width: 1,
+                ),
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: compact ? 18 : 22,
+                size: compact ? 20 : 24,
               ),
             ),
-            SizedBox(width: compact ? 10 : 12),
+            const SizedBox(width: 14),
 
             // Details
             Expanded(
@@ -259,12 +274,11 @@ class TransactionListItem extends StatelessWidget {
                 children: [
                   Text(
                     transaction.customerName ?? 'Walk-in Customer',
-                    style: (compact
-                            ? AppTextStyles.bodyMedium
-                            : AppTextStyles.titleSmall)
-                        .copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      fontSize: compact ? 13 : 15,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1C1C2E),
+                      letterSpacing: -0.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -274,33 +288,30 @@ class TransactionListItem extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
+                          horizontal: 8,
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xFFF0F0F5),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          typeLabel.toUpperCase(),
+                          typeLabel,
                           style: TextStyle(
                             color: color,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.2,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          transaction.transactionNumber,
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.textHint,
-                            fontSize: 10,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        _formatDate(transaction.transactionDate),
+                        style: const TextStyle(
+                          color: Color(0xFF8E8E93),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -314,37 +325,40 @@ class TransactionListItem extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    _formatAmount(transaction.totalAmount),
-                    style: (compact
-                            ? AppTextStyles.titleSmall
-                            : AppTextStyles.titleMedium)
-                        .copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                Text(
+                  _formatAmount(transaction.totalAmount),
+                  style: TextStyle(
+                    fontSize: compact ? 14 : 16,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1C1C2E),
+                    letterSpacing: -0.3,
                   ),
                 ),
-                if (showDate)
-                  Text(
-                    _formatDate(transaction.transactionDate),
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.textHint,
-                      fontSize: 10,
-                    ),
-                  ),
                 if (transaction.dueAmount > 0)
                   Container(
                     margin: const EdgeInsets.only(top: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                     child: Text(
                       'DUE: ${_formatAmount(transaction.dueAmount)}',
                       style: const TextStyle(
                         color: AppColors.warning,
                         fontSize: 9,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
+                    ),
+                  )
+                else
+                  Text(
+                    transaction.transactionNumber,
+                    style: const TextStyle(
+                      color: Color(0xFFAEB0B8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
               ],

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../domain/entities/expense_entity.dart';
@@ -28,11 +29,10 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('මෙහෙයුම් වියදම්'), // Operating Expenses
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
+      appBar: const HAppBar(
+        title: 'Expenses',
+        subtitle: 'මෙහෙයුම් වියදම්',
+        showBack: false,
       ),
       body: BlocBuilder<ExpensesCubit, ExpensesState>(
         builder: (context, state) {
@@ -129,26 +129,40 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   Widget _buildSummaryHeader(ExpensesState state) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Color(0x08000000), blurRadius: 10, offset: Offset(0, 3)),
+        ],
       ),
-      child: Column(
+      child: Row(
         children: [
-          Text(
-            'මෙම මාසයේ මුළු වියදම', // Monthly Operating Expenses
-            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
-          ),
-          const SizedBox(height: 8),
-          FittedBox(
-            child: Text(
-              'Rs. ${state.totalMonthlyExpenses.toStringAsFixed(2)}',
-              style: AppTextStyles.headlineMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.receipt_long_rounded,
+                color: AppColors.error, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('මෙම මාසයේ මුළු වියදම',
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.textSecondary)),
+              const SizedBox(height: 4),
+              Text(
+                'Rs. ${state.totalMonthlyExpenses.toStringAsFixed(0)}',
+                style: AppTextStyles.titleLarge.copyWith(
+                    color: AppColors.error, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
         ],
       ),
@@ -245,21 +259,90 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('වියදම මකා දමන්නද?'), // Delete Expense?
-        content: const Text('මෙම වියදම් වාර්තාව මකා දැමීමට ඔබට විශ්වාසද?'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(SiStrings.cancel)),
-          TextButton(
-            onPressed: () {
-              context.read<ExpensesCubit>().deleteExpense(id);
-              Navigator.pop(context);
-            },
-            child:
-                Text(SiStrings.delete, style: TextStyle(color: AppColors.error)),
-          ),
-        ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.delete_outline, size: 32, color: AppColors.error),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                children: [
+                  const Text(
+                    'වියදම මකා දමන්නද?',
+                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'මෙම වියදම් වාර්තාව මකා දැමීමට ඔබට විශ්වාසද?',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(top: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(SiStrings.cancel),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<ExpensesCubit>().deleteExpense(id);
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(SiStrings.delete, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
