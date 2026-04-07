@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 
@@ -29,21 +30,12 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
           isLoading: state.status == ReportsStatus.loading,
           child: Scaffold(
             backgroundColor: AppColors.background,
-            appBar: AppBar(
-              title: Text(
-                'පාරිභෝගික වාර්තාව', // Customer Report
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22, // Large and clear
-                ),
-              ),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              elevation: 0,
+            appBar: HAppBar(
+              title: 'Customer Report',
+              subtitle: 'පාරිභෝගික වාර්තාව',
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh_rounded, color: Color(0xFF1C1C2E)),
                   onPressed: () => context.read<ReportsCubit>().loadCustomerReport(),
                 ),
               ],

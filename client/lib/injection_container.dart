@@ -1,7 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Core
 import 'core/network/api_service.dart';
@@ -62,6 +61,7 @@ import 'features/reports/reports_injection.dart';
 import 'features/profile/profile_injection.dart';
 import 'features/expenses/expenses_injection.dart';
 import 'features/super_admin/admin_injection.dart';
+import 'features/price_management/price_management_injection.dart' as PriceManagementInjection;
 
 // Routes
 import 'routes/app_router.dart';
@@ -104,10 +104,6 @@ Future<void> _initExternalDependencies() async {
 
   // Connectivity
   sl.registerLazySingleton<Connectivity>(() => Connectivity());
-
-  // Flutter Secure Storage
-  sl.registerLazySingleton<FlutterSecureStorage>(
-      () => const FlutterSecureStorage());
 }
 
 /// Initialize core services
@@ -243,6 +239,7 @@ Future<void> _initFeatures() async {
   initExpensesInjection(sl);
   await ProfileInjection.init();
   initAdminInjection(sl);
+  await PriceManagementInjection.initializePriceManagementDependencies();
 }
 
 /// Initialize routes

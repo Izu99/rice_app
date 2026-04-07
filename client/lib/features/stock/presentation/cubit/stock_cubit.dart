@@ -468,4 +468,9 @@ class StockCubit extends Cubit<StockState> {
   void clearError() {
     emit(state.copyWith(errorMessage: null));
   }
+
+  /// Reset stock state (on logout)
+  void reset() {
+    emit(StockState.initial());
+  }
 }

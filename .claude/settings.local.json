@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs wc:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(find /c/Users/isuru/Documents/project/company/rice_app/client/lib/data/datasources -type f -name *price*)",
+      "Bash(find /c/Users/isuru/Documents/project/company/rice_app/client/lib/domain/repositories -type f -name *.dart)",
+      "Bash(flutter pub:*)",
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && grep -A 20 \"class.*Cubit.*extends\" {} | grep \"reset\\\\|close\" || echo \"NO RESET FOUND\"')",
+      "Bash(xargs grep:*)",
+      "Bash(flutter doctor:*)"
+    ]
+  }
+}

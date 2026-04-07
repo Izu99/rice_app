@@ -61,6 +61,12 @@ class SiStrings {
   static String get confirmPassword => _get('මුරපදය නැවත ඇතුළත් කරන්න', EnStrings.confirmPassword);
   static String get version => _get('අනුවාදය', EnStrings.version);
   static String get history => _get('ඉතිහාසය', EnStrings.history);
+  static String get registerNow => _get('ලියාපදිංචි වන්න', EnStrings.registerNow);
+  static String get registerPrompt => _get('නව මෝලක් ලියාපදිංචි කිරීමට?', EnStrings.registerPrompt);
+  static String get alreadyHaveCompany => _get('දැනටමත් ලියාපදිංචි වී තිබේද?', EnStrings.alreadyHaveCompany);
+  static String get registerCompany => _get('මෝල ලියාපදිංචි කිරීම', EnStrings.registerCompany);
+  static String get or => _get('හෝ', EnStrings.or);
+  static String get signInWithGoogle => _get('Google සමඟින් ඇතුල් වන්න', EnStrings.signInWithGoogle);
 
   // ==================== DASHBOARD / HOME ====================
   static String get todaySummary => _get('අද දින සාරාංශය', EnStrings.todaySummary);

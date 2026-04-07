@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart';
@@ -48,20 +46,17 @@ class _BuyCustomerSelectionScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(SiStrings.selectCustomer),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-        elevation: 0,
-        centerTitle: true,
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: HAppBar(
+        title: SiStrings.selectCustomer,
+        subtitle: 'Select a seller to buy from',
       ),
       body: Column(
         children: [
-          // Full width header background
+          // Light info banner
           Container(
             width: double.infinity,
-            color: AppColors.primary,
+            color: Colors.white,
             child: Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 800),
@@ -145,30 +140,38 @@ class _BuyCustomerSelectionScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed('buyAddCustomer'),
-        child: const Icon(Icons.add),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+      child: Row(
         children: [
-          Text(
-            SiStrings.buyingFrom,
-            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            SiStrings.searchOrSelect,
-            style: AppTextStyles.headlineSmall.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.shopping_bag_rounded,
+                color: AppColors.success, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(SiStrings.buyingFrom,
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.textSecondary)),
+              Text(SiStrings.searchOrSelect,
+                  style: AppTextStyles.titleSmall
+                      .copyWith(fontWeight: FontWeight.bold)),
+            ],
           ),
         ],
       ),

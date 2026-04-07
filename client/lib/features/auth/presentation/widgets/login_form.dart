@@ -72,22 +72,22 @@ class LoginForm extends StatelessWidget {
     return CustomTextField(
       controller: identifierController,
       focusNode: identifierFocusNode,
-      label: 'Phone or Email',
-      hint: 'ඔබගේ දුරකථන අංකය හෝ Email එක ඇතුළත් කරන්න',
+      label: SiStrings.usernameOrPhone,
+      hint: SiStrings.usernameOrPhone,
       prefixIcon: Icons.person,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       errorText: fieldErrors?['identifier'],
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'දුරකථන අංකය හෝ Email එක අවශ්‍යයි';
+          return SiStrings.usernameOrPhone;
         }
 
         final isEmail = value.contains('@');
         final isPhone = value.replaceAll(RegExp(r'[^\d]'), '').length >= 9;
 
         if (!isEmail && !isPhone) {
-          return 'නිවැරදි දුරකථන අංකයක් හෝ Email එකක් ඇතුළත් කරන්න';
+          return SiStrings.usernameOrPhone;
         }
         return null;
       },
@@ -103,7 +103,7 @@ class LoginForm extends StatelessWidget {
       controller: passwordController,
       focusNode: passwordFocusNode,
       label: SiStrings.password,
-      hint: 'ඔබගේ මුරපදය ඇතුළත් කරන්න',
+      hint: SiStrings.password,
       prefixIcon: Icons.lock_outline,
       obscureText: !isPasswordVisible,
       textInputAction: TextInputAction.done,

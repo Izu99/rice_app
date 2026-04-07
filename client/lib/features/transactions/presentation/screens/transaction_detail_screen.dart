@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../data/models/transaction_model.dart';
@@ -63,15 +64,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(_transaction?.transactionNumber ?? 'Transaction Details'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: HAppBar(
+        title: 'Transaction Details',
+        subtitle: _transaction?.transactionNumber,
         actions: [
           if (_transaction != null)
             IconButton(
-              icon: const Icon(Icons.print),
+              icon: const Icon(Icons.print, color: Color(0xFF1C1C2E)),
               onPressed: () {
                 // TODO: Implement printing
               },

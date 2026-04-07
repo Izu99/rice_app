@@ -61,6 +61,8 @@ class AdminState extends Equatable {
     this.lastCreatedAdminCredentials,
   });
 
+  factory AdminState.initial() => const AdminState();
+
   // Computed properties
   int get totalCompanies => allCompanies.length;
   int get activeCompanies =>
@@ -69,6 +71,20 @@ class AdminState extends Equatable {
       allCompanies.where((c) => c.status == CompanyStatus.inactive).length;
   int get pendingCompanies =>
       allCompanies.where((c) => c.status == CompanyStatus.pending).length;
+
+  /// Helper to get consistent stats across pages
+  AdminDashboardStats get currentStats => dashboardStats?.copyWith(
+        totalCompanies: totalCompanies,
+        activeCompanies: activeCompanies,
+        inactiveCompanies: inactiveCompanies,
+        pendingCompanies: pendingCompanies,
+      ) ??
+      AdminDashboardStats(
+        totalCompanies: totalCompanies,
+        activeCompanies: activeCompanies,
+        inactiveCompanies: inactiveCompanies,
+        pendingCompanies: pendingCompanies,
+      );
 
   AdminState copyWith({
     AdminStatus? status,
@@ -172,6 +188,30 @@ class AdminDashboardStats extends Equatable {
               .toList()
           : [],
       companiesPerMonth: Map<String, int>.from(json['companiesPerMonth'] ?? {}),
+    );
+  }
+
+  AdminDashboardStats copyWith({
+    int? totalCompanies,
+    int? activeCompanies,
+    int? inactiveCompanies,
+    int? pendingCompanies,
+    int? totalUsers,
+    int? todayTransactions,
+    double? totalRevenue,
+    List<CompanyModel>? recentCompanies,
+    Map<String, int>? companiesPerMonth,
+  }) {
+    return AdminDashboardStats(
+      totalCompanies: totalCompanies ?? this.totalCompanies,
+      activeCompanies: activeCompanies ?? this.activeCompanies,
+      inactiveCompanies: inactiveCompanies ?? this.inactiveCompanies,
+      pendingCompanies: pendingCompanies ?? this.pendingCompanies,
+      totalUsers: totalUsers ?? this.totalUsers,
+      todayTransactions: todayTransactions ?? this.todayTransactions,
+      totalRevenue: totalRevenue ?? this.totalRevenue,
+      recentCompanies: recentCompanies ?? this.recentCompanies,
+      companiesPerMonth: companiesPerMonth ?? this.companiesPerMonth,
     );
   }
 

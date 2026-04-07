@@ -43,11 +43,6 @@ class UserModel extends Equatable {
 
   /// Create from JSON (API or Local DB)
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    print('👤 [UserModel] Parsing JSON: keys=${json.keys.toList()}');
-    if (json.containsKey('companyId'))
-      print('👤 [UserModel] found companyId: ${json['companyId']}');
-    if (json.containsKey('company_id'))
-      print('👤 [UserModel] found company_id: ${json['company_id']}');
 
     return UserModel(
       id: json['id']?.toString() ?? '',

@@ -29,7 +29,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _secondaryPhoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _nicController = TextEditingController();
   final _notesController = TextEditingController();
 
   final _nameFocus = FocusNode();
@@ -42,7 +41,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _secondaryPhoneController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _nicController.dispose();
     _notesController.dispose();
     _nameFocus.dispose();
     _phoneFocus.dispose();
@@ -362,19 +360,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ),
           const SizedBox(height: 16),
 
-          // NIC
-          CustomTextField(
-            controller: _nicController,
-            label: 'NIC Number (Optional)',
-            hint: 'Enter NIC',
-            prefixIcon: Icons.badge_outlined,
-            textCapitalization: TextCapitalization.characters,
-            onChanged: (value) {
-              context.read<CustomerCubit>().updateNic(value);
-            },
-          ),
-          const SizedBox(height: 16),
-
           // Notes
           CustomTextField(
             controller: _notesController,
@@ -401,56 +386,77 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning, color: AppColors.warning),
-            SizedBox(width: 8),
-            Text('Phone Exists'),
-          ],
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('A customer with this phone number already exists:'),
-            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
+                color: AppColors.warning.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryLight,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      customer.initials,
-                      style: AppTextStyles.titleSmall.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Icon(Icons.phone_in_talk_outlined, size: 32, color: AppColors.warning),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                children: [
+                  const Text(
+                    'Phone Already Exists',
+                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'A customer with this phone number already exists:',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          customer.name,
-                          style: AppTextStyles.titleSmall.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              customer.initials,
+                              style: AppTextStyles.titleSmall.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                        Text(
-                          customer.formattedPhone,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(customer.name, style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+                              Text(customer.formattedPhone, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                            ],
                           ),
                         ),
                       ],
@@ -459,25 +465,55 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ],
               ),
             ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(top: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<BuyCubit>().selectCustomer(customer);
+                        context.go('/buy');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: const Text('Select This Customer', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<CustomerCubit>().clearError();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Use Different Phone'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<CustomerCubit>().clearError();
-            },
-            child: const Text('Use Different Phone'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<BuyCubit>().selectCustomer(customer);
-              context.go('/buy');
-            },
-            child: const Text('Select This Customer'),
-          ),
-        ],
       ),
     );
   }

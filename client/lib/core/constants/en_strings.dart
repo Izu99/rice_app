@@ -31,6 +31,12 @@ class EnStrings {
   static const String confirmPassword = 'Confirm Password';
   static const String version = 'Version';
   static const String history = 'History';
+  static const String registerNow = 'Register Now';
+  static const String registerPrompt = 'Register a new mill?';
+  static const String alreadyHaveCompany = 'Already have a company?';
+  static const String registerCompany = 'Register Company';
+  static const String or = 'OR';
+  static const String signInWithGoogle = 'Sign in with Google';
 
   // ==================== DASHBOARD / HOME ====================
   static const String todaySummary = 'Today\'s Summary';

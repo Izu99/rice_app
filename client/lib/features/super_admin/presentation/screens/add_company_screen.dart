@@ -7,6 +7,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/constants/districts.dart';
 import '../../../../data/models/company_model.dart';
 import '../cubit/admin_cubit.dart';
 import '../cubit/admin_state.dart';
@@ -31,6 +32,7 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
   final _addressController = TextEditingController();
   final _registrationNumberController = TextEditingController();
 
+  String? _selectedDistrict;
   bool _isEditMode = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -57,6 +59,7 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
       _phoneController.text = company.phone;
       _addressController.text = company.address;
       _registrationNumberController.text = company.registrationNumber ?? '';
+      _selectedDistrict = company.district;
     }
   }
 
@@ -76,12 +79,18 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
         title: Text(_isEditMode ? 'Edit Company' : 'Add New Company'),
-        backgroundColor: AppColors.adminPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 2,
+        shadowColor: Colors.black12,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {
@@ -121,7 +130,7 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
             message:
                 _isEditMode ? 'Updating company...' : 'Creating company...',
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppDimensions.paddingM),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -129,37 +138,37 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
                   children: [
                     // Header Card
                     _buildHeaderCard(),
-                    const SizedBox(height: AppDimensions.paddingL),
+                    const SizedBox(height: 24),
 
                     // Company Information Section
-                    _buildSectionTitle('Company Information'),
-                    const SizedBox(height: AppDimensions.paddingM),
+                    _buildSectionHeader('Company Information'),
+                    const SizedBox(height: 12),
                     _buildCompanyInfoSection(),
-                    const SizedBox(height: AppDimensions.paddingL),
+                    const SizedBox(height: 24),
 
                     // Owner Information Section
-                    _buildSectionTitle('Owner Information'),
-                    const SizedBox(height: AppDimensions.paddingM),
+                    _buildSectionHeader('Owner Information'),
+                    const SizedBox(height: 12),
                     _buildOwnerInfoSection(),
-                    const SizedBox(height: AppDimensions.paddingL),
+                    const SizedBox(height: 24),
 
                     // Login Credentials Section (only for new company)
                     if (!_isEditMode) ...[
-                      _buildSectionTitle('Login Credentials'),
-                      const SizedBox(height: AppDimensions.paddingM),
+                      _buildSectionHeader('Login Credentials'),
+                      const SizedBox(height: 12),
                       _buildCredentialsSection(),
-                      const SizedBox(height: AppDimensions.paddingL),
+                      const SizedBox(height: 24),
                     ],
 
                     // Additional Information Section
-                    _buildSectionTitle('Additional Information'),
-                    const SizedBox(height: AppDimensions.paddingM),
+                    _buildSectionHeader('Additional Information'),
+                    const SizedBox(height: 12),
                     _buildAdditionalInfoSection(),
-                    const SizedBox(height: AppDimensions.paddingXL),
+                    const SizedBox(height: 32),
 
                     // Submit Button
                     _buildSubmitButton(),
-                    const SizedBox(height: AppDimensions.paddingXL),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -173,51 +182,66 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
   Widget _buildHeaderCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppDimensions.paddingL),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppColors.adminPrimary,
-            AppColors.adminPrimary.withAlpha(204),
+            AppColors.primaryDark,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.adminPrimary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(51),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1.5,
+              ),
             ),
             child: Icon(
-              _isEditMode ? Icons.edit_note : Icons.add_business,
+              _isEditMode ? Icons.edit_document : Icons.add_business_rounded,
               color: Colors.white,
-              size: 32,
+              size: 30,
             ),
           ),
-          const SizedBox(width: AppDimensions.paddingM),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _isEditMode ? 'Edit Company Details' : 'Register New Company',
-                  style: AppTextStyles.titleLarge.copyWith(
+                  _isEditMode ? 'Update Company' : 'Register New Company',
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _isEditMode
-                      ? 'Update company information below'
-                      : 'Fill in the details to create a new rice mill company',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.white.withAlpha(229),
+                      ? 'Modify existing company records'
+                      : 'Create a new rice mill profile',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -228,27 +252,40 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.titleMedium.copyWith(
-        fontWeight: FontWeight.bold,
-        color: AppColors.textPrimary,
+  Widget _buildSectionChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8E8EE),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF444466),
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+        ),
       ),
     );
   }
 
+  Widget _buildSectionHeader(String label) {
+    return _buildSectionChip(label);
+  }
+
   Widget _buildCompanyInfoSection() {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -257,18 +294,18 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
           CustomTextField(
             controller: _nameController,
             label: 'Company Name',
-            hint: 'Enter rice mill company name',
-            prefixIcon: Icons.business,
+            hint: 'Enter company name',
+            prefixIcon: Icons.business_rounded,
             validator: (value) =>
                 value?.isEmpty ?? true ? 'Company name is required' : null,
             textCapitalization: TextCapitalization.words,
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _registrationNumberController,
             label: 'Registration Number',
-            hint: 'Business registration number (optional)',
-            prefixIcon: Icons.numbers,
+            hint: 'Enter registration number (optional)',
+            prefixIcon: Icons.badge_outlined,
           ),
         ],
       ),
@@ -277,15 +314,15 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
 
   Widget _buildOwnerInfoSection() {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -293,28 +330,27 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
         children: [
           CustomTextField(
             controller: _ownerNameController,
-            label: 'Owner Name',
-            hint: 'Enter owner full name',
-            prefixIcon: Icons.person,
+            label: 'Owner Full Name',
+            hint: 'Enter owner name',
+            prefixIcon: Icons.person_outline_rounded,
             validator: (value) =>
                 value?.isEmpty ?? true ? 'Owner name is required' : null,
             textCapitalization: TextCapitalization.words,
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _emailController,
             label: 'Email Address',
-            hint: 'Enter email address',
-            prefixIcon: Icons.email,
+            hint: 'Enter email (optional)',
+            prefixIcon: Icons.alternate_email_rounded,
             keyboardType: TextInputType.emailAddress,
-            validator: null,
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _phoneController,
             label: 'Phone Number',
-            hint: 'Enter phone number',
-            prefixIcon: Icons.phone,
+            hint: 'Enter contact number',
+            prefixIcon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -330,52 +366,58 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
 
   Widget _buildCredentialsSection() {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Info Banner
           Container(
-            padding: const EdgeInsets.all(AppDimensions.paddingS),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withAlpha(26),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusS),
-              border: Border.all(color: Colors.blue.withAlpha(77)),
+              color: Colors.blue.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.withOpacity(0.1)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, size: 20, color: Colors.blue),
-                const SizedBox(width: 8),
+                const Icon(Icons.info_rounded, size: 20, color: Colors.blue),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'These credentials will be used by the company admin to login',
-                    style: AppTextStyles.bodySmall.copyWith(color: Colors.blue),
+                    'Company admin will use these to login.',
+                    style: TextStyle(
+                        color: Colors.blue.shade800,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _passwordController,
-            label: 'Password',
-            hint: 'Enter password',
-            prefixIcon: Icons.lock,
+            label: 'New Password',
+            hint: 'Min. 6 characters',
+            prefixIcon: Icons.lock_outline_rounded,
             obscureText: _obscurePassword,
             suffix: IconButton(
               icon: Icon(
-                  _obscurePassword ? Icons.visibility : Icons.visibility_off),
+                _obscurePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 20,
+              ),
               onPressed: () =>
                   setState(() => _obscurePassword = !_obscurePassword),
             ),
@@ -383,17 +425,20 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
                 ? 'Password must be at least 6 characters'
                 : null,
           ),
-          const SizedBox(height: AppDimensions.paddingM),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _confirmPasswordController,
             label: 'Confirm Password',
             hint: 'Re-enter password',
-            prefixIcon: Icons.lock_outline,
+            prefixIcon: Icons.lock_clock_outlined,
             obscureText: _obscureConfirmPassword,
             suffix: IconButton(
-              icon: Icon(_obscureConfirmPassword
-                  ? Icons.visibility
-                  : Icons.visibility_off),
+              icon: Icon(
+                _obscureConfirmPassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 20,
+              ),
               onPressed: () => setState(
                   () => _obscureConfirmPassword = !_obscureConfirmPassword),
             ),
@@ -411,26 +456,61 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
 
   Widget _buildAdditionalInfoSection() {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(13),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
+          // District Dropdown styled
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9F9FB),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE8E8EE)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButtonFormField<String>(
+                value: _selectedDistrict,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'District',
+                  labelStyle: TextStyle(
+                      color: Color(0xFF444466),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600),
+                  prefixIcon: Icon(Icons.location_on_outlined, size: 20),
+                  border: InputBorder.none,
+                ),
+                items: SriLankanDistricts.sortedDistricts.map((district) {
+                  return DropdownMenuItem(
+                    value: district,
+                    child: Text(district, style: const TextStyle(fontSize: 14)),
+                  );
+                }).toList(),
+                onChanged: (value) => setState(() => _selectedDistrict = value),
+                validator: (value) => value == null || value.isEmpty
+                    ? 'District is required'
+                    : null,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           CustomTextField(
             controller: _addressController,
-            label: 'Address',
-            hint: 'Enter company address (optional)',
-            prefixIcon: Icons.location_on,
-            maxLines: 3,
+            label: 'Full Address',
+            hint: 'Enter company location address',
+            prefixIcon: Icons.map_outlined,
+            maxLines: 2,
             textCapitalization: TextCapitalization.sentences,
           ),
         ],
@@ -439,31 +519,43 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.adminPrimary.withOpacity(0.25),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.adminPrimary,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+            borderRadius: BorderRadius.circular(16),
           ),
-          elevation: 2,
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _isEditMode ? Icons.save : Icons.add_business,
-              color: Colors.white,
+              _isEditMode ? Icons.check_circle_rounded : Icons.rocket_launch,
+              size: 20,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Text(
-              _isEditMode ? 'Update Company' : 'Create Company',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: Colors.white,
+              _isEditMode ? 'Save Changes' : 'Register Company',
+              style: const TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -496,6 +588,7 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
               _registrationNumberController.text.trim().isNotEmpty
                   ? _registrationNumberController.text.trim()
                   : null,
+          district: _selectedDistrict,
         );
   }
 
@@ -511,6 +604,7 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
       registrationNumber: _registrationNumberController.text.trim().isNotEmpty
           ? _registrationNumberController.text.trim()
           : null,
+      district: _selectedDistrict,
     );
 
     context.read<AdminCubit>().updateCompany(updatedCompany);
@@ -523,93 +617,135 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+          borderRadius: BorderRadius.circular(24),
         ),
-        title: const Row(
+        contentPadding: EdgeInsets.zero,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, color: AppColors.success),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Company Created Successfully',
-                overflow: TextOverflow.visible,
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check_circle_rounded, size: 32, color: AppColors.success),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Company Created Successfully',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Please share these login credentials with the company admin:',
-                style: AppTextStyles.bodyMedium,
-              ),
-              const SizedBox(height: AppDimensions.paddingM),
 
-              // Credentials Card
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.paddingM),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  children: [
-                    _buildCredentialRow('Name', credentials.name),
-                    const Divider(height: 16),
-                    _buildCredentialRow('Email', credentials.email),
-                    const Divider(height: 16),
-                    _buildCredentialRow('Phone', credentials.phone),
-                    const Divider(height: 16),
-                    _buildCredentialRow('Password', credentials.password),
-                    const Divider(height: 16),
-                    _buildCredentialRow('Role', credentials.role),
-                  ],
-                ),
-              ),
+            // Body
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Please share these login credentials with the company admin:',
+                    style: TextStyle(color: Color(0xFF444466), fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: AppDimensions.paddingM),
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.paddingS),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withAlpha(26),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusS),
-                  border: Border.all(color: Colors.orange.withAlpha(77)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning_amber,
-                        size: 20, color: Colors.orange),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Please save these credentials securely. They will not be shown again.',
-                        style: AppTextStyles.bodySmall
-                            .copyWith(color: Colors.orange.shade800),
-                      ),
+                  // Credentials Card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE8E8EE)),
                     ),
-                  ],
-                ),
+                    child: Column(
+                      children: [
+                        _buildCredentialRow('Name', credentials.name),
+                        const Divider(height: 16, color: Color(0xFFE8E8EE)),
+                        _buildCredentialRow('Email', credentials.email),
+                        const Divider(height: 16, color: Color(0xFFE8E8EE)),
+                        _buildCredentialRow('Phone', credentials.phone),
+                        const Divider(height: 16, color: Color(0xFFE8E8EE)),
+                        _buildCredentialRow('Password', credentials.password),
+                        const Divider(height: 16, color: Color(0xFFE8E8EE)),
+                        _buildCredentialRow('Role', credentials.role),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.15)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, size: 20, color: Colors.orange),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Please save these credentials securely. They will not be shown again.',
+                            style: TextStyle(color: Colors.orange.shade800, fontSize: 11),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              context.read<AdminCubit>().clearMessages();
-              context.pop();
-            },
-            child: const Text('Done'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Copy all credentials to clipboard
-              final credentialsText = '''
+            ),
+
+            // Actions
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        context.read<AdminCubit>().clearMessages();
+                        context.pop();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Done'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        // Copy all credentials to clipboard
+                        final credentialsText = '''
 Company Admin Credentials:
 
 Name: ${credentials.name}
@@ -620,21 +756,29 @@ Role: ${credentials.role}
 
 Please share these credentials with the company admin securely.
 ''';
-              Clipboard.setData(ClipboardData(text: credentialsText));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Credentials copied to clipboard'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            },
-            icon: const Icon(Icons.copy),
-            label: const Text('Copy All'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+                        Clipboard.setData(ClipboardData(text: credentialsText));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Credentials copied to clipboard'),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.copy_rounded, size: 18),
+                      label: const Text('Copy', style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.adminPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

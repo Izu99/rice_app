@@ -7,6 +7,7 @@ import '../core/theme/app_colors.dart';
 // Features - Auth
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/register_screen.dart';
 
 // Features - Home
 import '../features/home/presentation/screens/home_screen.dart';
@@ -47,10 +48,18 @@ import '../features/expenses/presentation/screens/expense_add_edit_screen.dart';
 // Features - Profile
 import '../features/profile/presentation/screens/profile_screen.dart';
 
+// Features - Price Management
+import '../features/price_management/presentation/screens/add_price_screen.dart';
+import '../features/price_management/presentation/screens/view_prices_by_district_screen.dart';
+import '../features/price_management/presentation/screens/prices_in_district_screen.dart';
+
 // Features - Super Admin
 import '../features/super_admin/presentation/screens/admin_dashboard_screen.dart';
 import '../features/super_admin/presentation/screens/companies_screen.dart';
 import '../features/super_admin/presentation/screens/add_company_screen.dart';
+import '../features/super_admin/presentation/screens/admin_price_list_screen.dart';
+import '../features/super_admin/presentation/screens/admin_reports_screen.dart';
+import '../features/super_admin/presentation/screens/admin_settings_screen.dart';
 
 // Routes
 import 'route_names.dart';
@@ -101,6 +110,11 @@ class AppRouter {
         path: RouteNames.login,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.register,
+        name: 'register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       /*
       GoRoute(
@@ -370,12 +384,62 @@ class AppRouter {
         ],
       ),
 
+      // ==================== Admin Reports Route ====================
+      GoRoute(
+        path: RouteNames.adminReports,
+        name: 'adminReports',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (context, state) => adminRedirect(context, state, _authGuard),
+        builder: (context, state) => const AdminReportsScreen(),
+      ),
+
+      // ==================== Admin Settings Route ====================
+      GoRoute(
+        path: RouteNames.adminSettings,
+        name: 'adminSettings',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (context, state) => adminRedirect(context, state, _authGuard),
+        builder: (context, state) => const AdminSettingsScreen(),
+      ),
+
+      // ==================== Admin Price List Route ====================
+      GoRoute(
+        path: '/admin/prices',
+        name: 'adminPriceList',
+        parentNavigatorKey: _rootNavigatorKey,
+        redirect: (context, state) => adminRedirect(context, state, _authGuard),
+        builder: (context, state) => const AdminPriceListScreen(),
+      ),
+
       // ==================== Settings Route ====================
       GoRoute(
         path: RouteNames.settings,
         name: 'settings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
+      ),
+
+      // ==================== Price Management Routes ====================
+      GoRoute(
+        path: '/prices',
+        name: 'prices',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ViewPricesByDistrictScreen(),
+      ),
+      GoRoute(
+        path: '/prices/add',
+        name: 'addPrice',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddPriceScreen(),
+      ),
+      GoRoute(
+        path: '/prices/district/:district',
+        name: 'pricesInDistrict',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final district = state.pathParameters['district'] ?? '';
+          return PricesInDistrictScreen(district: district);
+        },
       ),
     ],
   );

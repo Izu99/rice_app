@@ -137,10 +137,10 @@ class AppColors {
   // ==================== TEXT COLORS ====================
 
   /// Primary text color
-  static const Color textPrimary = Color(0xFF212121);
+  static const Color textPrimary = Color(0xFF1B5E20);
 
   /// Secondary text color
-  static const Color textSecondary = Color(0xFF757575);
+  static const Color textSecondary = Color(0xFF66BB6A);
 
   /// Tertiary/Hint text color
   static const Color textHint = Color(0xFFBDBDBD);
@@ -327,14 +327,14 @@ class AppColors {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryLight, primary],
+    colors: [Color(0xFF43A047), Color(0xFF1B5E20)],
   );
 
   /// Primary vertical gradient
   static const LinearGradient primaryVerticalGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [primaryLight, primary],
+    colors: [Color(0xFF43A047), Color(0xFF1B5E20)],
   );
 
   /// Secondary gradient

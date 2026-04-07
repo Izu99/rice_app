@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         errorBuilder: (context, error, stackTrace) => 
                           const Icon(Icons.account_circle_outlined, color: AppColors.textHint, size: 24),
                       ),
-                      label: const Text('Google සමඟින් ඇතුල් වන්න'),
+                      label: Text(SiStrings.signInWithGoogle),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: const BorderSide(color: AppColors.divider),
@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'හෝ',
+                            SiStrings.or,
                             style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
                           ),
                         ),
@@ -345,6 +345,28 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildFooter() {
     return Column(
       children: [
+        // Register link
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              SiStrings.registerPrompt,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+            ),
+            TextButton(
+              onPressed: () => context.go(RouteNames.register),
+              child: Text(
+                SiStrings.registerNow,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
         // Version info
         Text(
           '${SiStrings.version} 1.0.0',

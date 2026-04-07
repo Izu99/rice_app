@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../data/models/stock_item_model.dart';
@@ -83,7 +84,7 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
         return LoadingOverlay(
           isLoading: state.status == SellStatus.processing,
           child: Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: const Color(0xFFF4F6FA),
             appBar: _buildAppBar(state),
             body: _buildBody(state),
             bottomNavigationBar: state.currentStep == SellStep.review
@@ -96,26 +97,18 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
   }
 
   PreferredSizeWidget _buildAppBar(SellState state) {
-    return AppBar(
-      backgroundColor: AppColors.cardSell,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.white),
-        onPressed: () {
-          if (state.currentStep == SellStep.review) {
-            context.read<SellCubit>().goBackToItems();
-          } else {
-            context.goNamed('dashboard');
-          }
-        },
-      ),
-      title: Text(
-      state.currentStep == SellStep.review
+    return HAppBar(
+      title: 'Sell Rice',
+      subtitle: state.currentStep == SellStep.review
           ? SiStrings.reviewSale
           : SiStrings.sellRice,
-      style: AppTextStyles.titleMedium
-          .copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
-    ),
+      onBack: () {
+        if (state.currentStep == SellStep.review) {
+          context.read<SellCubit>().goBackToItems();
+        } else {
+          context.goNamed('dashboard');
+        }
+      },
     );
   }
 

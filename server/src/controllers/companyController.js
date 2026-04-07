@@ -56,7 +56,7 @@ exports.updateProfile = async (req, res) => {
     }
 
     const allowedUpdates = [
-      'name', 'phone', 'address', 'registrationNumber'
+      'name', 'phone', 'address', 'district', 'registrationNumber'
     ]
 
     const updates = {}

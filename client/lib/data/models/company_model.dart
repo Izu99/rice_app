@@ -41,6 +41,7 @@ class CompanyModel extends Equatable {
   final String? registrationNumber;
   final String? taxNumber;
   final String address;
+  final String? district;
   final String phone;
   final String? secondaryPhone;
   final String? email;
@@ -68,6 +69,7 @@ class CompanyModel extends Equatable {
     this.registrationNumber,
     this.taxNumber,
     required this.address,
+    this.district,
     required this.phone,
     this.secondaryPhone,
     this.email,
@@ -98,6 +100,7 @@ class CompanyModel extends Equatable {
       registrationNumber: json['registration_number']?.toString(),
       taxNumber: json['tax_number']?.toString(),
       address: json['address']?.toString() ?? '',
+      district: json['district']?.toString() ?? json['District']?.toString(),
       phone: json['phone']?.toString() ?? '',
       secondaryPhone: json['secondary_phone']?.toString(),
       email: json['email']?.toString(),
@@ -111,12 +114,12 @@ class CompanyModel extends Equatable {
           json['is_email_verified'] == true || json['is_email_verified'] == 1,
       maxUsers: _parseInt(json['max_users'], defaultValue: 5),
       currentUsers: _parseInt(json['current_users'], defaultValue: 1),
-      ownerId: json['owner_id']?.toString(),
-      ownerName: json['owner_name']?.toString(),
+      ownerId: json['ownerId']?.toString() ?? json['owner_id']?.toString(),
+      ownerName: json['ownerName']?.toString() ?? json['owner_name']?.toString(),
       settings: json['settings'] is Map
           ? Map<String, dynamic>.from(json['settings'])
           : null,
-      createdAt: _parseDateTime(json['created_at']) ?? DateTime.now(),
+      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ?? DateTime.now(),
       updatedAt: _parseDateTime(json['updated_at']) ?? DateTime.now(),
       isSynced: json['is_synced'] == true || json['is_synced'] == 1,
       syncedAt: _parseDateTime(json['synced_at']),
@@ -132,6 +135,7 @@ class CompanyModel extends Equatable {
       'registration_number': registrationNumber,
       'tax_number': taxNumber,
       'address': address,
+      'district': district,
       'phone': phone,
       'secondary_phone': secondaryPhone,
       'email': email,
@@ -156,16 +160,27 @@ class CompanyModel extends Equatable {
 
   /// Convert to JSON for API
   Map<String, dynamic> toJsonForApi() {
-    return {
+    final data = <String, dynamic>{
       'name': name,
-      'registration_number': registrationNumber,
-      'tax_number': taxNumber,
-      'address': address,
-      'phone': phone,
-      'secondary_phone': secondaryPhone,
+      'ownerName': ownerName,
       'email': email,
+      'phone': phone,
+      'address': address,
+      'district': district,
+      'tax_number': taxNumber,
       'website': website,
+      'logoUrl': logoUrl,
+      'status': status.name,
+      'maxUsers': maxUsers,
+      'currentUsers': currentUsers,
+      'settings': settings,
     };
+
+    if (registrationNumber != null && registrationNumber!.isNotEmpty) {
+      data['registrationNumber'] = registrationNumber;
+    }
+
+    return data;
   }
 
   /// Copy with new values
@@ -176,6 +191,7 @@ class CompanyModel extends Equatable {
     String? registrationNumber,
     String? taxNumber,
     String? address,
+    String? district,
     String? phone,
     String? secondaryPhone,
     String? email,
@@ -203,6 +219,7 @@ class CompanyModel extends Equatable {
       registrationNumber: registrationNumber ?? this.registrationNumber,
       taxNumber: taxNumber ?? this.taxNumber,
       address: address ?? this.address,
+      district: district ?? this.district,
       phone: phone ?? this.phone,
       secondaryPhone: secondaryPhone ?? this.secondaryPhone,
       email: email ?? this.email,
@@ -315,10 +332,19 @@ class CompanyModel extends Equatable {
         id,
         serverId,
         name,
+        registrationNumber,
+        address,
+        district,
         phone,
+        email,
+        ownerName,
+        status,
         isActive,
         plan,
+        maxUsers,
+        currentUsers,
         isSynced,
+        updatedAt,
       ];
 
   @override

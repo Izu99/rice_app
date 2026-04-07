@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../injection_container.dart';
 import '../cubit/reports_cubit.dart';
@@ -61,10 +62,10 @@ class _ReportsScreenState extends State<ReportsScreen>
           isLoading: _isLoadingRange,
           child: Scaffold(
             backgroundColor: AppColors.background,
-            appBar: AppBar(
-              title: Text(SiStrings.reports),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
+            appBar: HAppBar(
+              title: 'Reports',
+              subtitle: SiStrings.reports,
+              showBack: false,
             ),
             body: RefreshIndicator(
               onRefresh: () =>

@@ -3,12 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../domain/entities/customer_entity.dart';
@@ -41,7 +37,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
   final _secondaryPhoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
-  final _nicController = TextEditingController();
   final _notesController = TextEditingController();
 
   // Focus Nodes
@@ -93,7 +88,6 @@ _loadCustomerData();
       _secondaryPhoneController.text = customer.secondaryPhone ?? '';
       _addressController.text = customer.address ?? '';
       _cityController.text = customer.city ?? '';
-      _nicController.text = customer.nic ?? '';
       _notesController.text = customer.notes ?? '';
       _selectedType = customer.customerType;
     }
@@ -108,7 +102,6 @@ _loadCustomerData();
     _secondaryPhoneController.dispose();
     _addressController.dispose();
     _cityController.dispose();
-    _nicController.dispose();
     _notesController.dispose();
     _phoneFocusNode.dispose();
     super.dispose();
@@ -284,7 +277,6 @@ _loadCustomerData();
       _secondaryPhoneController.text = customer.secondaryPhone ?? '';
       _addressController.text = customer.address ?? '';
       _cityController.text = customer.city ?? '';
-      _nicController.text = customer.nic ?? '';
       _notesController.text = customer.notes ?? '';
     });
   }
@@ -319,7 +311,7 @@ _loadCustomerData();
           email: null,
           address: _addressController.text.trim(),
           city: _cityController.text.trim(),
-          nic: _nicController.text.trim(),
+          nic: null,
           notes: _notesController.text.trim(),
           companyId: companyId,
           customerType: _selectedType,
@@ -332,7 +324,7 @@ _loadCustomerData();
           email: null,
           address: _addressController.text.trim(),
           city: _cityController.text.trim(),
-          nic: _nicController.text.trim(),
+          nic: null,
           notes: _notesController.text.trim(),
           companyId: companyId,
           customerType: _selectedType,
@@ -373,31 +365,30 @@ _loadCustomerData();
         return LoadingOverlay(
           isLoading: state.formStatus == CustomerFormStatus.submitting,
           child: Scaffold(
-            appBar: AppBar(
-              title: Text(_isEditing ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම' : 'නව ගනුදෙනුකරු'),
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.white,
-              elevation: 0,
+            backgroundColor: const Color(0xFFF4F6FA),
+            appBar: HAppBar(
+              title: _isEditing ? 'Edit Customer' : 'New Customer',
+              subtitle: _isEditing ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම' : 'නව ගනුදෙනුකරු',
             ),
             body: Column(
               children: [
                 Container(
                   width: double.infinity,
-                  color: AppColors.primary,
-                  padding: const EdgeInsets.only(bottom: 24),
+                  color: Colors.white,
+                  padding: const EdgeInsets.only(bottom: 24, top: 12),
                   child: Column(
                     children: [
                       CircleAvatar(
                         radius: 40,
-                        backgroundColor: Colors.white24,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
                         child: Icon(Icons.person_add_alt_1,
-                            size: 40, color: Colors.white),
+                            size: 40, color: AppColors.primary),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         _isEditing ? 'තොරතුරු යාවත්කාලීන කිරීම' : 'නව ගිණුමක් සාදන්න',
                         style: AppTextStyles.bodyMedium
-                            .copyWith(color: Colors.white70),
+                            .copyWith(color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -405,7 +396,7 @@ _loadCustomerData();
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: const Color(0xFFF4F6FA),
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(30)),
                     ),
@@ -573,13 +564,6 @@ _loadCustomerData();
                                   (value == null || value.trim().isEmpty)
                                       ? 'කරුණාකර නගරය ඇතුළත් කරන්න'
                                       : null,
-                            ),
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _nicController,
-                              decoration: _inputDecoration(
-                                  'හැඳුනුම්පත් අංකය', Icons.badge_outlined),
-                              textCapitalization: TextCapitalization.characters,
                             ),
                             const SizedBox(height: 16),
                             TextFormField(

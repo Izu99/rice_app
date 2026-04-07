@@ -117,20 +117,29 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Widget _buildAppBar(ProfileState state) {
     return SliverAppBar(
-      expandedHeight: 60,
+      expandedHeight: 0,
       pinned: true,
-      backgroundColor: AppColors.primary,
-      foregroundColor: AppColors.white,
-      title: Text(SiStrings.profile),
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFF1C1C2E),
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.black12,
+      scrolledUnderElevation: 1,
+      title: const Text(
+        'Profile',
+        style: TextStyle(
+          color: Color(0xFF1C1C2E),
+          fontWeight: FontWeight.w800,
+          fontSize: 17,
+        ),
+      ),
+      centerTitle: false,
       actions: [
         if (state.pendingSyncCount > 0)
           Badge(
             label: Text(state.pendingSyncCount.toString()),
             child: IconButton(
-              icon: const Icon(Icons.sync),
-              onPressed: () {
-                // TODO: Sync data
-              },
+              icon: const Icon(Icons.sync, color: Color(0xFF1C1C2E)),
+              onPressed: () {},
             ),
           ),
       ],
@@ -499,44 +508,108 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ගිණුම යාවත්කාලීන කිරීම'), // Edit Profile
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'නම', // Name
-                prefixIcon: Icon(Icons.person),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.person_outline, size: 32, color: AppColors.primary),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'විද්‍යුත් තැපෑල (Email)', // Email
-                prefixIcon: Icon(Icons.email),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'ගිණුම යාවත්කාලීන කිරීම',
+                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      labelText: 'නම',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'විද්‍යුත් තැපෑල (Email)',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.emailAddress,
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(top: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(SiStrings.cancel),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<ProfileCubit>().updateProfile(
+                              name: nameController.text,
+                              email: emailController.text,
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(SiStrings.save, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(SiStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<ProfileCubit>().updateProfile(
-                    name: nameController.text,
-                    email: emailController.text,
-                  );
-            },
-            child: Text(SiStrings.save),
-          ),
-        ],
       ),
     );
   }
@@ -561,78 +634,140 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
           builder: (context, state) {
             return AlertDialog(
-              title: Text(SiStrings.resetPassword),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              contentPadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: currentController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'වත්මන් මුරපදය', // Current Password
-                      prefixIcon: Icon(Icons.lock_outline),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: newController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'නව මුරපදය', // New Password
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: confirmController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'මුරපදය නැවත ඇතුළත් කරන්න', // Confirm Password
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                  ),
-                  if (state.errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Text(
-                        state.errorMessage!,
-                        style: const TextStyle(color: AppColors.error),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.lock_outline, size: 32, color: AppColors.primary),
                       ),
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          SiStrings.resetPassword,
+                          style: const TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: currentController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'වත්මන් මුරපදය',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: newController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'නව මුරපදය',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: confirmController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'මුරපදය නැවත ඇතුළත් කරන්න',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          ),
+                        ),
+                        if (state.errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Text(
+                              state.errorMessage!,
+                              style: const TextStyle(color: AppColors.error, fontSize: 12),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(top: 20),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF444466),
+                              side: const BorderSide(color: Color(0xFFE8E8EE)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text(SiStrings.cancel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: state.isChangingPassword
+                                ? null
+                                : () {
+                                    if (newController.text != confirmController.text) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('මුරපද එකිනෙකට නොගැලපේ'),
+                                          backgroundColor: AppColors.error,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    context.read<ProfileCubit>().changePassword(
+                                          currentPassword: currentController.text,
+                                          newPassword: newController.text,
+                                        );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                            child: state.isChangingPassword
+                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : const Text('වෙනස් කරන්න', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(SiStrings.cancel),
-                ),
-                ElevatedButton(
-                  onPressed: state.isChangingPassword
-                      ? null
-                      : () {
-                          if (newController.text != confirmController.text) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('මුරපද එකිනෙකට නොගැලපේ'), // Passwords do not match
-                                backgroundColor: AppColors.error,
-                              ),
-                            );
-                            return;
-                          }
-                          context.read<ProfileCubit>().changePassword(
-                                currentPassword: currentController.text,
-                                newPassword: newController.text,
-                              );
-                        },
-                  child: state.isChangingPassword
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('වෙනස් කරන්න'), // Change
-                ),
-              ],
             );
           },
         ),
@@ -645,62 +780,127 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     final nameController = TextEditingController(text: state.company?.name);
     final phoneController = TextEditingController(text: state.company?.phone);
-    final addressController =
-        TextEditingController(text: state.company?.address);
+    final addressController = TextEditingController(text: state.company?.address);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('ආයතනයේ විස්තර'), // Company Info
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'ආයතනයේ නම', // Company Name
-                  prefixIcon: Icon(Icons.business),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.business_outlined, size: 32, color: AppColors.primary),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'දුරකථන අංකය', // Phone
-                  prefixIcon: Icon(Icons.phone),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'ආයතනයේ විස්තර',
+                      style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: 'ආයතනයේ නම',
+                        prefixIcon: const Icon(Icons.business_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'දුරකථන අංකය',
+                        prefixIcon: const Icon(Icons.phone_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: addressController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'ලිපිනය',
+                        prefixIcon: const Icon(Icons.location_on_outlined),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                    ),
+                  ],
                 ),
-                keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: addressController,
-                decoration: const InputDecoration(
-                  labelText: 'ලිපිනය', // Address
-                  prefixIcon: Icon(Icons.location_on),
-                ),
-                maxLines: 2,
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(top: 20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF4F6FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
-            ],
-          ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(SiStrings.cancel),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.read<ProfileCubit>().updateCompany(
+                              name: nameController.text,
+                              phone: phoneController.text,
+                              address: addressController.text,
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(SiStrings.save, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(SiStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<ProfileCubit>().updateCompany(
-                    name: nameController.text,
-                    phone: phoneController.text,
-                    address: addressController.text,
-                  );
-            },
-            child: Text(SiStrings.save),
-          ),
-        ],
       ),
     );
   }
@@ -709,26 +909,78 @@ class _ProfileScreenState extends State<ProfileScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('භාෂාව තෝරන්න'), // Select Language
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Text('🇺🇸', style: TextStyle(fontSize: 24)),
-              title: const Text('English'),
-              onTap: () {
-                Navigator.pop(context);
-                context.read<ProfileCubit>().changeLanguage('en');
-              },
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.language_outlined, size: 32, color: AppColors.primary),
+                ),
+              ),
             ),
-            ListTile(
-              leading: const Text('🇱🇰', style: TextStyle(fontSize: 24)),
-              title: const Text('සිංහල'),
-              onTap: () {
-                Navigator.pop(context);
-                context.read<ProfileCubit>().changeLanguage('si');
-              },
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'භාෂාව තෝරන්න',
+                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLanguageTile('🇺🇸', 'English', 'en'),
+                  const SizedBox(height: 8),
+                  _buildLanguageTile('🇱🇰', 'සිංහල', 'si'),
+                ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageTile(String flag, String label, String code) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        context.read<ProfileCubit>().changeLanguage(code);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F6FA),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 14),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Color(0xFF1C1C2E),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: Color(0xFFB0B0C0), size: 20),
           ],
         ),
       ),

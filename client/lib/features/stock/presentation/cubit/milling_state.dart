@@ -38,6 +38,8 @@ class MillingState extends Equatable {
     this.millingHistory = const [],
   });
 
+  factory MillingState.initial() => const MillingState();
+
   // Calculate expected outputs based on input
   double get expectedRiceKg => inputPaddyKg * (millingPercentage / 100);
   double get expectedBrokenRiceKg => inputPaddyKg * 0.08; // 8% broken rice

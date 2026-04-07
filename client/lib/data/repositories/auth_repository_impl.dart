@@ -3,6 +3,7 @@ import '../../core/constants/enums.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/errors/failures.dart';
 import '../../core/network/network_info.dart';
+import '../../core/utils/logger_utils.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../core/security/token_storage.dart';
@@ -40,8 +41,7 @@ class AuthRepositoryImpl implements AuthRepository {
         await tokenStorage.saveCompany(authResponse.company!);
       }
 
-      print(
-          '📦 [AuthRepo] Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
+      Log.auth('Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
       return Right(userEntity);
     } catch (e) {
       if (e is AuthException) {
@@ -126,7 +126,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     await tokenStorage.clearAll();
     if (await networkInfo.isConnected) {
-      remoteDataSource.logout().catchError((e) {});
+      remoteDataSource.logout().catchError((e) => false);
     }
     return const Right(null);
   }
@@ -326,7 +326,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final remoteUser = await remoteDataSource.getCurrentUser();
       final companyId = remoteUser.companyId;
-      print('🔍 [AuthRepo] getCompany: companyId="$companyId"');
+      Log.i('getCompany: companyId="$companyId"', tag: 'AUTH_REPO');
       if (companyId.isNotEmpty) {
         final company = await remoteDataSource.getCompanyDetails(companyId);
         await tokenStorage.saveCompany(company);
@@ -390,5 +390,45 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> saveLastSyncTime(DateTime dateTime) async {
     // Local storage
     return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, CompanyModel>> publicRegisterCompany({
+    required String name,
+    required String address,
+    required String phone,
+    required String ownerName,
+    required String ownerPhone,
+    required String ownerPassword,
+    String? email,
+    String? registrationNumber,
+    String? district,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final company = await remoteDataSource.publicRegisterCompany(
+        name: name,
+        address: address,
+        phone: phone,
+        ownerName: ownerName,
+        ownerPhone: ownerPhone,
+        ownerPassword: ownerPassword,
+        email: email,
+        registrationNumber: registrationNumber,
+        district: district,
+      );
+      return Right(company);
+    } catch (e) {
+      if (e is ValidationException) {
+        return Left(ValidationFailure(message: e.message));
+      }
+      if (e is AuthException) {
+        return Left(AuthFailure(message: e.message, code: e.statusCode));
+      }
+      if (e is ServerException) return Left(ServerFailure(message: e.message));
+      return Left(UnknownFailure(message: e.toString()));
+    }
   }
 }

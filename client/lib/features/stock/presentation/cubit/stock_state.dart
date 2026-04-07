@@ -35,6 +35,8 @@ class StockState extends Equatable {
     this.isSynced = true,
   });
 
+  factory StockState.initial() => const StockState();
+
   StockState copyWith({
     StockStatus? status,
     StockAddStatus? stockAddStatus,

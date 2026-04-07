@@ -159,4 +159,28 @@ abstract class AuthRepository {
   Future<Either<Failure, CompanyModel>> updateCompany({
     required CompanyModel company,
   });
+
+  /// Register a new company (Public)
+  ///
+  /// Parameters:
+  /// - [name]: Company name
+  /// - [address]: Company address
+  /// - [phone]: Company phone number
+  /// - [ownerName]: Owner's full name
+  /// - [ownerPhone]: Owner's phone number
+  /// - [ownerPassword]: Owner's password
+  /// - [email]: Company email (optional)
+  /// - [registrationNumber]: Registration number (optional)
+  /// - [district]: District (optional)
+  Future<Either<Failure, CompanyModel>> publicRegisterCompany({
+    required String name,
+    required String address,
+    required String phone,
+    required String ownerName,
+    required String ownerPhone,
+    required String ownerPassword,
+    String? email,
+    String? registrationNumber,
+    String? district,
+  });
 }

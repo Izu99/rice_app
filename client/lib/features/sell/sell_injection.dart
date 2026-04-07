@@ -6,6 +6,7 @@ import '../../data/datasources/remote/transaction_remote_ds.dart';
 import '../../data/repositories/customer_repository_impl.dart';
 import '../../data/repositories/stock_repository_impl.dart';
 import '../../data/repositories/transaction_repository_impl.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../domain/repositories/transaction_repository.dart';
@@ -62,6 +63,7 @@ class SellInjection {
         customerRepository: _sl<CustomerRepository>(),
         stockRepository: _sl<StockRepository>(),
         transactionRepository: _sl<TransactionRepository>(),
+        authRepository: _sl<AuthRepository>(),
       ),
     );
   }

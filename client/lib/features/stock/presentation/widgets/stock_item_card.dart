@@ -20,95 +20,107 @@ class StockItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPaddy = item.itemType == ItemType.paddy;
-    final typeColor = isPaddy ? AppColors.paddyColor : AppColors.riceColor;
+    final typeColor = isPaddy ? AppColors.paddy : AppColors.riceAccent;
 
-    return Card(
-      elevation: 2,
-      shadowColor: typeColor.withOpacity(0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        side: BorderSide(color: typeColor.withOpacity(0.2)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFF1F1F1)),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.paddingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Row
-              Row(
-                children: [
-                  // Type Icon
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusS),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row
+                Row(
+                  children: [
+                    // Type Icon
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: typeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isPaddy ? Icons.grass_rounded : Icons.rice_bowl_rounded,
+                        color: typeColor,
+                        size: 24,
+                      ),
                     ),
-                    child: Icon(
-                      isPaddy ? Icons.grass : Icons.rice_bowl,
-                      color: typeColor,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: AppDimensions.paddingM),
+                    const SizedBox(width: 16),
 
-                  // Name & Type
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
+                    // Name & Type
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              color: Color(0xFF1C1C2E),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: typeColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            isPaddy ? 'Paddy' : 'Rice',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: typeColor,
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(height: 2),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: typeColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              isPaddy ? 'Paddy' : 'Rice',
+                              style: TextStyle(
+                                color: typeColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+
+                    // Sync Status
+                    if (!item.isSynced)
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // Sync Status
-                  if (!item.isSynced)
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        child: const Icon(
+                          Icons.cloud_off_rounded,
+                          color: AppColors.warning,
+                          size: 14,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.cloud_off,
-                        color: AppColors.warning,
-                        size: 16,
-                      ),
-                    ),
 
-                  // Edit Button
-                  if (onEdit != null)
-                    IconButton(
+                    // Edit Button
+                    if (onEdit != null)
+                      IconButton(
                       icon: const Icon(Icons.edit_outlined),
                       onPressed: onEdit,
                       color: AppColors.textSecondary,
@@ -212,7 +224,8 @@ class StockItemCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildDetailColumn({

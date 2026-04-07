@@ -33,11 +33,20 @@ enum PasswordResetStatus {
   failure,
 }
 
+/// Register status
+enum RegisterStatus {
+  initial,
+  loading,
+  success,
+  failure,
+}
+
 /// Auth State - Manages authentication state
 class AuthState extends Equatable {
   final AuthStatus authStatus;
   final LoginStatus loginStatus;
   final PasswordResetStatus passwordResetStatus;
+  final RegisterStatus registerStatus;
   final UserEntity? user;
   final CompanyModel? company;
   final String? token;
@@ -55,6 +64,7 @@ class AuthState extends Equatable {
     this.authStatus = AuthStatus.initial,
     this.loginStatus = LoginStatus.initial,
     this.passwordResetStatus = PasswordResetStatus.initial,
+    this.registerStatus = RegisterStatus.initial,
     this.user,
     this.company,
     this.token,
@@ -101,6 +111,7 @@ class AuthState extends Equatable {
     AuthStatus? authStatus,
     LoginStatus? loginStatus,
     PasswordResetStatus? passwordResetStatus,
+    RegisterStatus? registerStatus,
     UserEntity? user,
     CompanyModel? company,
     String? token,
@@ -120,6 +131,7 @@ class AuthState extends Equatable {
       authStatus: authStatus ?? this.authStatus,
       loginStatus: loginStatus ?? this.loginStatus,
       passwordResetStatus: passwordResetStatus ?? this.passwordResetStatus,
+      registerStatus: registerStatus ?? this.registerStatus,
       user: clearUser ? null : (user ?? this.user),
       company: clearUser ? null : (company ?? this.company),
       token: clearUser ? null : (token ?? this.token),
@@ -141,6 +153,7 @@ class AuthState extends Equatable {
         authStatus,
         loginStatus,
         passwordResetStatus,
+        registerStatus,
         user,
         company,
         token,

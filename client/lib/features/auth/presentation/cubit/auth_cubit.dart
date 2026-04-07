@@ -4,6 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../domain/repositories/auth_repository.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../injection_container.dart' as di;
+import '../../../home/presentation/cubit/dashboard_cubit.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
+import '../../../buy/presentation/cubit/buy_cubit.dart';
+import '../../../buy/presentation/cubit/customer_cubit.dart';
+import '../../../sell/presentation/cubit/sell_cubit.dart';
+import '../../../stock/presentation/cubit/stock_cubit.dart';
+import '../../../stock/presentation/cubit/milling_cubit.dart';
+import '../../../reports/presentation/cubit/reports_cubit.dart';
+import '../../../super_admin/presentation/cubit/admin_cubit.dart';
+import '../../../customers/presentation/cubit/customers_cubit.dart';
+import '../../../expenses/presentation/cubit/expenses_cubit.dart';
+import '../../../price_management/presentation/cubit/price_management_cubit.dart';
+import '../../../../core/network/api_service.dart';
+import '../../../../core/utils/logger_utils.dart';
 import 'auth_state.dart';
 
 /// Auth Cubit - Manages authentication business logic
@@ -39,18 +54,18 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void _handleGoogleAuthEvent(GoogleSignInAuthenticationEvent? event) async {
-    print('🔑 [AuthCubit] Google Auth Event: $event');
+    Log.auth('Google Auth Event: $event');
     if (event is GoogleSignInAuthenticationEventSignIn) {
       _currentGoogleUser = event.user;
       final user = event.user;
-      // If we are not currently in a loading state for login, 
+      // If we are not currently in a loading state for login,
       // this might be a background sign-in or lightweight auth
       if (state.loginStatus != LoginStatus.loading && state.authStatus != AuthStatus.authenticated) {
-        final auth = user.authentication;
+        final auth = await user.authentication;
         if (auth.idToken != null) {
           final result = await _authRepository.googleLogin(idToken: auth.idToken!);
           result.fold(
-            (failure) => print('❌ [AuthCubit] Google Auto-Login failed: ${failure.message}'),
+            (failure) => Log.e('Google Auto-Login failed: ${failure.message}', tag: 'AUTH'),
             (userEntity) {
               emit(state.copyWith(
                 authStatus: AuthStatus.authenticated,
@@ -68,7 +83,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void _handleGoogleAuthError(Object error) {
-    print('❌ [AuthCubit] Google Auth Error: $error');
+    Log.e('Google Auth Error: $error', tag: 'AUTH');
   }
 
   /// Check if user is already logged in
@@ -203,8 +218,7 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (user) async {
         // Get company
-        print(
-            '🔐 [AuthCubit] User authenticated: ${user.name}, CompanyID: ${user.companyId}');
+        Log.auth('User authenticated: ${user.name}, CompanyID: ${user.companyId}');
         final companyResult = await _authRepository.getCompany();
         final company = companyResult.fold((l) => null, (r) => r);
 
@@ -248,7 +262,7 @@ class AuthCubit extends Cubit<AuthState> {
       
       _currentGoogleUser = googleUser;
       
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
@@ -346,10 +360,13 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _googleSignIn.signOut();
     } catch (e) {
-      print('⚠️ [AuthCubit] Google Sign-Out error: $e');
+      Log.w('Google Sign-Out error: $e', tag: 'AUTH');
     }
 
     final result = await _authRepository.logout();
+
+    // Reset all session-based Cubits to clear stale data
+    _resetAllCubits();
 
     result.fold(
       (failure) {
@@ -369,6 +386,29 @@ class AuthCubit extends Cubit<AuthState> {
         ));
       },
     );
+  }
+
+  /// Reset all Cubits that might contain user-specific data
+  void _resetAllCubits() {
+    try {
+      // Clear API cache first to prevent stale role/user data on next login
+      if (di.sl.isRegistered<ApiService>()) di.sl<ApiService>().clearCache();
+
+      if (di.sl.isRegistered<DashboardCubit>()) di.sl<DashboardCubit>().reset();
+      if (di.sl.isRegistered<ProfileCubit>()) di.sl<ProfileCubit>().reset();
+      if (di.sl.isRegistered<BuyCubit>()) di.sl<BuyCubit>().reset();
+      if (di.sl.isRegistered<CustomerCubit>()) di.sl<CustomerCubit>().reset();
+      if (di.sl.isRegistered<CustomersCubit>()) di.sl<CustomersCubit>().reset();
+      if (di.sl.isRegistered<SellCubit>()) di.sl<SellCubit>().reset();
+      if (di.sl.isRegistered<StockCubit>()) di.sl<StockCubit>().reset();
+      if (di.sl.isRegistered<MillingCubit>()) di.sl<MillingCubit>().reset();
+      if (di.sl.isRegistered<ReportsCubit>()) di.sl<ReportsCubit>().reset();
+      if (di.sl.isRegistered<AdminCubit>()) di.sl<AdminCubit>().reset();
+      if (di.sl.isRegistered<ExpensesCubit>()) di.sl<ExpensesCubit>().reset();
+      if (di.sl.isRegistered<PriceManagementCubit>()) di.sl<PriceManagementCubit>().reset();
+    } catch (e) {
+      Log.w('Error resetting cubits: $e', tag: 'AUTH');
+    }
   }
 
   /// Request password reset OTP
@@ -636,6 +676,53 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (user) {
         emit(state.copyWith(user: user));
+      },
+    );
+  }
+
+  /// Register a new company (Public)
+  Future<void> registerCompany({
+    required String name,
+    required String address,
+    required String phone,
+    required String ownerName,
+    required String ownerPhone,
+    required String ownerPassword,
+    String? email,
+    String? registrationNumber,
+    String? district,
+  }) async {
+    emit(state.copyWith(
+      registerStatus: RegisterStatus.loading,
+      clearError: true,
+    ));
+
+    final result = await _authRepository.publicRegisterCompany(
+      name: name,
+      address: address,
+      phone: phone,
+      ownerName: ownerName,
+      ownerPhone: ownerPhone,
+      ownerPassword: ownerPassword,
+      email: email,
+      registrationNumber: registrationNumber,
+      district: district,
+    );
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(
+          registerStatus: RegisterStatus.failure,
+          errorMessage: failure.message,
+        ));
+      },
+      (company) {
+        emit(state.copyWith(
+          registerStatus: RegisterStatus.success,
+          successMessage:
+              'Company "${company.name}" registered successfully! Your account is pending admin approval.',
+          clearError: true,
+        ));
       },
     );
   }

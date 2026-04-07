@@ -143,6 +143,16 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(status: ProfileStatus.initial, clearUser: true));
   }
 
+  /// Reset profile state (on logout)
+  void reset() {
+    emit(ProfileState.initial().copyWith(
+      language: state.language,
+      isDarkMode: state.isDarkMode,
+      notificationsEnabled: state.notificationsEnabled,
+      biometricEnabled: state.biometricEnabled,
+    ));
+  }
+
   void toggleDarkMode(bool value) {
     emit(state.copyWith(isDarkMode: value));
     // TODO: Save to preferences

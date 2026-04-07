@@ -47,6 +47,13 @@ abstract class CustomerRemoteDataSource {
 
   /// Validate phone number uniqueness
   Future<bool> isPhoneAvailable(String phone, {String? excludeId});
+
+  /// Get customer transactions
+  Future<List<Map<String, dynamic>>> getCustomerTransactions({
+    required String customerId,
+    int page = 1,
+    int limit = 20,
+  });
 }
 
 class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
@@ -547,6 +554,48 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     } catch (e) {
       // Don't throw for availability check, just log and return true
       return true;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getCustomerTransactions({
+    required String customerId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final either = await apiService.get(
+        '${ApiEndpoints.customers}/$customerId/transactions',
+        queryParameters: {
+          'page': page.toString(),
+          'limit': limit.toString(),
+        },
+      );
+
+      return either.fold(
+        (failure) => throw _mapFailureToException(failure),
+        (response) {
+          if (response.success && response.data != null) {
+            final List<dynamic> transactionsJson =
+                response.data['transactions'] ?? [];
+            return transactionsJson
+                .map((json) => json as Map<String, dynamic>)
+                .toList();
+          }
+
+          throw ServerException(
+            message: response.message ?? 'Failed to fetch customer transactions',
+            statusCode: response.statusCode,
+          );
+        },
+      );
+    } on SocketException {
+      throw NetworkException();
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(
+          message: 'Failed to fetch customer transactions: ${e.toString()}');
     }
   }
 

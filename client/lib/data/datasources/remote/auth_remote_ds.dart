@@ -93,6 +93,19 @@ abstract class AuthRemoteDataSource {
     required String adminPassword,
   });
 
+  /// Public Register new company
+  Future<CompanyModel> publicRegisterCompany({
+    required String name,
+    required String address,
+    required String phone,
+    required String ownerName,
+    required String ownerPhone,
+    required String ownerPassword,
+    String? email,
+    String? registrationNumber,
+    String? district,
+  });
+
   /// Get all companies (Super Admin)
   Future<List<CompanyModel>> getAllCompanies();
 
@@ -809,6 +822,66 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (response.statusCode == 409) {
             throw ValidationException(
               message: 'Company or admin phone already exists',
+            );
+          }
+
+          throw ServerException(
+            message: response.message ?? 'Failed to register company',
+            statusCode: response.statusCode,
+          );
+        },
+      );
+    } on SocketException {
+      throw NetworkException();
+    } on ValidationException {
+      rethrow;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(
+          message: 'Failed to register company: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<CompanyModel> publicRegisterCompany({
+    required String name,
+    required String address,
+    required String phone,
+    required String ownerName,
+    required String ownerPhone,
+    required String ownerPassword,
+    String? email,
+    String? registrationNumber,
+    String? district,
+  }) async {
+    try {
+      final either = await apiService.post(
+        ApiEndpoints.registerCompany,
+        data: {
+          'name': name,
+          'address': address,
+          'phone': phone,
+          'ownerName': ownerName,
+          'ownerPhone': ownerPhone,
+          'ownerPassword': ownerPassword,
+          'email': email,
+          'registrationNumber': registrationNumber,
+          'district': district,
+          'status': 'pending',
+        },
+      );
+
+      return either.fold(
+        (failure) => throw _mapFailureToException(failure),
+        (response) {
+          if (response.success && response.data != null) {
+            return CompanyModel.fromJson(response.data['company'] ?? response.data);
+          }
+
+          if (response.statusCode == 409) {
+            throw ValidationException(
+              message: 'Company or owner phone already exists',
             );
           }
 

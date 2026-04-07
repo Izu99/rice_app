@@ -73,8 +73,19 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     result.fold(
       (failure) => emit(state.copyWith(status: ExpensesStatus.error, errorMessage: failure.message)),
       (newExpense) {
-        emit(state.copyWith(status: ExpensesStatus.success));
-        loadExpenses();
+        // Add to list immediately without a full reload
+        final updatedExpenses = [newExpense, ...state.expenses];
+        final updatedTotal = state.totalMonthlyExpenses + newExpense.amount;
+        final updatedBreakdown = Map<String, double>.from(state.categoryBreakdown);
+        updatedBreakdown[newExpense.category.value] =
+            (updatedBreakdown[newExpense.category.value] ?? 0) + newExpense.amount;
+
+        emit(state.copyWith(
+          status: ExpensesStatus.success,
+          expenses: updatedExpenses,
+          totalMonthlyExpenses: updatedTotal,
+          categoryBreakdown: updatedBreakdown,
+        ));
       },
     );
   }
@@ -89,14 +100,47 @@ class ExpensesCubit extends Cubit<ExpensesState> {
   }
 
   Future<void> deleteExpense(String id) async {
+    final previousExpenses = state.expenses;
+    final deleted = previousExpenses.firstWhere(
+      (e) => e.id == id,
+      orElse: () => ExpenseEntity.empty(),
+    );
+
+    // Remove from UI immediately
+    final optimisticExpenses = previousExpenses.where((e) => e.id != id).toList();
+    final updatedTotal = state.totalMonthlyExpenses - deleted.amount;
+    final updatedBreakdown = Map<String, double>.from(state.categoryBreakdown);
+    if (deleted.id.isNotEmpty) {
+      updatedBreakdown[deleted.category.value] =
+          ((updatedBreakdown[deleted.category.value] ?? 0) - deleted.amount).clamp(0, double.infinity);
+    }
+
+    emit(state.copyWith(
+      expenses: optimisticExpenses,
+      totalMonthlyExpenses: updatedTotal < 0 ? 0 : updatedTotal,
+      categoryBreakdown: updatedBreakdown,
+    ));
+
     final result = await _repository.deleteExpense(id);
     result.fold(
-      (failure) => emit(state.copyWith(status: ExpensesStatus.error, errorMessage: failure.message)),
-      (success) => loadExpenses(),
+      (failure) {
+        // Revert on failure
+        emit(state.copyWith(
+          status: ExpensesStatus.error,
+          expenses: previousExpenses,
+          totalMonthlyExpenses: state.totalMonthlyExpenses,
+          errorMessage: failure.message,
+        ));
+      },
+      (_) => emit(state.copyWith(status: ExpensesStatus.loaded)),
     );
   }
 
   void resetStatus() {
     emit(state.copyWith(status: ExpensesStatus.loaded));
+  }
+
+  void reset() {
+    emit(const ExpensesState());
   }
 }

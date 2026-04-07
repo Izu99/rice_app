@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/constants/enums.dart';
 import '../cubit/expenses_cubit.dart';
 import '../cubit/expenses_state.dart';
@@ -63,10 +60,9 @@ class _ExpenseAddEditScreenState extends State<ExpenseAddEditScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text('නව වියදමක් එක් කරන්න'), // Add New Expense
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+        appBar: const HAppBar(
+          title: 'Add Expense',
+          subtitle: 'නව වියදමක් එක් කරන්න',
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

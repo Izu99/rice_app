@@ -248,9 +248,9 @@ class ConfirmationDialog extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingL),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
-        color: headerColor.withOpacity(0.1),
+        color: headerColor.withValues(alpha: 0.08),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppDimensions.radiusL),
         ),
@@ -258,14 +258,14 @@ class ConfirmationDialog extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: headerColor.withOpacity(0.15),
+              color: headerColor.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(
               headerIcon,
-              size: AppDimensions.iconXL,
+              size: 32,
               color: headerColor,
             ),
           ),
@@ -276,9 +276,9 @@ class ConfirmationDialog extends StatelessWidget {
 
   Widget _buildActions(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
+      padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
-        color: AppColors.grey50,
+        color: Color(0xFFF4F6FA),
         borderRadius: BorderRadius.vertical(
           bottom: Radius.circular(AppDimensions.radiusL),
         ),
@@ -296,11 +296,11 @@ class ConfirmationDialog extends StatelessWidget {
                   Navigator.pop(context, false);
                 },
                 isOutlined: true,
-                color: cancelColor ?? AppColors.grey600,
+                color: cancelColor ?? const Color(0xFF444466),
               ),
             ),
 
-          if (showCancel) const SizedBox(width: AppDimensions.paddingM),
+          if (showCancel) const SizedBox(width: 12),
 
           // Confirm button
           Expanded(
@@ -391,17 +391,15 @@ class _DialogButton extends StatelessWidget {
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: color,
-          side: BorderSide(color: color.withOpacity(0.5)),
-          padding: const EdgeInsets.symmetric(
-            vertical: AppDimensions.paddingM,
-          ),
+          side: const BorderSide(color: Color(0xFFE8E8EE)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: Text(
           label,
-          style: AppTextStyles.button.copyWith(color: color),
+          style: AppTextStyles.button.copyWith(color: color, fontSize: 13),
         ),
       );
     }
@@ -411,17 +409,15 @@ class _DialogButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: AppColors.white,
-        padding: const EdgeInsets.symmetric(
-          vertical: AppDimensions.paddingM,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          borderRadius: BorderRadius.circular(12),
         ),
         elevation: 0,
       ),
       child: Text(
         label,
-        style: AppTextStyles.button,
+        style: AppTextStyles.button.copyWith(fontSize: 13),
       ),
     );
   }
@@ -535,14 +531,14 @@ class SuccessDialog extends StatelessWidget {
         children: [
           // Success icon
           Container(
-            padding: const EdgeInsets.all(AppDimensions.paddingL),
-            decoration: const BoxDecoration(
-              color: AppColors.successLight,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.success.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              icon ?? Icons.check_circle,
-              size: AppDimensions.iconXXL,
+              icon ?? Icons.check_circle_rounded,
+              size: 40,
               color: AppColors.success,
             ),
           ),
@@ -598,7 +594,14 @@ class SuccessDialog extends StatelessWidget {
                   Navigator.pop(context);
                   onDismiss?.call();
                 },
-                child: Text(buttonLabel),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
         ],
