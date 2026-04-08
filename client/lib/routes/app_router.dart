@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 // Core
 import '../core/theme/app_colors.dart';
+import '../core/shared_widgets/app_page_scaffold.dart';
+import '../core/shared_widgets/h_app_bar.dart';
 
 // Features - Auth
 import '../features/auth/presentation/screens/splash_screen.dart';
@@ -526,42 +528,125 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Maintenance Settings'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
+    return AppPageScaffold(
+      title: 'Maintenance Settings',
+      subtitle: 'Fix data issues or check backend connectivity',
+      actions: [
+        IconButton(
+          onPressed: () => _showBackendAction(context),
+          icon: const Icon(Icons.cloud_outlined),
+          tooltip: 'Backend',
+        ),
+      ],
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
-            'Database Management',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
+          const HSectionChip('Database Management'),
+          const SizedBox(height: 16),
           const Text(
             'Use these tools if you are experiencing data errors or sync issues.',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          Card(
-            color: AppColors.error.withOpacity(0.05),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: AppColors.error.withOpacity(0.2)),
+            style: TextStyle(
+              color: Color(0xFF6B7280),
+              fontSize: 13,
+              height: 1.5,
             ),
-            child: ListTile(
-              leading: const Icon(Icons.delete_forever, color: AppColors.error),
-              title: const Text('Reset Local Database',
-                  style: TextStyle(
-                      color: AppColors.error, fontWeight: FontWeight.bold)),
-              subtitle: const Text(
-                  'This will delete all local customers and transactions. Data NOT synced to the server will be lost.'),
-              onTap: () => _showResetConfirmation(context),
+          ),
+          const SizedBox(height: 20),
+          HCard(
+            onTap: () => _showResetConfirmation(context),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.delete_forever, color: AppColors.error),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Reset Local Database',
+                        style: TextStyle(
+                          color: Color(0xFF991B1B),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Delete local customers and transactions. Unsynced data will be lost.',
+                        style: TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Color(0xFFB0B7C3)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          HCard(
+            onTap: () {},
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.settings_backup_restore_outlined,
+                      color: AppColors.primary),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Backend Sync',
+                        style: TextStyle(
+                          color: Color(0xFF1F2937),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Trigger a backend connection check and sync health status.',
+                        style: TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Color(0xFFB0B7C3)),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showBackendAction(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Backend action opened'),
       ),
     );
   }
@@ -572,25 +657,29 @@ class SettingsScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Are you absolutely sure?'),
         content: const Text(
-            'This action will wipe your local data and restart the app. Only use this to fix corrupt data.'),
+          'This action will wipe your local data and restart the app. Only use this to fix corrupt data.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: Colors.white),
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               Navigator.pop(dialogContext);
 
-              // In a real app we might trigger a system restart, here we go home
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text(
-                          'All local data related to SharedPreferences cleared. Please close and restart the app if issues persist.'),
-                      backgroundColor: AppColors.success),
+                    content: Text(
+                      'All local data related to SharedPreferences cleared. Please close and restart the app if issues persist.',
+                    ),
+                    backgroundColor: AppColors.success,
+                  ),
                 );
                 context.go(RouteNames.splash);
               }

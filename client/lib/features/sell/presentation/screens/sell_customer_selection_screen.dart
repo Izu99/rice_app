@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/constants/enums.dart';
@@ -46,12 +47,10 @@ class _SellCustomerSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      appBar: HAppBar(
-        title: SiStrings.selectCustomer,
-        subtitle: 'Select a buyer to sell to',
-      ),
+    return AppPageScaffold(
+      title: SiStrings.selectCustomer,
+      subtitle: SiStrings.isSinhala ? 'Select Buyer' : 'ගනුදෙනුකරු තෝරන්න',
+      bottomBar: AppSubBottomBar(),
       body: Column(
         children: [
           // Light info banner
@@ -114,7 +113,8 @@ class _SellCustomerSelectionScreenState
                             return EmptyStateWidget(
                               icon: Icons.person_off_outlined,
                               title: SiStrings.noCustomersFound,
-                              subtitle: 'විකිණීම ආරම්භ කිරීමට නව පාරිභෝගිකයෙකු එක් කරන්න',
+                              subtitle:
+                                  'විකිණීම ආරම්භ කිරීමට නව පාරිභෝගිකයෙකු එක් කරන්න',
                               actionLabel: SiStrings.addNewCustomer,
                               onAction: () =>
                                   context.pushNamed('sellAddCustomer'),
@@ -159,20 +159,22 @@ class _SellCustomerSelectionScreenState
               color: AppColors.info.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.sell_rounded,
-                color: AppColors.info, size: 22),
+            child:
+                const Icon(Icons.sell_rounded, color: AppColors.info, size: 22),
           ),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('ඔබ විකුණන්නේ කාටද?',
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textSecondary)),
-              Text(SiStrings.searchOrSelect,
-                  style: AppTextStyles.titleSmall
-                      .copyWith(fontWeight: FontWeight.bold)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('ඔබ විකුණන්නේ කාටද?',
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textSecondary)),
+                Text(SiStrings.searchOrSelect,
+                    style: AppTextStyles.titleSmall
+                        .copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ],
       ),

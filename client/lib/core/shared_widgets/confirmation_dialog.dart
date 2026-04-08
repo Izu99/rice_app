@@ -102,12 +102,14 @@ class ConfirmationDialog extends StatelessWidget {
     return show(
       context,
       title: title,
-      message:
-          'ඔබට "$itemName" මකා දැමීමට අවශ්‍ය බව සහතිකද?${additionalMessage != null ? '\n\n$additionalMessage' : ''}',
-      confirmLabel: 'මකා දමන්න', // Delete
+      message: '"$itemName" ස්ථිරවම මකා දැමේ.',
+      subtitle: 'මෙය නැවත ආපසු හැරවිය නොහැක.${additionalMessage != null ? '\n$additionalMessage' : ''}',
+      confirmLabel: 'ඔව්, මකා දමන්න', // Yes, Delete
+      cancelLabel: 'නැත, ආපසු යන්න', // No, Go Back
       type: DialogType.danger,
       isDangerous: true,
       icon: Icons.delete_forever_outlined,
+      barrierDismissible: false,
     );
   }
 
@@ -131,9 +133,12 @@ class ConfirmationDialog extends StatelessWidget {
       context,
       title: 'ඉවත් වන්නද?', // Logout?
       message: 'ඔබට මෙම ගිණුමෙන් ඉවත් වීමට අවශ්‍යද?',
-      confirmLabel: 'ඉවත් වන්න', // Logout
+      subtitle: 'සුරකින ලද නොමැති දත්ත නැති විය හැක.',
+      confirmLabel: 'ඔව්, ඉවත් වන්න', // Yes, Logout
+      cancelLabel: 'නැත, රඳවා ගන්න', // No, Stay
       type: DialogType.warning,
       icon: Icons.logout_outlined,
+      barrierDismissible: false,
     );
   }
 
@@ -169,7 +174,6 @@ class ConfirmationDialog extends StatelessWidget {
       icon: Icons.cancel_outlined,
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -276,45 +280,42 @@ class ConfirmationDialog extends StatelessWidget {
 
   Widget _buildActions(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: const BoxDecoration(
         color: Color(0xFFF4F6FA),
         borderRadius: BorderRadius.vertical(
           bottom: Radius.circular(AppDimensions.radiusL),
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Cancel button
-          if (showCancel)
-            Expanded(
-              child: _DialogButton(
-                label: cancelLabel,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onCancel?.call();
-                  Navigator.pop(context, false);
-                },
-                isOutlined: true,
-                color: cancelColor ?? const Color(0xFF444466),
-              ),
-            ),
-
-          if (showCancel) const SizedBox(width: 12),
-
-          // Confirm button
-          Expanded(
-            child: _DialogButton(
-              label: confirmLabel,
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                onConfirm?.call();
-                Navigator.pop(context, true);
-              },
-              color: confirmColor ?? _getConfirmColor(),
-              isOutlined: false,
-            ),
+          // Confirm button (primary — shown first)
+          _DialogButton(
+            label: confirmLabel,
+            onPressed: () {
+              HapticFeedback.mediumImpact();
+              onConfirm?.call();
+              Navigator.pop(context, true);
+            },
+            color: confirmColor ?? _getConfirmColor(),
+            isOutlined: false,
           ),
+
+          // Cancel button (secondary — shown below)
+          if (showCancel) ...[
+            const SizedBox(height: 8),
+            _DialogButton(
+              label: cancelLabel,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                onCancel?.call();
+                Navigator.pop(context, false);
+              },
+              isOutlined: true,
+              color: cancelColor ?? const Color(0xFF444466),
+            ),
+          ],
         ],
       ),
     );
@@ -518,7 +519,6 @@ class SuccessDialog extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -598,10 +598,12 @@ class SuccessDialog extends StatelessWidget {
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: Text(buttonLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(buttonLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
         ],

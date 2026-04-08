@@ -226,17 +226,17 @@ class SyncStatusModel extends Equatable {
         }
         return 'යාවත්කාලීනයි';
       case SyncState.syncing:
-        return 'සමමුහුර්ත කරමින්...';
+        return 'sync කරමින්...';
       case SyncState.success:
-        return 'සමමුහුර්තය සම්පූර්ණයි';
+        return 'syncය සම්පූර්ණයි';
       case SyncState.error:
-        return 'සමමුහුර්තය අසාර්ථකයි';
+        return 'syncය අසාර්ථකයි';
       case SyncState.offline:
         return 'අන්තර්ජාල සම්බන්ධතාවය නැත';
       case SyncState.paused:
-        return 'සමමුහුර්තය නතර කර ඇත';
+        return 'syncය නතර කර ඇත';
       case SyncState.cancelled:
-        return 'සමමුහුර්තය අවලංගු කරන ලදී';
+        return 'syncය අවලංගු කරන ලදී';
     }
   }
 

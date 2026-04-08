@@ -458,7 +458,9 @@ class ReportRepositoryImpl implements ReportRepository {
           'rice': totals[ItemType.rice] ?? 0,
         },
         'totalValue': totalValue,
-        'lowStockCount': items.where((i) => i.currentQuantity < 500).length, // Example threshold
+        'lowStockCount': items
+            .where((i) => i.currentQuantity < 500)
+            .length, // Example threshold
         'items_count': items.length,
         'items': items
             .map((i) => {
@@ -488,10 +490,10 @@ class ReportRepositoryImpl implements ReportRepository {
   }) async {
     try {
       final customers = await customerRemoteDataSource.getAllCustomers();
-      
+
       double totalReceivable = 0;
       double totalPayable = 0;
-      
+
       for (var c in customers) {
         if (c.balance > 0) {
           totalReceivable += c.balance;
@@ -504,12 +506,14 @@ class ReportRepositoryImpl implements ReportRepository {
         'customerCount': customers.length,
         'totalReceivable': totalReceivable,
         'totalPayable': totalPayable,
-        'customers': customers.map((c) => {
-          'id': c.id,
-          'name': c.name,
-          'balance': c.balance,
-          'phone': c.phone,
-        }).toList(),
+        'customers': customers
+            .map((c) => {
+                  'id': c.id,
+                  'name': c.name,
+                  'balance': c.balance,
+                  'phone': c.phone,
+                })
+            .toList(),
       });
     } catch (e) {
       if (e is ServerException) {

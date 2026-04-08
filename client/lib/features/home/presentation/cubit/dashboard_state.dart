@@ -163,7 +163,8 @@ class DashboardState extends Equatable {
   String get formattedMonthlySales => 'Rs. ${_formatNumber(monthlySales)}';
 
   /// Formatted monthly expenses
-  String get formattedMonthlyExpenses => 'Rs. ${_formatNumber(monthlyExpenses)}';
+  String get formattedMonthlyExpenses =>
+      'Rs. ${_formatNumber(monthlyExpenses)}';
 
   /// Formatted monthly profit
   String get formattedMonthlyProfit => 'Rs. ${_formatNumber(monthlyProfit)}';

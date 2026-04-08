@@ -758,14 +758,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<CompanyModel> getCompanyDetails(String companyId) async {
     try {
       final either = await apiService.get(
-        '${ApiEndpoints.companies}/$companyId',
+        ApiEndpoints.companyProfile,
       );
 
       return either.fold(
         (failure) => throw _mapFailureToException(failure),
         (response) {
           if (response.success && response.data != null) {
-            return CompanyModel.fromJson(response.data);
+            final companyData = response.data['company'] ?? response.data;
+            return CompanyModel.fromJson(companyData);
           }
 
           if (response.statusCode == 404) {
@@ -876,7 +877,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         (failure) => throw _mapFailureToException(failure),
         (response) {
           if (response.success && response.data != null) {
-            return CompanyModel.fromJson(response.data['company'] ?? response.data);
+            return CompanyModel.fromJson(
+                response.data['company'] ?? response.data);
           }
 
           if (response.statusCode == 409) {
@@ -1239,15 +1241,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<CompanyModel> updateCompany(CompanyModel company) async {
     try {
       final either = await apiService.put(
-        '/companies/profile', // Updating own company profile
-        data: company.toJson(),
+        ApiEndpoints.companyProfile,
+        data: company.toJsonForApi(),
       );
 
       return either.fold(
         (failure) => throw _mapFailureToException(failure),
         (response) {
           if (response.success && response.data != null) {
-            return CompanyModel.fromJson(response.data);
+            final companyData = response.data['company'] ?? response.data;
+            return CompanyModel.fromJson(companyData);
           }
 
           throw ServerException(

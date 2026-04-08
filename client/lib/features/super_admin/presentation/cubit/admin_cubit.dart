@@ -34,7 +34,7 @@ class AdminCubit extends Cubit<AdminState> {
       )),
       (statsMap) {
         final stats = AdminDashboardStats.fromJson(statsMap);
-        
+
         companiesResult.fold(
           (failure) => emit(state.copyWith(
             status: AdminStatus.loaded,
@@ -44,7 +44,8 @@ class AdminCubit extends Cubit<AdminState> {
             status: AdminStatus.loaded,
             dashboardStats: stats,
             allCompanies: companies,
-            filteredCompanies: _applyFilters(companies, state.currentFilter, state.searchQuery),
+            filteredCompanies: _applyFilters(
+                companies, state.currentFilter, state.searchQuery),
           )),
         );
       },
@@ -212,9 +213,8 @@ class AdminCubit extends Cubit<AdminState> {
     final previousList = state.allCompanies;
 
     // Update UI immediately
-    final optimisticList = previousList
-        .map((c) => c.id == company.id ? company : c)
-        .toList();
+    final optimisticList =
+        previousList.map((c) => c.id == company.id ? company : c).toList();
     emit(state.copyWith(
       allCompanies: optimisticList,
       filteredCompanies:

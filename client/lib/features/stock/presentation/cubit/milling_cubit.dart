@@ -294,10 +294,13 @@ class MillingCubit extends Cubit<MillingState> {
           state.outputRiceKg > 0 ? state.outputRiceKg : state.expectedRiceKg;
       final outputBags = (outputKg / 50).ceil();
 
-      Log.i('Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags', tag: 'MILLING');
+      Log.i(
+          'Parameters: variety=$variety, outputKg=$outputKg, outputBags=$outputBags',
+          tag: 'MILLING');
 
       // Perform one-shot milling process with timeout
-      final result = await _stockRepository.startMilling(
+      final result = await _stockRepository
+          .startMilling(
         paddyItemId: state.selectedPaddy!.id,
         paddyQuantity: state.inputPaddyKg,
         paddyBags: state.inputPaddyBags,
@@ -307,7 +310,8 @@ class MillingCubit extends Cubit<MillingState> {
         outputRiceBags: outputBags,
         outputRiceName: riceName,
         status: 'completed',
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw Exception('Milling process timed out. Please try again.');

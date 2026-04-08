@@ -195,11 +195,11 @@ class SyncStatusIndicator extends StatelessWidget {
   String _getLabel(SyncStatusModel status) {
     switch (status.state) {
       case SyncState.syncing:
-        return 'සමමුහුර්ත කරමින්...';
+        return 'sync කරමින්...';
       case SyncState.success:
-        return 'සමමුහුර්තයි';
+        return 'syncයි';
       case SyncState.error:
-        return 'සමමුහුර්ත දෝෂයක්';
+        return 'sync දෝෂයක්';
       case SyncState.offline:
         return 'නොබැඳි (Offline)';
       case SyncState.paused:
@@ -207,10 +207,9 @@ class SyncStatusIndicator extends StatelessWidget {
       case SyncState.cancelled:
         return 'අවලංගුයි';
       case SyncState.idle:
-        return status.hasPending ? 'බලාපොරොත්තුවෙන්' : 'සමමුහුර්තයි';
+        return status.hasPending ? 'බලාපොරොත්තුවෙන්' : 'syncයි';
     }
   }
-
 
   void _showSyncDetails(BuildContext context, SyncStatusModel status) {
     showModalBottomSheet(
@@ -257,7 +256,7 @@ class SyncDetailsSheet extends StatelessWidget {
             ),
           ),
 
-          const Text('සමමුහුර්ත තත්ත්වය', style: AppTextStyles.h5), // Sync Status
+          const Text('sync තත්ත්වය', style: AppTextStyles.h5), // Sync Status
           const SizedBox(height: AppDimensions.paddingL),
 
           // Status icon
@@ -284,11 +283,12 @@ class SyncDetailsSheet extends StatelessWidget {
           const SizedBox(height: AppDimensions.paddingL),
 
           // Details
-          _buildDetailRow('තත්ත්වය', _getStatusText(), _getStatusColor()), // Status
+          _buildDetailRow(
+              'තත්ත්වය', _getStatusText(), _getStatusColor()), // Status
 
           if (status.lastSyncTime != null)
             _buildDetailRow(
-              'අවසන් වරට සමමුහුර්ත කළේ', // Last Synced
+              'අවසන් වරට sync කළේ', // Last Synced
               Formatters.relativeTime(status.lastSyncTime!),
               AppColors.textSecondary,
             ),
@@ -324,10 +324,11 @@ class SyncDetailsSheet extends StatelessWidget {
                         ),
                       )
                     : const Icon(Icons.sync),
-                label: Text(status.isSyncing ? 'සමමුහුර්ත කරමින්...' : 'දැන් සමමුහුර්ත කරන්න'), // Sync Now
+                label: Text(status.isSyncing
+                    ? 'sync කරමින්...'
+                    : 'දැන් sync කරන්න'), // Sync Now
               ),
             ),
-
 
           const SizedBox(height: AppDimensions.paddingM),
         ],
@@ -366,11 +367,11 @@ class SyncDetailsSheet extends StatelessWidget {
   String _getStatusText() {
     switch (status.state) {
       case SyncState.syncing:
-        return 'සමමුහුර්ත කරමින්...';
+        return 'sync කරමින්...';
       case SyncState.success:
-        return 'සියලු දත්ත සමමුහුර්තයි';
+        return 'සියලු දත්ත syncයි';
       case SyncState.error:
-        return 'සමමුහුර්තය අසාර්ථකයි';
+        return 'syncය අසාර්ථකයි';
       case SyncState.offline:
         return 'නොබැඳි (Offline) ක්‍රමය';
       case SyncState.paused:
@@ -381,7 +382,6 @@ class SyncDetailsSheet extends StatelessWidget {
         return status.hasPending ? 'වෙනස්කම් බලාපොරොත්තුවෙන්' : 'යාවත්කාලීනයි';
     }
   }
-
 
   Color _getStatusColor() {
     switch (status.state) {

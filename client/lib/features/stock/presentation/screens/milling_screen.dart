@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
@@ -28,8 +29,6 @@ class _MillingScreenState extends State<MillingScreen>
   final _inputWeightController = TextEditingController();
   final _inputBagsController = TextEditingController();
   final _outputRiceController = TextEditingController();
-
-
 
   @override
   void initState() {
@@ -57,22 +56,20 @@ class _MillingScreenState extends State<MillingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      appBar: HAppBar(
-        title: 'Milling',
-        subtitle: 'වී කෙටීම',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF1C1C2E)),
-            onPressed: () {
-              context.read<MillingCubit>().resetMilling();
-              _clearControllers();
-            },
-            tooltip: 'නැවත මුල සිට', // Reset
-          ),
-        ],
-      ),
+    return AppPageScaffold(
+      title: SiStrings.milling,
+      subtitle: SiStrings.isSinhala ? 'Milling' : 'වී කෙටීම',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            context.read<MillingCubit>().resetMilling();
+            _clearControllers();
+          },
+          tooltip: 'නැවත මුල සිට',
+        ),
+      ],
+      bottomBar: AppSubBottomBar(),
       body: BlocConsumer<MillingCubit, MillingState>(
         listener: (context, state) {
           try {
@@ -89,9 +86,11 @@ class _MillingScreenState extends State<MillingScreen>
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 context.read<MillingCubit>().resetMilling();
                 _clearControllers();
-                context.push('/stock'); // Automatically navigate to stock after success
+                context.push(
+                    '/stock'); // Automatically navigate to stock after success
               });
-            } else if (state.status == MillingStatus.error && state.errorMessage != null) {
+            } else if (state.status == MillingStatus.error &&
+                state.errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage!),
@@ -142,13 +141,15 @@ class _MillingScreenState extends State<MillingScreen>
 
                     // Input Section
                     if (state.selectedPaddy != null) ...[
-                      _buildSectionTitle('2. ප්‍රමාණය ඇතුළත් කරන්න'), // Input Quantity
+                      _buildSectionTitle(
+                          '2. ප්‍රමාණය ඇතුළත් කරන්න'), // Input Quantity
                       const SizedBox(height: AppDimensions.paddingS),
                       _buildInputSection(state),
                       const SizedBox(height: AppDimensions.paddingL),
 
                       // Milling Calculator
-                      _buildSectionTitle('3. ප්‍රතිදානය (සහල්)'), // Milling Output
+                      _buildSectionTitle(
+                          '3. ප්‍රතිදානය (සහල්)'), // Milling Output
                       const SizedBox(height: AppDimensions.paddingS),
                       MillingCalculator(
                         inputPaddyKg: state.inputPaddyKg,
@@ -497,28 +498,27 @@ class _MillingScreenState extends State<MillingScreen>
     );
   }
 
-    void _confirmAndProcess() {
-      // Capture cubit before showing dialog to avoid context issues
-      final cubit = context.read<MillingCubit>();
-      
-      showDialog(
-        context: context,
-        builder: (dialogContext) => MillingConfirmationDialog(
-          title: 'වී කෙටීම තහවුරු කරන්න', // Confirm Milling
-          message: 'මෙම කාණ්ඩය කෙටීම ආරම්භ කිරීමට අවශ්‍යද? '
-              'මෙමඟින් තොගයෙන් වී අඩු වී සහල් එක් වනු ඇත.',
-          confirmLabel: 'තහවුරු කරන්න',
-          onConfirm: () {
-            Navigator.pop(dialogContext); // Pop the custom dialog
-            // Defer the cubit call to the next frame to avoid Navigator locked issues
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              cubit.processMilling();
-            });
-          },
-        ),
-      );
-    }
+  void _confirmAndProcess() {
+    // Capture cubit before showing dialog to avoid context issues
+    final cubit = context.read<MillingCubit>();
 
+    showDialog(
+      context: context,
+      builder: (dialogContext) => MillingConfirmationDialog(
+        title: 'වී කෙටීම තහවුරු කරන්න', // Confirm Milling
+        message: 'මෙම කාණ්ඩය කෙටීම ආරම්භ කිරීමට අවශ්‍යද? '
+            'මෙමඟින් තොගයෙන් වී අඩු වී සහල් එක් වනු ඇත.',
+        confirmLabel: 'තහවුරු කරන්න',
+        onConfirm: () {
+          Navigator.pop(dialogContext); // Pop the custom dialog
+          // Defer the cubit call to the next frame to avoid Navigator locked issues
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            cubit.processMilling();
+          });
+        },
+      ),
+    );
+  }
 
   void _clearControllers() {
     _inputWeightController.clear();
@@ -530,4 +530,3 @@ class _MillingScreenState extends State<MillingScreen>
     return '${date.day}/${date.month}/${date.year}';
   }
 }
-

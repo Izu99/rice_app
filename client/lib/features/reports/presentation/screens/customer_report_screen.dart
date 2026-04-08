@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 
@@ -28,18 +29,18 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
       builder: (context, state) {
         return LoadingOverlay(
           isLoading: state.status == ReportsStatus.loading,
-          child: Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: HAppBar(
-              title: 'Customer Report',
-              subtitle: 'පාරිභෝගික වාර්තාව',
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Color(0xFF1C1C2E)),
-                  onPressed: () => context.read<ReportsCubit>().loadCustomerReport(),
-                ),
-              ],
-            ),
+          child: AppPageScaffold(
+            title: SiStrings.customerReport,
+            subtitle:
+                SiStrings.isSinhala ? 'Customer Report' : 'පාරිභෝගික වාර්තාව',
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () =>
+                    context.read<ReportsCubit>().loadCustomerReport(),
+              ),
+            ],
+            bottomBar: AppSubBottomBar(),
             body: state.customerReport == null
                 ? _buildEmptyState()
                 : _buildReportContent(state.customerReport!),
@@ -58,7 +59,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
           const SizedBox(height: 16),
           Text(
             'පාරිභෝගික දත්ත පූරණය වෙමින් පවතී...',
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyLarge
+                .copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -67,8 +69,10 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
 
   Widget _buildReportContent(Map<String, dynamic> report) {
     final List<dynamic> customers = report['customers'] ?? [];
-    final double totalReceivables = (report['totalReceivable'] as num?)?.toDouble() ?? 0.0;
-    final double totalPayables = (report['totalPayable'] as num?)?.toDouble() ?? 0.0;
+    final double totalReceivables =
+        (report['totalReceivable'] as num?)?.toDouble() ?? 0.0;
+    final double totalPayables =
+        (report['totalPayable'] as num?)?.toDouble() ?? 0.0;
     final int customerCount = (report['customerCount'] as num?)?.toInt() ?? 0;
 
     return SingleChildScrollView(
@@ -141,11 +145,14 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                 children: [
                   Text(
                     'මුළු පාරිභෝගිකයින් සංඛ්‍යාව', // KEEP for now or move
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.bold),
                   ),
                   Text(
                     '$count',
-                    style: AppTextStyles.titleLarge.copyWith(fontWeight: FontWeight.w700),
+                    style: AppTextStyles.titleLarge
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -156,7 +163,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -244,13 +252,17 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
       child: Row(
         children: [
           Expanded(flex: 3, child: Text(SiStrings.name, style: _headerStyle())),
-          Expanded(flex: 3, child: Text(SiStrings.balance, textAlign: TextAlign.right, style: _headerStyle())),
+          Expanded(
+              flex: 3,
+              child: Text(SiStrings.balance,
+                  textAlign: TextAlign.right, style: _headerStyle())),
         ],
       ),
     );
   }
 
-  TextStyle _headerStyle() => AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary);
+  TextStyle _headerStyle() => AppTextStyles.bodySmall
+      .copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary);
 
   Widget _buildTableRow(Map<String, dynamic> customer) {
     final String name = customer['name'] as String? ?? '';
@@ -260,7 +272,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.grey200, width: 0.5)),
+        border:
+            Border(bottom: BorderSide(color: AppColors.grey200, width: 0.5)),
       ),
       child: Row(
         children: [

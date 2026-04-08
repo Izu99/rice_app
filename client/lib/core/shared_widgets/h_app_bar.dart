@@ -1,9 +1,11 @@
 // lib/core/shared_widgets/h_app_bar.dart
-// Helakuru-style reusable AppBar — white, clean, light theme
+// Attractive gradient AppBar — consistent across all non-home screens
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
+
+// ─── Main AppBar ─────────────────────────────────────────────────────────────
 
 class HAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -11,7 +13,7 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showBack;
   final VoidCallback? onBack;
-  final Widget? bottom; // e.g. TabBar
+  final Widget? bottom;
   final double bottomHeight;
 
   const HAppBar({
@@ -26,74 +28,174 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + bottomHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + 2 + bottomHeight);
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light,
       ),
-      child: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 1,
-        shadowColor: Colors.black12,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
-        automaticallyImplyLeading: false,
-        leading: showBack
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: AppColors.textPrimary, size: 20),
-                onPressed: onBack ?? () => Navigator.of(context).pop(),
-              )
-            : null,
-        title: subtitle != null
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 17,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.primaryGradient,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x40000000),
+              blurRadius: 12,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: kToolbarHeight,
+                child: Row(
+                  children: [
+                    // Back button
+                    if (showBack) _AnimatedBackButton(onBack: onBack),
+                    if (!showBack) const SizedBox(width: 16),
+
+                    // Title
+                    Expanded(
+                      child: subtitle != null
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 17,
+                                    letterSpacing: 0.1,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  subtitle!,
+                                  style: const TextStyle(
+                                    color: Color(0xCCFFFFFF),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            )
+                          : Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 17,
+                                letterSpacing: 0.1,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                     ),
-                  ),
-                  Text(
-                    subtitle!,
-                    style: const TextStyle(
-                      color: Color(0xFF888899),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              )
-            : Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 17,
+
+                    // Actions
+                    if (actions != null) ...[
+                      ...actions!.map((a) => _tintAction(a)),
+                      const SizedBox(width: 4),
+                    ] else
+                      const SizedBox(width: 16),
+                  ],
                 ),
               ),
-        actions: actions,
-        bottom: bottom != null
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(bottomHeight),
-                child: bottom!,
-              )
-            : null,
+
+              // Optional bottom widget (e.g. TabBar)
+              if (bottom != null)
+                SizedBox(height: bottomHeight, child: bottom!),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Wraps action icons to ensure they appear white on the gradient bg
+  Widget _tintAction(Widget action) {
+    return IconTheme(
+      data: const IconThemeData(color: Colors.white, size: 22),
+      child: action,
+    );
+  }
+}
+
+// ─── Animated back button ────────────────────────────────────────────────────
+
+class _AnimatedBackButton extends StatefulWidget {
+  final VoidCallback? onBack;
+  const _AnimatedBackButton({this.onBack});
+
+  @override
+  State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
+}
+
+class _AnimatedBackButtonState extends State<_AnimatedBackButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.78).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) {
+        _ctrl.reverse();
+        (widget.onBack ?? Navigator.of(context).pop)();
+      },
+      onTapCancel: () => _ctrl.reverse(),
+      child: ScaleTransition(
+        scale: _scale,
+        child: Container(
+          width: 44,
+          height: 44,
+          margin: const EdgeInsets.only(left: 8, right: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 18,
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Section chip label — Helakuru-style rounded grey badge
+// ─── Section chip ─────────────────────────────────────────────────────────────
+
 class HSectionChip extends StatelessWidget {
   final String label;
   final Color? color;
@@ -121,7 +223,8 @@ class HSectionChip extends StatelessWidget {
   }
 }
 
-/// Clean white card with subtle shadow — used across all screens
+// ─── Card ────────────────────────────────────────────────────────────────────
+
 class HCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -140,7 +243,7 @@ class HCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = Container(
+    Widget card = Container(
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color ?? Colors.white,
@@ -157,13 +260,23 @@ class HCard extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return GestureDetector(onTap: onTap, child: card);
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: AppColors.primary.withValues(alpha: 0.08),
+          highlightColor: AppColors.primary.withValues(alpha: 0.04),
+          child: card,
+        ),
+      );
     }
     return card;
   }
 }
 
-/// Helakuru-style icon circle — pastel bg with colored icon
+// ─── Icon circle ─────────────────────────────────────────────────────────────
+
 class HIconCircle extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -191,7 +304,8 @@ class HIconCircle extends StatelessWidget {
   }
 }
 
-/// Helakuru-style list tile card — white card with icon + title + subtitle
+// ─── List tile ────────────────────────────────────────────────────────────────
+
 class HListTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -223,19 +337,23 @@ class HListTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(
-                      color: Color(0xFF1C1C2E),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    )),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF1C1C2E),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
-                  Text(subtitle!,
-                      style: const TextStyle(
-                        color: Color(0xFF888899),
-                        fontSize: 12,
-                      )),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      color: Color(0xFF888899),
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -249,7 +367,8 @@ class HListTile extends StatelessWidget {
   }
 }
 
-/// Status badge chip
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
 class HBadge extends StatelessWidget {
   final String label;
   final Color color;

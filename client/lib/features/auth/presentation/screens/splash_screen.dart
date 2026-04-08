@@ -26,6 +26,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    debugPrint('>>> [SPLASH] initState - splash screen is rendering!');
     _initializeAnimations();
     _checkAuthStatus();
   }

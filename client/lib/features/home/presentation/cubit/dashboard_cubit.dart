@@ -293,7 +293,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         status: DashboardStatus.loaded, // Revert to loaded state
         errorMessage: 'Sync failed: ${e.toString()}',
       ));
-      
+
       // Still try to load data even if sync failed (offline mode support)
       await loadDashboard();
     }
@@ -316,11 +316,12 @@ class DashboardCubit extends Cubit<DashboardState> {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final startOfMonth = DateTime(now.year, now.month, 1);
-      
+
       // We need data for the graph (last 7 days including today)
       // AND for the month stats (from startOfMonth)
       final sevenDaysAgo = today.subtract(const Duration(days: 6));
-      final fetchStart = startOfMonth.isBefore(sevenDaysAgo) ? startOfMonth : sevenDaysAgo;
+      final fetchStart =
+          startOfMonth.isBefore(sevenDaysAgo) ? startOfMonth : sevenDaysAgo;
 
       // Fetch transactions
       final txnResult = await _transactionRepository.getTransactionsByDateRange(
@@ -336,121 +337,131 @@ class DashboardCubit extends Cubit<DashboardState> {
 
       // Process Transactions
       txnResult.fold(
-        (l) => debugPrint('⚠️ [DashboardCubit] create local transactions error: ${l.message}'),
-        (transactions) {
-            // Filter valid transactions
-            final validTxns = transactions.where((t) => t.status != TransactionStatus.cancelled).toList();
+          (l) => debugPrint(
+              '⚠️ [DashboardCubit] create local transactions error: ${l.message}'),
+          (transactions) {
+        // Filter valid transactions
+        final validTxns = transactions
+            .where((t) => t.status != TransactionStatus.cancelled)
+            .toList();
 
-            // Handle Expenses
-            List<ExpenseEntity> expenses = [];
-            expResult.fold(
-              (l) => debugPrint('⚠️ [DashboardCubit] create local expenses error: ${l.message}'),
-              (r) => expenses = r,
-            );
+        // Handle Expenses
+        List<ExpenseEntity> expenses = [];
+        expResult.fold(
+          (l) => debugPrint(
+              '⚠️ [DashboardCubit] create local expenses error: ${l.message}'),
+          (r) => expenses = r,
+        );
 
+        // 1. Weekly Activity (Last 7 days)
+        final Map<int, Map<String, double>> localWeeklyActivity = {};
+        final List<Map<String, dynamic>> localWeeklyTrend = [];
 
-            // 1. Weekly Activity (Last 7 days)
-            final Map<int, Map<String, double>> localWeeklyActivity = {};
-            final List<Map<String, dynamic>> localWeeklyTrend = [];
-            
-            for (int i = 0; i < 7; i++) {
-              final date = today.subtract(Duration(days: 6 - i));
-              
-              double buy = 0;
-              double sell = 0;
-              
-              for (final t in validTxns) {
-                  final tDate = t.transactionDate;
-                  if (tDate.year == date.year && tDate.month == date.month && tDate.day == date.day) {
-                      if (t.type == TransactionType.buy) buy += t.totalAmount;
-                      if (t.type == TransactionType.sell) sell += t.totalAmount;
-                  }
-              }
-              localWeeklyActivity[i] = {'buy': buy, 'sell': sell};
-              localWeeklyTrend.add({
-                '_id': '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-                'buy': buy,
-                'sell': sell,
-              });
+        for (int i = 0; i < 7; i++) {
+          final date = today.subtract(Duration(days: 6 - i));
+
+          double buy = 0;
+          double sell = 0;
+
+          for (final t in validTxns) {
+            final tDate = t.transactionDate;
+            if (tDate.year == date.year &&
+                tDate.month == date.month &&
+                tDate.day == date.day) {
+              if (t.type == TransactionType.buy) buy += t.totalAmount;
+              if (t.type == TransactionType.sell) sell += t.totalAmount;
             }
-
-            // 2. Month & Today Stats
-            double localTodayPurchases = 0;
-            double localTodaySales = 0;
-            int localTodayBuyCount = 0;
-            int localTodaySellCount = 0;
-            
-            double localMonthPurchases = 0;
-            double localMonthSales = 0;
-            int localMonthBuyCount = 0;
-            int localMonthSellCount = 0;
-
-            // Transactions totals
-            for (final t in validTxns) {
-               final tDate = t.transactionDate;
-               
-               // Month
-               if (tDate.year == today.year && tDate.month == today.month) {
-                   if (t.type == TransactionType.buy) {
-                       localMonthPurchases += t.totalAmount;
-                       localMonthBuyCount++;
-                   } else if (t.type == TransactionType.sell) {
-                       localMonthSales += t.totalAmount;
-                       localMonthSellCount++;
-                   }
-               }
-
-               // Today
-               if (tDate.year == today.year && tDate.month == today.month && tDate.day == today.day) {
-                   if (t.type == TransactionType.buy) {
-                       localTodayPurchases += t.totalAmount;
-                       localTodayBuyCount++;
-                   } else if (t.type == TransactionType.sell) {
-                       localTodaySales += t.totalAmount;
-                       localTodaySellCount++;
-                   }
-               }
-            }
-
-            // Expenses totals
-            double localTodayExpenses = 0;
-            double localMonthExpenses = 0;
-
-            for (final e in expenses) {
-                final eDate = e.date;
-                // Month
-                if (eDate.year == today.year && eDate.month == today.month) {
-                    localMonthExpenses += e.amount;
-                }
-                // Today
-                if (eDate.year == today.year && eDate.month == today.month && eDate.day == today.day) {
-                    localTodayExpenses += e.amount;
-                }
-            }
-            
-            // Calculate Profits
-            final localTodayProfit = localTodaySales - localTodayPurchases - localTodayExpenses;
-            final localMonthProfit = localMonthSales - localMonthPurchases - localMonthExpenses;
-
-            emit(state.copyWith(
-                weeklyActivity: localWeeklyActivity,
-                weeklyTrend: localWeeklyTrend,
-                todayPurchases: localTodayPurchases,
-                todaySales: localTodaySales,
-                todayExpenses: localTodayExpenses,
-                todayProfit: localTodayProfit,
-                todayBuyCount: localTodayBuyCount,
-                todaySellCount: localTodaySellCount,
-                monthlyPurchases: localMonthPurchases,
-                monthlySales: localMonthSales,
-                monthlyExpenses: localMonthExpenses,
-                monthlyProfit: localMonthProfit,
-                monthlyBuyCount: localMonthBuyCount,
-                monthlySellCount: localMonthSellCount,
-            ));
-
+          }
+          localWeeklyActivity[i] = {'buy': buy, 'sell': sell};
+          localWeeklyTrend.add({
+            '_id':
+                '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+            'buy': buy,
+            'sell': sell,
+          });
         }
-      );
+
+        // 2. Month & Today Stats
+        double localTodayPurchases = 0;
+        double localTodaySales = 0;
+        int localTodayBuyCount = 0;
+        int localTodaySellCount = 0;
+
+        double localMonthPurchases = 0;
+        double localMonthSales = 0;
+        int localMonthBuyCount = 0;
+        int localMonthSellCount = 0;
+
+        // Transactions totals
+        for (final t in validTxns) {
+          final tDate = t.transactionDate;
+
+          // Month
+          if (tDate.year == today.year && tDate.month == today.month) {
+            if (t.type == TransactionType.buy) {
+              localMonthPurchases += t.totalAmount;
+              localMonthBuyCount++;
+            } else if (t.type == TransactionType.sell) {
+              localMonthSales += t.totalAmount;
+              localMonthSellCount++;
+            }
+          }
+
+          // Today
+          if (tDate.year == today.year &&
+              tDate.month == today.month &&
+              tDate.day == today.day) {
+            if (t.type == TransactionType.buy) {
+              localTodayPurchases += t.totalAmount;
+              localTodayBuyCount++;
+            } else if (t.type == TransactionType.sell) {
+              localTodaySales += t.totalAmount;
+              localTodaySellCount++;
+            }
+          }
+        }
+
+        // Expenses totals
+        double localTodayExpenses = 0;
+        double localMonthExpenses = 0;
+
+        for (final e in expenses) {
+          final eDate = e.date;
+          // Month
+          if (eDate.year == today.year && eDate.month == today.month) {
+            localMonthExpenses += e.amount;
+          }
+          // Today
+          if (eDate.year == today.year &&
+              eDate.month == today.month &&
+              eDate.day == today.day) {
+            localTodayExpenses += e.amount;
+          }
+        }
+
+        // Calculate Profits
+        final localTodayProfit =
+            localTodaySales - localTodayPurchases - localTodayExpenses;
+        final localMonthProfit =
+            localMonthSales - localMonthPurchases - localMonthExpenses;
+
+        emit(state.copyWith(
+          weeklyActivity: localWeeklyActivity,
+          weeklyTrend: localWeeklyTrend,
+          todayPurchases: localTodayPurchases,
+          todaySales: localTodaySales,
+          todayExpenses: localTodayExpenses,
+          todayProfit: localTodayProfit,
+          todayBuyCount: localTodayBuyCount,
+          todaySellCount: localTodaySellCount,
+          monthlyPurchases: localMonthPurchases,
+          monthlySales: localMonthSales,
+          monthlyExpenses: localMonthExpenses,
+          monthlyProfit: localMonthProfit,
+          monthlyBuyCount: localMonthBuyCount,
+          monthlySellCount: localMonthSellCount,
+        ));
+      });
     } catch (e) {
       debugPrint('⚠️ [DashboardCubit] Error in _loadLocalActivityData: $e');
     }

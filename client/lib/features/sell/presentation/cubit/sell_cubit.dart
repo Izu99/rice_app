@@ -44,7 +44,8 @@ class SellCubit extends Cubit<SellState> {
 
       final userResult = await _authRepository.getCurrentUser();
       userResult.fold(
-        (failure) => Log.w('Could not get user: ${failure.message}', tag: 'SELL'),
+        (failure) =>
+            Log.w('Could not get user: ${failure.message}', tag: 'SELL'),
         (user) {
           _userId = user.id;
           if (_companyId.isEmpty) _companyId = user.companyId;
@@ -119,8 +120,7 @@ class SellCubit extends Cubit<SellState> {
               .where((item) =>
                   item.currentQuantity > 0 &&
                   item.type == state.selectedItemType)
-              .map((entity) =>
-                  StockItemModel.fromEntity(entity, _companyId))
+              .map((entity) => StockItemModel.fromEntity(entity, _companyId))
               .toList();
           emit(state.copyWith(availableStock: availableStock));
         },

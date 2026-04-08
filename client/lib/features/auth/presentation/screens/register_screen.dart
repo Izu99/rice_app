@@ -20,7 +20,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Company Details
   final _companyNameController = TextEditingController();
   final _companyAddressController = TextEditingController();
@@ -74,9 +74,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             email: _companyEmailController.text.trim().isEmpty
                 ? null
                 : _companyEmailController.text.trim(),
-            registrationNumber: _registrationNumberController.text.trim().isEmpty
-                ? null
-                : _registrationNumberController.text.trim(),
+            registrationNumber:
+                _registrationNumberController.text.trim().isEmpty
+                    ? null
+                    : _registrationNumberController.text.trim(),
             district: _selectedDistrict,
           );
     }
@@ -120,11 +121,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionHeader('Company Information', Icons.business_rounded),
+                          _buildSectionHeader(
+                              'Company Information', Icons.business_rounded),
                           const SizedBox(height: 12),
                           _buildCompanyDetailsCard(),
                           const SizedBox(height: 24),
-                          _buildSectionHeader('Owner Details', Icons.person_rounded),
+                          _buildSectionHeader(
+                              'Owner Details', Icons.person_rounded),
                           const SizedBox(height: 12),
                           _buildOwnerDetailsCard(),
                           const SizedBox(height: 24),
@@ -164,7 +167,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         centerTitle: true,
         title: Text(
           SiStrings.registerCompany,
-          style: AppTextStyles.h3.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+          style: AppTextStyles.h3
+              .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         background: Container(
           decoration: const BoxDecoration(
@@ -244,7 +248,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               label: 'Company Name',
               hint: 'Enter company name',
               prefixIcon: Icons.business_rounded,
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 16),
             CustomTextField(
@@ -252,7 +257,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               label: 'Company Address',
               hint: 'Enter address',
               prefixIcon: Icons.location_on_rounded,
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -260,7 +266,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               decoration: InputDecoration(
                 labelText: 'District',
                 prefixIcon: const Icon(Icons.map_rounded),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFFE8E8EE)),
@@ -282,7 +289,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hint: '07x xxxxxxx',
               prefixIcon: Icons.phone_rounded,
               keyboardType: TextInputType.phone,
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 16),
             CustomTextField(
@@ -318,7 +326,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               label: 'Owner Full Name',
               hint: 'Enter owner name',
               prefixIcon: Icons.person_rounded,
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 16),
             CustomTextField(
@@ -327,7 +336,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hint: 'Login phone number',
               prefixIcon: Icons.phone_android_rounded,
               keyboardType: TextInputType.phone,
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
           ],
         ),
@@ -354,7 +364,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) return 'Required';
@@ -371,12 +382,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               obscureText: _obscureConfirmPassword,
               suffix: IconButton(
                 icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                  _obscureConfirmPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                   size: 20,
                 ),
-                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                onPressed: () => setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword),
               ),
-              validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Required' : null,
             ),
           ],
         ),
@@ -393,7 +408,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 0,
         ),
         child: Text(

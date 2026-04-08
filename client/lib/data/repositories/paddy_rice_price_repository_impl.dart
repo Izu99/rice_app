@@ -38,7 +38,8 @@ class PaddyRicePriceRepositoryImpl implements PaddyRicePriceRepository {
       return Right(model.toEntity());
     } catch (e) {
       if (e is ValidationException) {
-        return Left(ValidationFailure(message: e.message, fieldErrors: e.errors));
+        return Left(
+            ValidationFailure(message: e.message, fieldErrors: e.errors));
       } else if (e is ServerException) {
         return Left(ServerFailure(message: e.message, code: e.statusCode));
       } else if (e is NetworkException) {
@@ -103,7 +104,8 @@ class PaddyRicePriceRepositoryImpl implements PaddyRicePriceRepository {
   }
 
   @override
-  Future<Either<Failure, List<DistrictWithPricesResponse>>> getDistrictsList() async {
+  Future<Either<Failure, List<DistrictWithPricesResponse>>>
+      getDistrictsList() async {
     if (!await networkInfo.isConnected) return const Left(NetworkFailure());
     try {
       final districts = await remoteDataSource.getDistrictsList();
@@ -160,7 +162,8 @@ class PaddyRicePriceRepositoryImpl implements PaddyRicePriceRepository {
       if (e is NotFoundException) {
         return const Left(NotFoundFailure(message: 'Price not found'));
       } else if (e is ValidationException) {
-        return Left(ValidationFailure(message: e.message, fieldErrors: e.errors));
+        return Left(
+            ValidationFailure(message: e.message, fieldErrors: e.errors));
       } else if (e is ServerException) {
         return Left(ServerFailure(message: e.message, code: e.statusCode));
       } else if (e is NetworkException) {

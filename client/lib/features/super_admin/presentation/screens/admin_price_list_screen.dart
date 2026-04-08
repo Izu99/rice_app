@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../features/price_management/presentation/cubit/price_management_cubit.dart';
 import '../../../../features/price_management/presentation/cubit/price_management_state.dart';
 import '../../../../features/price_management/presentation/widgets/price_list_item.dart';
@@ -47,6 +48,24 @@ class _AdminPriceListScreenState extends State<AdminPriceListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
+      appBar: HAppBar(
+        title: 'Price Management',
+        subtitle: 'Admin Control Panel',
+        onBack: () => context.pop(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_box_rounded,
+                color: AppColors.adminPrimary, size: 24),
+            onPressed: () => context.pushNamed('addPrice'),
+            tooltip: 'Add Price',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      bottomNavigationBar:
+          BlocBuilder<PriceManagementCubit, PriceManagementState>(
+        builder: (context, state) => _buildBottomStatusBar(state.prices.length),
+      ),
       body: BlocBuilder<PriceManagementCubit, PriceManagementState>(
         builder: (context, state) {
           return LoadingOverlay(
@@ -56,7 +75,6 @@ class _AdminPriceListScreenState extends State<AdminPriceListScreen> {
               color: AppColors.adminPrimary,
               child: CustomScrollView(
                 slivers: [
-                  _buildStickyHeader(context),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -114,33 +132,49 @@ class _AdminPriceListScreenState extends State<AdminPriceListScreen> {
     );
   }
 
-  Widget _buildStickyHeader(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-        onPressed: () => context.pop(),
+  Widget _buildBottomStatusBar(int count) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
-      title: const Text(
-        'Price List',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.list_alt_rounded,
+                  size: 18, color: AppColors.adminPrimary),
+              const SizedBox(width: 8),
+              Text(
+                'Total Items: $count',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+            ],
+          ),
+          const Text(
+            'LKR/KG',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: AppColors.adminPrimary,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
-          onPressed: () => _loadPrices(),
-          tooltip: 'Refresh',
-        ),
-      ],
     );
   }
 
@@ -290,7 +324,8 @@ class _AdminPriceListScreenState extends State<AdminPriceListScreen> {
                 color: AppColors.error.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.error_outline, size: 48, color: AppColors.error),
+              child:
+                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
             ),
             const SizedBox(height: 16),
             Text(

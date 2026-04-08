@@ -39,7 +39,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
 
     // Load customer detail
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -107,7 +107,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    state.errorMessage ?? 'ගනුදෙනුකරු හමු නොවීය', // Customer not found
+                    state.errorMessage ??
+                        'ගනුදෙනුකරු හමු නොවීය', // Customer not found
                     style: AppTextStyles.bodyLarge,
                   ),
                   const SizedBox(height: 24),
@@ -144,7 +145,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 children: [
                   _buildInfoTab(customer),
                   _buildTransactionsTab(state),
-                  _buildBalanceTab(customer),
                 ],
               ),
             ),
@@ -157,198 +157,72 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
 
   Widget _buildAppBar(CustomerEntity customer) {
     return SliverAppBar(
-      expandedHeight: 220,
-      pinned: true,
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      iconTheme: const IconThemeData(color: Colors.white),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.primaryGradient,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+            color: Colors.white, size: 20),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: 17,
+            backgroundColor: Colors.white.withOpacity(0.18),
+            child: Text(
+              customer.initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: -30,
-                right: -30,
-                child: CircleAvatar(
-                  radius: 80,
-                  backgroundColor: Colors.white.withOpacity(0.04),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  customer.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Positioned(
-                bottom: 40,
-                left: -20,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.white.withOpacity(0.03),
+                Text(
+                  customer.customerType.sinhalaName,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.75),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 2,
-                        ),
-                      ),
-                      child: CircleAvatar(
-                        radius: 42,
-                        backgroundColor: Colors.white.withOpacity(0.12),
-                        child: Text(
-                          customer.initials,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      customer.name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        customer.customerType.sinhalaName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
       actions: [
-        _buildAppBarAction(
-          icon: Icons.edit_rounded,
-          onTap: () => _editCustomer(customer),
+        IconButton(
+          icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+          onPressed: () => _editCustomer(customer),
+          tooltip: 'සංස්කරණය',
         ),
-        const SizedBox(width: 8),
-        _buildAppBarAction(
-          icon: Icons.more_vert_rounded,
-          onTap: () => _showMoreOptions(context, customer),
+        IconButton(
+          icon: const Icon(Icons.delete_outline_rounded,
+              color: Colors.white, size: 20),
+          onPressed: () => _deleteCustomer(customer),
+          tooltip: 'මකා දමන්න',
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 4),
       ],
-    );
-  }
-
-  Widget _buildAppBarAction({required IconData icon, required VoidCallback onTap}) {
-    return Material(
-      color: Colors.white.withOpacity(0.12),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-      ),
-    );
-  }
-
-  void _showMoreOptions(BuildContext context, CustomerEntity customer) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8E8EE),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildOptionTile(
-              icon: Icons.share_rounded,
-              title: 'බෙදාගන්න', // Share
-              onTap: () {
-                Navigator.pop(context);
-                _shareCustomer(customer);
-              },
-            ),
-            _buildOptionTile(
-              icon: Icons.delete_outline_rounded,
-              title: 'මකා දමන්න', // Delete
-              color: const Color(0xFFE53935),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteCustomer(customer);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionTile({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    final effectiveColor = color ?? AppColors.textPrimary;
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: effectiveColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: effectiveColor, size: 20),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: effectiveColor,
-          fontWeight: FontWeight.w700,
-          fontSize: 15,
-        ),
-      ),
-      onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      pinned: true,
+      elevation: 2,
+      backgroundColor: AppColors.primary,
+      surfaceTintColor: Colors.transparent,
+      iconTheme: const IconThemeData(color: Colors.white),
     );
   }
 
@@ -356,10 +230,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     return SliverToBoxAdapter(
       child: Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -376,15 +250,16 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 icon: Icons.account_balance_wallet_rounded,
                 label: 'ශේෂය (Balance)',
                 value: customer.formattedBalance,
-                valueColor:
-                    customer.balance >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFE53935),
+                valueColor: const Color(0xFFE53935), // Red color for Balance
               ),
             ),
+            const SizedBox(width: 8),
             Container(
               width: 1,
-              height: 40,
+              height: 32,
               color: const Color(0xFFF0F0F5),
             ),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildStatItem(
                 icon: Icons.insights_rounded,
@@ -393,7 +268,70 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 valueColor: _getBalanceStatusColor(customer.balance),
               ),
             ),
+            if (customer.balance != 0) ...[
+              const SizedBox(width: 12),
+              _buildPayActionBtn(
+                label: customer.balance < 0 ? 'ගෙවන්න' : 'ලබාගන්න',
+                icon: customer.balance < 0
+                    ? Icons.payments_rounded
+                    : Icons.move_to_inbox_rounded,
+                color: const Color(
+                    0xFF4CAF50), // Green for Pay money (any direction)
+                onTap: () {
+                  final cubit = context.read<CustomersCubit>();
+                  final txnsWithBalance = cubit.state.customerTransactions
+                      .where((t) =>
+                          ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
+                      .toList();
+
+                  if (txnsWithBalance.isNotEmpty) {
+                    _showPaymentDialog(context, txnsWithBalance.first);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')),
+                    );
+                  }
+                },
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPayActionBtn({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 4,
+      shadowColor: color.withOpacity(0.4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -416,11 +354,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         Icon(icon, color: const Color(0xFF8E8E93), size: 20),
         const SizedBox(height: 8),
         FittedBox(
-          fit: BoxFit.scaleDown,
           child: Text(
             value,
             style: TextStyle(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.bold,
               fontSize: 16,
               color: valueColor ?? AppColors.textPrimary,
             ),
@@ -457,9 +394,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             ),
             dividerColor: Colors.transparent,
             tabs: const [
-              Tab(child: Text('විස්තර', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))), // Info
-              Tab(child: Text('ඉතිහාසය', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))), // History
-              Tab(child: Text('ශේෂය', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13))), // Balance
+              Tab(
+                  child: Text('විස්තර',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 13))), // Info
+              Tab(
+                  child: Text('ගනුදෙනු ඉතිහාසය',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13))), // History
             ],
           ),
         ),
@@ -669,10 +612,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             ),
             const SizedBox(height: 16),
             const Text(
-              'ගනුදෙනු කිසිවක් හමු නොවීය', // No transactions found
+              'ගනුදෙනු ඉතිහාසය හමු නොවීය', // No transactions found
               style: TextStyle(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
             ),
@@ -691,6 +634,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         final color = isBuy ? const Color(0xFFE53935) : const Color(0xFF4CAF50);
         final balance = (txn['balance'] as num?)?.toDouble() ?? 0.0;
         final hasBalance = balance > 0;
+        final totalAmount = (txn['total_amount'] ?? txn['totalAmount'] ?? 0.0)
+            .toString(); // Handle potential null or different keys
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -702,7 +647,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           child: Column(
             children: [
               ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 leading: Container(
                   width: 48,
                   height: 48,
@@ -711,7 +657,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
-                    isBuy ? Icons.call_received_rounded : Icons.call_made_rounded,
+                    isBuy
+                        ? Icons.call_received_rounded
+                        : Icons.call_made_rounded,
                     color: color,
                     size: 24,
                   ),
@@ -719,7 +667,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 title: Text(
                   isBuy ? 'මිලදී ගැනීම' : 'විකිණීම', // Purchase / Sale
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                     fontSize: 15,
                   ),
@@ -729,37 +677,57 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                   children: [
                     const SizedBox(height: 4),
                     Text(
-                      DateFormat('yyyy MMM dd').format(DateTime.parse(txn['date'] ?? txn['transactionDate'])),
+                      DateFormat('yyyy MMM dd').format(DateTime.parse(
+                          txn['date'] ??
+                              txn['transactionDate'] ??
+                              DateTime.now().toIso8601String())),
                       style: const TextStyle(
                         color: Color(0xFF8E8E93),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (hasBalance) ...[
-                      const SizedBox(height: 4),
+                    const SizedBox(height: 4),
+                    if (hasBalance)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: AppColors.error.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'හිඟ මුදල: Rs. $balance', // Due Amount
+                          'හිඟ: Rs. $balance',
                           style: const TextStyle(
                             color: AppColors.error,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.success.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          '✓ ගෙවා ඇත', // Paid
+                          style: TextStyle(
+                            color: AppColors.success,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ],
                   ],
                 ),
                 trailing: Text(
-                  'Rs. ${txn['total_amount']}',
+                  'Rs. $totalAmount',
                   style: TextStyle(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                     color: color,
                     fontSize: 16,
                   ),
@@ -773,14 +741,24 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                     children: [
                       OutlinedButton.icon(
                         onPressed: () => _showPaymentDialog(context, txn),
-                        icon: Icon(isBuy ? Icons.payments_rounded : Icons.move_to_inbox_rounded, size: 16),
-                        label: Text(isBuy ? 'ගෙවන්න' : 'ලබාගන්න'), // Pay / Receive
+                        icon: Icon(
+                            isBuy
+                                ? Icons.payments_rounded
+                                : Icons.move_to_inbox_rounded,
+                            size: 16),
+                        label:
+                            Text(isBuy ? 'ගෙවන්න' : 'ලබාගන්න'), // Pay / Receive
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isBuy ? AppColors.error : AppColors.success,
-                          side: BorderSide(color: isBuy ? AppColors.error : AppColors.success),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          foregroundColor:
+                              isBuy ? AppColors.error : AppColors.success,
+                          side: BorderSide(
+                              color:
+                                  isBuy ? AppColors.error : AppColors.success),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 0),
                           minimumSize: const Size(0, 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
                         ),
                       ),
                     ],
@@ -793,66 +771,20 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     );
   }
 
-  Widget _buildBalanceTab(CustomerEntity customer) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: customer.balance >= 0
-                    ? [AppColors.success, AppColors.success.withOpacity(0.7)]
-                    : [AppColors.error, AppColors.error.withOpacity(0.7)],
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                const Text('වත්මන් ශේෂය', // Current Balance
-                    style: TextStyle(color: Colors.white70)),
-                const SizedBox(height: 8),
-                FittedBox(
-                  child: Text(
-                    customer.formattedBalance,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _getSinhalaBalanceStatus(customer.balance).toUpperCase(),
-                  style: const TextStyle(
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomActions(CustomerEntity customer) {
     final hasPayableBalance = customer.balance < 0;
     final hasReceivableBalance = customer.balance > 0;
+    final hasBalance = hasPayableBalance || hasReceivableBalance;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
@@ -860,28 +792,33 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (hasPayableBalance || hasReceivableBalance) ...[
+            if (hasBalance) ...[
               _buildActionBtn(
-                label: hasPayableBalance ? 'හිඟ මුදල ගෙවන්න' : 'හිඟ මුදල ලබාගන්න', // Pay / Receive Due
-                icon: hasPayableBalance ? Icons.payments_rounded : Icons.move_to_inbox_rounded,
+                label: hasPayableBalance ? 'හිඟ මුදල ගෙවන්න' : 'හිඟ මුදල ලබාගන්න',
+                icon: hasPayableBalance
+                    ? Icons.payments_rounded
+                    : Icons.move_to_inbox_rounded,
                 color: hasPayableBalance ? AppColors.error : AppColors.success,
                 onTap: () {
-                  // If we have transactions, pay the most recent one with balance
-                  final cubit = context.read<CustomersCubit>();
-                  final txnsWithBalance = cubit.state.customerTransactions
-                      .where((t) => ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
+                  final txnsWithBalance = context
+                      .read<CustomersCubit>()
+                      .state
+                      .customerTransactions
+                      .where((t) =>
+                          ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
                       .toList();
-                  
                   if (txnsWithBalance.isNotEmpty) {
                     _showPaymentDialog(context, txnsWithBalance.first);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')), // No pending transactions
+                      const SnackBar(
+                          content:
+                              Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')),
                     );
                   }
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
             ],
             Row(
               children: [
@@ -895,7 +832,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                     ),
                   ),
                 if (customer.customerType.canBuy && customer.customerType.canSell)
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                 if (customer.customerType.canSell)
                   Expanded(
                     child: _buildActionBtn(
@@ -907,6 +844,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                   ),
               ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -918,89 +856,151 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     final type = txn['type']?.toString().toLowerCase() ?? 'buy';
     final isBuy = type == 'buy';
     final transactionId = txn['id'] ?? txn['_id'];
-    
-    final TextEditingController amountController = TextEditingController(text: balance.toString());
-    final TextEditingController notesController = TextEditingController();
-    PaymentMethod selectedMethod = PaymentMethod.cash;
+    final txnNumber =
+        txn['transactionNumber'] ?? txn['transaction_number'] ?? 'N/A';
+    final formattedBalance =
+        'Rs. ${balance.toStringAsFixed(2).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',')}';
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isBuy ? 'ගෙවීම සිදු කරන්න' : 'මුදල් ලබාගන්න'), // Make Payment / Receive Money
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      builder: (dialogContext) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: BoxDecoration(
+                color: AppColors.success.withOpacity(0.08),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20)),
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.payments_rounded,
+                      size: 32, color: AppColors.success),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                children: [
+                  Text(
+                    isBuy ? 'ගෙවීම් තහවුරු කරන්න' : 'ලැබීම් තහවුරු කරන්න',
+                    style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1C1C2E)),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F6FA),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('ගනුදෙනු අංකය',
+                                style: TextStyle(
+                                    color: Color(0xFF8E8E93), fontSize: 13)),
+                            Text(txnNumber,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('හිඟ මුදල',
+                                style: TextStyle(
+                                    color: Color(0xFF8E8E93), fontSize: 13)),
+                            Text(
+                              formattedBalance,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: isBuy
+                                      ? AppColors.error
+                                      : AppColors.success),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isBuy
+                        ? 'ඔබ $formattedBalance ගෙවීම සිදු කිරීමට සූදානම්ද?'
+                        : 'ඔබ $formattedBalance ලැබීම් සිදු කිරීමට සූදානම්ද?',
+                    style: const TextStyle(
+                        color: Color(0xFF8E8E93), fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding:
+            const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
             children: [
-              Text(
-                'ගනුදෙනු අංකය: ${txn['transactionNumber'] ?? txn['transaction_number'] ?? 'N/A'}',
-                style: AppTextStyles.labelSmall,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'මුදල (Amount)',
-                  prefixText: 'Rs. ',
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('නැත'),
                 ),
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<PaymentMethod>(
-                value: selectedMethod,
-                decoration: const InputDecoration(
-                  labelText: 'ගෙවීම් ක්‍රමය', // Payment Method
-                  border: OutlineInputBorder(),
-                ),
-                items: PaymentMethod.values.map((method) {
-                  return DropdownMenuItem(
-                    value: method,
-                    child: Text(method.sinhalaName),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) selectedMethod = value;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: notesController,
-                decoration: const InputDecoration(
-                  labelText: 'සටහන් (Notes)',
-                  border: OutlineInputBorder(),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    context.read<CustomersCubit>().addPayment(
+                          transactionId: transactionId,
+                          amount: balance,
+                          method: PaymentMethod.cash,
+                          notes: null,
+                        );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: const Text('ඔව්, ගෙවන්න',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('අවලංගු කරන්න'), // Cancel
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final amount = double.tryParse(amountController.text);
-              if (amount == null || amount <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('කරුණාකර වලංගු මුදලක් ඇතුළත් කරන්න')), // Valid amount
-                );
-                return;
-              }
-              
-              Navigator.pop(context);
-              context.read<CustomersCubit>().addPayment(
-                transactionId: transactionId,
-                amount: amount,
-                method: selectedMethod,
-                notes: notesController.text,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isBuy ? AppColors.error : AppColors.success,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('තහවුරු කරන්න'), // Confirm
           ),
         ],
       ),
@@ -1015,27 +1015,29 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(18),
-      elevation: 4,
-      shadowColor: color.withOpacity(0.4),
+      borderRadius: BorderRadius.circular(14),
+      elevation: 2,
+      shadowColor: color.withOpacity(0.35),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: 46,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  letterSpacing: 0.5,
+              Icon(icon, color: Colors.white, size: 18),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -1089,21 +1091,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Future<void> _deleteCustomer(CustomerEntity customer) async {
-    final confirmed = await ConfirmationDialog.show(
+    final confirmed = await ConfirmationDialog.showDelete(
       context,
-      title: 'ගනුදෙනුකරු මකා දමන්නද?', // Delete Customer?
-      message: '${customer.name} මකා දැමීමට ඔබට විශ්වාසද?',
-      confirmLabel: 'මකා දමන්න',
-      isDangerous: true,
+      title: 'ගනුදෙනුකරු මකා දමන්නද?',
+      itemName: customer.name,
     );
 
     if (confirmed && mounted) {
       context.read<CustomersCubit>().deleteCustomer(customer.id);
     }
-  }
-
-  void _shareCustomer(CustomerEntity customer) {
-    debugPrint('Sharing ${customer.name}');
   }
 
   void _continueToBuy(CustomerEntity customer) {

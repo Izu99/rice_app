@@ -41,7 +41,8 @@ class AuthRepositoryImpl implements AuthRepository {
         await tokenStorage.saveCompany(authResponse.company!);
       }
 
-      Log.auth('Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
+      Log.auth(
+          'Login success: user=${userEntity.name}, companyId=${userEntity.companyId}');
       return Right(userEntity);
     } catch (e) {
       if (e is AuthException) {
@@ -49,17 +50,17 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       if (e is ServerException) return Left(ServerFailure(message: e.message));
       return Left(UnknownFailure(message: e.toString()));
-      }
-      }
+    }
+  }
 
-      @override
-      Future<Either<Failure, UserEntity>> googleLogin({
-      required String idToken,
-      }) async {
-      if (!await networkInfo.isConnected) {
+  @override
+  Future<Either<Failure, UserEntity>> googleLogin({
+    required String idToken,
+  }) async {
+    if (!await networkInfo.isConnected) {
       return const Left(NetworkFailure(message: 'No internet connection'));
-      }
-      try {
+    }
+    try {
       final authResponse = await remoteDataSource.googleLogin(idToken: idToken);
       await tokenStorage.saveToken(authResponse.accessToken);
       await tokenStorage.saveRefreshToken(authResponse.refreshToken);
@@ -72,17 +73,18 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       return Right(userEntity);
-      } catch (e) {
+    } catch (e) {
       if (e is AuthException) {
         return Left(AuthFailure(message: e.message, code: e.statusCode));
       }
       if (e is ServerException) return Left(ServerFailure(message: e.message));
       return Left(UnknownFailure(message: e.toString()));
-      }
-      }
+    }
+  }
 
-      @override
-      Future<Either<Failure, UserEntity>> register({required String name,
+  @override
+  Future<Either<Failure, UserEntity>> register(
+      {required String name,
       required String phone,
       required String password,
       required String companyId,

@@ -43,14 +43,14 @@ class TransactionDetailCubit extends Cubit<TransactionDetailState> {
     emit(state.copyWith(status: TransactionDetailStatus.loading));
 
     // We need to get the Model directly for full details or convert Entity back
-    // For simplicity, let's use the RemoteDataSource directly if needed, 
+    // For simplicity, let's use the RemoteDataSource directly if needed,
     // but Repository is better.
     // Let's assume Repository returns Entity, but we might need Model for items detail.
     // Actually, Entity has items too.
-    
+
     // I will check the transactionRemoteDataSource since getTransactionById in Repo returns Entity.
     // I'll update Repo to allow getting the Model if possible, or just use Entity.
-    
+
     final result = await _repository.getTransactionById(id);
 
     result.fold(
@@ -65,17 +65,17 @@ class TransactionDetailCubit extends Cubit<TransactionDetailState> {
           // Accessing remote DS via repository impl or just assuming Entity is enough.
           // For now, let's use the entity and see if it's enough.
           // But wait, the user wants "Full Detail".
-          
-          // I'll use a trick: cast repository to implementation if I must, 
+
+          // I'll use a trick: cast repository to implementation if I must,
           // or better, update repository interface.
           // For now, I'll just use the Entity.
-          
+
           // Actually, I'll update the TransactionModel to be more complete and use it.
           // I will create a new method in repo to get full details.
         } catch (e) {
           // fallback
         }
-        
+
         // Converting entity back to a simplified model for the UI if needed
         // Or just using Entity. Let's use Entity for now.
       },

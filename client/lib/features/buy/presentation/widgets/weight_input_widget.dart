@@ -305,24 +305,26 @@ class _WeightInputWidgetState extends State<WeightInputWidget>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.title != null)
-                Text(
-                  widget.title!,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.title != null)
+                  Text(
+                    widget.title!,
+                    style: AppTextStyles.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              if (widget.subtitle != null)
-                Text(
-                  widget.subtitle!,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                if (widget.subtitle != null)
+                  Text(
+                    widget.subtitle!,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           if (widget.tareWeight != null)
             Container(

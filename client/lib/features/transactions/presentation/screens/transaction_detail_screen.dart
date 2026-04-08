@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../data/models/transaction_model.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../injection_container.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 
 class TransactionDetailScreen extends StatefulWidget {
   final String transactionId;
@@ -14,7 +17,8 @@ class TransactionDetailScreen extends StatefulWidget {
   const TransactionDetailScreen({super.key, required this.transactionId});
 
   @override
-  State<TransactionDetailScreen> createState() => _TransactionDetailScreenState();
+  State<TransactionDetailScreen> createState() =>
+      _TransactionDetailScreenState();
 }
 
 class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
@@ -38,7 +42,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     try {
       final repo = sl<TransactionRepository>();
       final result = await repo.getFullTransactionById(widget.transactionId);
-      
+
       if (mounted) {
         result.fold(
           (failure) => setState(() {
@@ -63,20 +67,23 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      appBar: HAppBar(
-        title: 'Transaction Details',
-        subtitle: _transaction?.transactionNumber,
-        actions: [
-          if (_transaction != null)
-            IconButton(
-              icon: const Icon(Icons.print, color: Color(0xFF1C1C2E)),
-              onPressed: () {
-                // TODO: Implement printing
-              },
-            ),
-        ],
+    context.select((ProfileCubit c) => c.state.language);
+    return AppPageScaffold(
+      title: SiStrings.transactionDetails,
+      subtitle: _transaction?.transactionNumber,
+      actions: [
+        if (_transaction != null)
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () {
+              // TODO: Implement printing
+            },
+          ),
+      ],
+      bottomBar: AppSubBottomBar(
+        trailingIcon: _transaction != null ? Icons.print_outlined : null,
+        onTrailing: _transaction != null ? () {} : null,
+        trailingTooltip: SiStrings.isSinhala ? 'මුද්‍රණය' : 'Print',
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -95,14 +102,17 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           const SizedBox(height: 16),
           Text(_error!, style: AppTextStyles.bodyLarge),
           const SizedBox(height: 24),
-          ElevatedButton(onPressed: _loadTransaction, child: const Text('නැවත උත්සාහ කරන්න')), // Retry
+          ElevatedButton(
+              onPressed: _loadTransaction,
+              child: const Text('නැවත උත්සාහ කරන්න')), // Retry
         ],
       ),
     );
   }
 
   Widget _buildTransactionDetails() {
-    if (_transaction == null) return const Center(child: Text('තොරතුරු හමු නොවීය')); // No data found
+    if (_transaction == null)
+      return const Center(child: Text('තොරතුරු හමු නොවීය')); // No data found
     final t = _transaction!;
 
     return SingleChildScrollView(
@@ -130,9 +140,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isBuy ? AppColors.error.withOpacity(0.1) : AppColors.success.withOpacity(0.1),
+        color: isBuy
+            ? AppColors.error.withOpacity(0.1)
+            : AppColors.success.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isBuy ? AppColors.error.withOpacity(0.2) : AppColors.success.withOpacity(0.2)),
+        border: Border.all(
+            color: isBuy
+                ? AppColors.error.withOpacity(0.2)
+                : AppColors.success.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -147,8 +162,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isBuy ? 'Purchase Order' : 'Sales Invoice',
-                  style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
+                  isBuy ? SiStrings.purchaseOrder : SiStrings.salesInvoice,
+                  style: AppTextStyles.titleMedium
+                      .copyWith(fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
@@ -167,7 +183,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             child: Text(
               t.status.sinhalaName.toUpperCase(),
-              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -187,18 +206,22 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               children: [
                 const Icon(Icons.person_outline, color: AppColors.primary),
                 const SizedBox(width: 8),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Customer Information', 
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    SiStrings.customerInformation,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             const Divider(height: 24),
-            Text(t.customerName ?? 'අනියම් ගනුදෙනුකරු', style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)), // Walk-in Customer
-            if (t.customerPhone != null) Text(t.customerPhone!, style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey)),
+            Text(t.customerName ?? 'අනියම් ගනුදෙනුකරු',
+                style: AppTextStyles.bodyLarge
+                    .copyWith(fontWeight: FontWeight.bold)), // Walk-in Customer
+            if (t.customerPhone != null)
+              Text(t.customerPhone!,
+                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey)),
           ],
         ),
       ),
@@ -217,13 +240,13 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               children: [
                 Icon(Icons.list_alt, color: AppColors.primary),
                 SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Items List', 
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                const Expanded(
+                  child: Text(
+                    'Items List',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
               ],
             ),
           ),
@@ -236,14 +259,19 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             itemBuilder: (context, index) {
               final item = t.items[index];
               return ListTile(
-                title: Text(item.itemName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('මලු ${item.bags} • ${item.quantity.toStringAsFixed(2)} kg'),
+                title: Text(item.itemName,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                    'මලු ${item.bags} • ${item.quantity.toStringAsFixed(2)} kg'),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Rs. ${item.totalAmount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('@ Rs. ${item.pricePerKg.toStringAsFixed(2)}/kg', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    Text('Rs. ${item.totalAmount.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text('@ Rs. ${item.pricePerKg.toStringAsFixed(2)}/kg',
+                        style:
+                            const TextStyle(fontSize: 10, color: Colors.grey)),
                   ],
                 ),
               );
@@ -258,7 +286,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 const Expanded(
                   child: Text('Total Weight', style: TextStyle(fontSize: 14)),
                 ),
-                Text('${t.totalWeight.toStringAsFixed(2)} kg', style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold)),
+                Text('${t.totalWeight.toStringAsFixed(2)} kg',
+                    style: AppTextStyles.titleSmall
+                        .copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -281,7 +311,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 SizedBox(width: 8),
                 const Expanded(
                   child: Text(
-                    'Payment Summary', 
+                    'Payment Summary',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -290,10 +320,12 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
             ),
             const Divider(height: 24),
             _buildAmountRow('Subtotal', t.subtotal),
-            if (t.discount > 0) _buildAmountRow('Discount', -t.discount, color: AppColors.error),
+            if (t.discount > 0)
+              _buildAmountRow('Discount', -t.discount, color: AppColors.error),
             const Divider(),
             _buildAmountRow('Total Amount', t.totalAmount, isBold: true),
-            _buildAmountRow('Paid Amount', t.paidAmount, color: AppColors.success),
+            _buildAmountRow('Paid Amount', t.paidAmount,
+                color: AppColors.success),
             const Divider(),
             _buildAmountRow(
               t.dueAmount > 0 ? 'Balance Due' : 'Balance',
@@ -307,7 +339,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
-  Widget _buildAmountRow(String label, double amount, {bool isBold = false, Color? color}) {
+  Widget _buildAmountRow(String label, double amount,
+      {bool isBold = false, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -316,7 +349,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         children: [
           Expanded(
             child: Text(
-              label, 
+              label,
               style: TextStyle(
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                 fontSize: isBold ? 16 : 14,
@@ -351,7 +384,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 SizedBox(width: 8),
                 const Expanded(
                   child: Text(
-                    'Notes', 
+                    'Notes',
                     style: TextStyle(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -368,10 +401,14 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Color _getStatusColor(TransactionStatus status) {
     switch (status) {
-      case TransactionStatus.completed: return AppColors.success;
-      case TransactionStatus.pending: return AppColors.warning;
-      case TransactionStatus.cancelled: return AppColors.error;
-      default: return Colors.grey;
+      case TransactionStatus.completed:
+        return AppColors.success;
+      case TransactionStatus.pending:
+        return AppColors.warning;
+      case TransactionStatus.cancelled:
+        return AppColors.error;
+      default:
+        return Colors.grey;
     }
   }
 }

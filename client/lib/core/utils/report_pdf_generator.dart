@@ -107,7 +107,8 @@ class ReportPdfGenerator {
     );
   }
 
-  static pw.Widget _summaryCard(String label, double value, {bool isNetProfit = false}) {
+  static pw.Widget _summaryCard(String label, double value,
+      {bool isNetProfit = false}) {
     return pw.Expanded(
       child: pw.Container(
         padding: const pw.EdgeInsets.all(12),
@@ -120,9 +121,9 @@ class ReportPdfGenerator {
           crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
             pw.Text(
-              label, 
+              label,
               style: pw.TextStyle(
-                fontSize: 11, 
+                fontSize: 11,
                 color: PdfColors.black,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -132,9 +133,11 @@ class ReportPdfGenerator {
             pw.Text(
               'Rs. ${value.toStringAsFixed(0)}',
               style: pw.TextStyle(
-                fontSize: 14, 
+                fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
-                color: isNetProfit ? (value >= 0 ? PdfColors.black : PdfColors.red800) : PdfColors.black,
+                color: isNetProfit
+                    ? (value >= 0 ? PdfColors.black : PdfColors.red800)
+                    : PdfColors.black,
               ),
             ),
           ],
@@ -143,7 +146,8 @@ class ReportPdfGenerator {
     );
   }
 
-  static pw.Widget _buildTransactionsTable(List<TransactionEntity> transactions) {
+  static pw.Widget _buildTransactionsTable(
+      List<TransactionEntity> transactions) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.grey700, width: 0.8),
       columnWidths: {
@@ -166,7 +170,8 @@ class ReportPdfGenerator {
               children: [
                 _tableCell(t.isBuyTransaction ? 'Buy' : 'Sell'),
                 _tableCell(t.customerName),
-                _tableCell(DateFormat('yyyy-MM-dd hh:mm a').format(t.transactionDate)),
+                _tableCell(
+                    DateFormat('yyyy-MM-dd hh:mm a').format(t.transactionDate)),
                 _tableCell('Rs. ${t.totalAmount.toStringAsFixed(0)}',
                     align: pw.TextAlign.right),
               ],

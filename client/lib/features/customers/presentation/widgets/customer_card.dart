@@ -203,8 +203,7 @@ class CustomerCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          _buildTypeBadge(customer.customerType,
-                              compact: true),
+                          _buildTypeBadge(customer.customerType, compact: true),
                         ],
                       ),
                       Text(
@@ -247,8 +246,9 @@ class CustomerCard extends StatelessWidget {
           fit: BoxFit.scaleDown,
           child: Text(
             type.displayName,
-            style: (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
-                .copyWith(
+            style:
+                (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
+                    .copyWith(
               color: type.color,
               fontWeight: FontWeight.w600,
             ),
@@ -283,9 +283,10 @@ class CustomerCard extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 customer.formattedBalance,
-                style:
-                    (compact ? AppTextStyles.labelSmall : AppTextStyles.labelMedium)
-                        .copyWith(
+                style: (compact
+                        ? AppTextStyles.labelSmall
+                        : AppTextStyles.labelMedium)
+                    .copyWith(
                   color: color,
                   fontWeight: FontWeight.w600,
                 ),
@@ -297,7 +298,6 @@ class CustomerCard extends StatelessWidget {
     );
   }
 }
-
 
 /// Action button for customer card
 class _ActionButton extends StatelessWidget {

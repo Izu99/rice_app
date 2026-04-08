@@ -11,7 +11,7 @@ class NumberFormatter {
     // Add spaces as thousand separators
     final chars = integerPart.split('').reversed.toList();
     final result = <String>[];
-    
+
     for (int i = 0; i < chars.length; i++) {
       if (i > 0 && i % 3 == 0) {
         result.add(' ');
@@ -37,7 +37,7 @@ class NumberFormatter {
 
     final chars = formatted.split('').reversed.toList();
     final result = <String>[];
-    
+
     for (int i = 0; i < chars.length; i++) {
       if (i > 0 && i % 3 == 0) {
         result.add(' ');

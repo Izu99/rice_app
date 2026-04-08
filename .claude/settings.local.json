@@ -8,7 +8,13 @@
       "Bash(flutter pub:*)",
       "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && grep -A 20 \"class.*Cubit.*extends\" {} | grep \"reset\\\\|close\" || echo \"NO RESET FOUND\"')",
       "Bash(xargs grep:*)",
-      "Bash(flutter doctor:*)"
+      "Bash(flutter doctor:*)",
+      "Read(//c/Users/isuru/AppData/Roaming/**)",
+      "Read(//c/Users/isuru/AppData/Local/**)",
+      "Bash(del:*)",
+      "Bash(grep -i -E \"\\\\.\\(png|jpg|jpeg|svg|ico|webp\\)$\")",
+      "Bash(dart analyze:*)",
+      "Bash(find:*)"
     ]
   }
 }

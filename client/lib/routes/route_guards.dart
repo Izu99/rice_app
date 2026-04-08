@@ -15,9 +15,13 @@ class AuthGuard {
   /// Check if user is authenticated
   Future<bool> isAuthenticated() async {
     try {
+      debugPrint('>>> [AUTH GUARD] checking isLoggedIn...');
       final result = await _authRepository.isLoggedIn();
-      return result.fold((l) => false, (r) => r);
-    } catch (e) {
+      final value = result.fold((l) => false, (r) => r);
+      debugPrint('>>> [AUTH GUARD] isLoggedIn result=$value');
+      return value;
+    } catch (e, st) {
+      debugPrint('>>> [AUTH GUARD] isAuthenticated ERROR: $e\n$st');
       return false;
     }
   }
@@ -60,7 +64,10 @@ FutureOr<String?> authRedirect(
   GoRouterState state,
   AuthGuard authGuard,
 ) async {
+  debugPrint('>>> [ROUTER] redirect called for: ${state.matchedLocation}');
   final isLoggedIn = await authGuard.isAuthenticated();
+  debugPrint(
+      '>>> [ROUTER] isLoggedIn=$isLoggedIn for ${state.matchedLocation}');
   final isLoggingIn = state.matchedLocation == RouteNames.login;
   final isSplash = state.matchedLocation == RouteNames.splash;
 

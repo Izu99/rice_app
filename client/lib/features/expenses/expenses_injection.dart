@@ -13,7 +13,8 @@ void initExpensesInjection(GetIt sl) {
 
   // Repository
   sl.registerLazySingleton<ExpenseRepository>(
-    () => ExpenseRepositoryImpl(remoteDataSource: sl<ExpenseRemoteDataSource>()),
+    () =>
+        ExpenseRepositoryImpl(remoteDataSource: sl<ExpenseRemoteDataSource>()),
   );
 
   // Cubit

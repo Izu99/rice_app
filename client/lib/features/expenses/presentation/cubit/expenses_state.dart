@@ -36,17 +36,18 @@ class ExpensesState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       totalMonthlyExpenses: totalMonthlyExpenses ?? this.totalMonthlyExpenses,
       categoryBreakdown: categoryBreakdown ?? this.categoryBreakdown,
-      filterCategory: clearCategory ? null : (filterCategory ?? this.filterCategory),
+      filterCategory:
+          clearCategory ? null : (filterCategory ?? this.filterCategory),
     );
   }
 
   @override
   List<Object?> get props => [
-    status, 
-    expenses, 
-    errorMessage, 
-    totalMonthlyExpenses, 
-    categoryBreakdown, 
-    filterCategory
-  ];
+        status,
+        expenses,
+        errorMessage,
+        totalMonthlyExpenses,
+        categoryBreakdown,
+        filterCategory
+      ];
 }

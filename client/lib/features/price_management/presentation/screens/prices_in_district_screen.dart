@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
 import '../widgets/price_list_item.dart';
@@ -21,8 +22,7 @@ class PricesInDistrictScreen extends StatefulWidget {
   });
 
   @override
-  State<PricesInDistrictScreen> createState() =>
-      _PricesInDistrictScreenState();
+  State<PricesInDistrictScreen> createState() => _PricesInDistrictScreenState();
 }
 
 class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
@@ -47,22 +47,98 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
       },
       child: BlocBuilder<PriceManagementCubit, PriceManagementState>(
         builder: (context, state) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: HAppBar(
-              title: widget.district,
-              subtitle: 'Paddy Rice Prices',
-              onBack: () => context.pop(),
-            ),
+          return AppPageScaffold(
+            title: widget.district,
+            subtitle: 'Market Prices',
+            onBack: () => context.pop(),
+            bottomBar: _buildBottomStatusBar(state.prices.length),
             body: LoadingOverlay(
               isLoading: state.status == PriceManagementStatus.loadingPrices,
-              message: 'Loading prices...',
-              child: state.prices.isEmpty && state.status != PriceManagementStatus.loadingPrices
-                  ? _buildEmptyState()
-                  : _buildPricesList(context, state),
+              message: 'Loading market data...',
+              child: Column(
+                children: [
+                  // Info Summary Strip
+                  if (state.prices.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
+                      color: AppColors.primary.withOpacity(0.05),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded,
+                              size: 16,
+                              color: AppColors.primary.withOpacity(0.7)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Displaying ${state.prices.length} price listings in ${widget.district}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  Expanded(
+                    child: state.prices.isEmpty &&
+                            state.status != PriceManagementStatus.loadingPrices
+                        ? _buildEmptyState()
+                        : _buildPricesList(context, state),
+                  ),
+                ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildBottomStatusBar(int count) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shopping_bag_rounded,
+                  size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Total Varieties: $count',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+            ],
+          ),
+          const Text(
+            'LKR/KG',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: AppColors.primary,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -72,37 +148,56 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 64,
-            color: AppColors.grey500,
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.no_meals_rounded,
+              size: 64,
+              color: Colors.grey[400],
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'No prices available',
-            style: AppTextStyles.titleMedium
-                .copyWith(color: AppColors.grey700),
+            'No prices listed',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.grey[800],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'No companies have added prices for ${widget.district} yet',
-            textAlign: TextAlign.center,
-            style:
-                AppTextStyles.bodyMedium.copyWith(color: AppColors.grey500),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'No companies have added prices for ${widget.district} yet. Check back soon for updates.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey[500],
+                height: 1.5,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPricesList(
-      BuildContext context, PriceManagementState state) {
+  Widget _buildPricesList(BuildContext context, PriceManagementState state) {
     return RefreshIndicator(
-      onRefresh: () =>
-          context.read<PriceManagementCubit>().loadPricesByDistrict(widget.district),
+      onRefresh: () => context
+          .read<PriceManagementCubit>()
+          .loadPricesByDistrict(widget.district),
       color: AppColors.primary,
+      backgroundColor: Colors.white,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         itemCount: state.prices.length,
         itemBuilder: (context, index) {
           final price = state.prices[index];

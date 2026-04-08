@@ -20,7 +20,8 @@ class EnStrings {
   static const String rememberMe = 'Remember Me';
   static const String forgotPassword = 'Forgot Password?';
   static const String resetPassword = 'Reset Password';
-  static const String enterPhoneForOtp = 'Enter your phone number to receive OTP';
+  static const String enterPhoneForOtp =
+      'Enter your phone number to receive OTP';
   static const String paddy = 'Paddy';
   static const String rice = 'Rice';
   static const String phoneNumber = 'Phone Number';
@@ -95,6 +96,10 @@ class EnStrings {
   static const String refresh = 'Refresh';
 
   // ==================== BUY / SELL ====================
+  static const String addToStock = 'Add to Stock';
+  static const String addBatchToList = 'Add to List';
+  static const String currentListItems = 'Current List Items';
+  static const String unconfirmedWeights = 'Unconfirmed weights';
   static const String buyPaddy = 'Buy Paddy';
   static const String sellRice = 'Sell Rice';
   static const String selectCustomer = 'Select Customer';
@@ -115,7 +120,8 @@ class EnStrings {
   static const String balance = 'Balance';
   static const String totalReceivable = 'Total Receivable';
   static const String totalPayable = 'Total Payable';
-  static const String accountNotFound = 'Account not found. Please contact administrator to register.';
+  static const String accountNotFound =
+      'Account not found. Please contact administrator to register.';
 
   // ==================== STATUS / NOTIFICATIONS ====================
   static const String success = 'Success';
@@ -123,6 +129,7 @@ class EnStrings {
   static const String warning = 'Warning';
   static const String syncSuccess = 'Sync Successful';
   static const String syncing = 'Syncing...';
+  static const String pending = 'pending';
 
   // ==================== DIALOGS ====================
   static const String confirm = 'Confirm';
@@ -132,4 +139,91 @@ class EnStrings {
   static const String update = 'Update';
   static const String yes = 'Yes';
   static const String no = 'No';
+  static const String change = 'Change';
+
+  // ==================== NAVIGATION ====================
+  static const String home = 'Home';
+  static const String dashboard = 'Dashboard';
+  static const String marketplace = 'Marketplace';
+  static const String records = 'Records';
+  static const String reportsAndTools = 'Reports & Tools';
+  static const String transactions = 'Transactions';
+  static const String milling = 'Milling';
+  static const String addPrice = 'Add Price';
+  static const String dailyReport = 'Daily\nReport';
+  static const String prices = 'Prices';
+  static const String searchFeatures = 'Search features...';
+
+  // ==================== PROFILE ====================
+  static const String profileTitle = 'Profile';
+  static const String editProfile = 'Edit Profile';
+  static const String editProfileSubtitle = 'Update name, email, photo';
+  static const String changePassword = 'Change Password';
+  static const String changePasswordSubtitle = 'Update your password';
+  static const String companyInfo = 'Company Info';
+  static const String companyInfoSubtitle = 'Company information';
+  static const String companyInfoUnavailable = 'Company details not available';
+  static const String darkMode = 'Dark Mode';
+  static const String darkModeSubtitle = 'Enable dark mode';
+  static const String notificationsLabel = 'Notifications';
+  static const String biometricLogin = 'Biometric Login';
+  static const String biometricSubtitle = 'Use fingerprint/face recognition';
+  static const String language = 'Language';
+  static const String helpFaq = 'Help & FAQ';
+  static const String helpSubtitle = 'Get support';
+  static const String termsPrivacy = 'Terms & Privacy';
+  static const String termsSubtitle = 'Read our policies';
+  static const String sendFeedback = 'Send Feedback';
+  static const String feedbackSubtitle = 'Help us improve';
+  static const String logoutSubtitle = 'Sign out of your account';
+  static const String lastSynced = 'Last synced:';
+  static const String updateProfile = 'Update Profile';
+  static const String email = 'Email';
+  static const String currentPassword = 'Current Password';
+  static const String passwordsDoNotMatch = 'Passwords do not match';
+  static const String companyName = 'Company Name';
+  static const String address = 'Address';
+  static const String district = 'District';
+  static const String registrationNumber = 'Registration Number';
+  static const String taxNumber = 'Tax Number';
+  static const String website = 'Website';
+  static const String secondaryPhone = 'Secondary Phone';
+  static const String selectLanguage = 'Select Language';
+  static const String roleAdmin = 'Admin';
+  static const String roleOperator = 'Operator';
+  static const String roleUser = 'User';
+  static const String notEntered = 'Not entered';
+  static const String todayProfit = "Today's profit";
+  static const String erpVersion = 'Rice Mill ERP v1.0';
+
+  // ==================== STOCK ====================
+  static const String liveStock = 'Live Stock';
+  static const String paddyStockVarieties = 'Paddy Stock Varieties';
+  static const String riceStockVarieties = 'Rice Stock Varieties';
+
+  // ==================== EXPENSES ====================
+  static const String addExpense = 'Add Expense';
+  static const String operationalExpenses = 'Operational Expenses';
+
+  // ==================== TRANSACTIONS ====================
+  static const String transactionDetails = 'Transaction Details';
+  static const String purchaseOrder = 'Purchase Order';
+  static const String salesInvoice = 'Sales Invoice';
+  static const String customerInformation = 'Customer Information';
+  static const String itemsList = 'Items List';
+  static const String totalWeight = 'Total Weight';
+
+  // ==================== CUSTOMERS ====================
+  static const String addCustomer = 'Add Customer';
+  static const String editCustomer = 'Edit Customer';
+  static const String newCustomer = 'New Customer';
+
+  // ==================== REPORTS ====================
+  static const String dateRange = 'Date Range';
+  static const String day = 'Day';
+  static const String week = 'Week';
+  static const String month = 'Month';
+  static const String dailyReportTitle = 'Daily Report';
+  static const String customerReport = 'Customer Report';
+  static const String stockReport = 'Stock Report';
 }

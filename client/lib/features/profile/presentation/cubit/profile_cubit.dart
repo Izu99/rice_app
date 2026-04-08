@@ -107,6 +107,12 @@ class ProfileCubit extends Cubit<ProfileState> {
     required String name,
     required String address,
     required String phone,
+    String? email,
+    String? district,
+    String? registrationNumber,
+    String? taxNumber,
+    String? website,
+    String? secondaryPhone,
   }) async {
     if (state.company == null) return;
 
@@ -116,6 +122,12 @@ class ProfileCubit extends Cubit<ProfileState> {
       name: name,
       address: address,
       phone: phone,
+      email: email,
+      district: district,
+      registrationNumber: registrationNumber,
+      taxNumber: taxNumber,
+      website: website,
+      secondaryPhone: secondaryPhone,
     );
 
     final result = await _authRepository.updateCompany(company: updatedCompany);

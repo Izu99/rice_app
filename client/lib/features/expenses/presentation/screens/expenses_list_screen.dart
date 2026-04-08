@@ -5,8 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../../domain/entities/expense_entity.dart';
 import '../cubit/expenses_cubit.dart';
 import '../cubit/expenses_state.dart';
@@ -27,11 +29,12 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.select((ProfileCubit c) => c.state.language);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const HAppBar(
-        title: 'Expenses',
-        subtitle: 'මෙහෙයුම් වියදම්',
+      appBar: HAppBar(
+        title: SiStrings.expenses,
+        subtitle: SiStrings.operationalExpenses,
         showBack: false,
       ),
       body: BlocBuilder<ExpensesCubit, ExpensesState>(
@@ -64,8 +67,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         onPressed: () => context.pushNamed('expenseAdd'),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('වියදමක් එක් කරන්න',
-            style: TextStyle(color: Colors.white)), // Add Expense
+        label: Text(SiStrings.addExpense,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -135,7 +138,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
-          BoxShadow(color: Color(0x08000000), blurRadius: 10, offset: Offset(0, 3)),
+          BoxShadow(
+              color: Color(0x08000000), blurRadius: 10, offset: Offset(0, 3)),
         ],
       ),
       child: Row(
@@ -255,96 +259,14 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
     );
   }
 
-  void _showDeleteConfirmation(String id) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: EdgeInsets.zero,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.delete_outline, size: 32, color: AppColors.error),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                children: [
-                  const Text(
-                    'වියදම මකා දමන්නද?',
-                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'මෙම වියදම් වාර්තාව මකා දැමීමට ඔබට විශ්වාසද?',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(top: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF4F6FA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF444466),
-                        side: const BorderSide(color: Color(0xFFE8E8EE)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(SiStrings.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.read<ExpensesCubit>().deleteExpense(id);
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(SiStrings.delete, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+  void _showDeleteConfirmation(String id) async {
+    final confirmed = await ConfirmationDialog.showDelete(
+      context,
+      title: 'වියදම මකා දමන්නද?',
+      itemName: 'වියදම් වාර්තාව',
     );
+    if (confirmed && mounted) {
+      context.read<ExpensesCubit>().deleteExpense(id);
+    }
   }
 }
-

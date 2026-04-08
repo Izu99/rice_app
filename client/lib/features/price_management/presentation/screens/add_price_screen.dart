@@ -9,6 +9,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../profile/presentation/cubit/profile_state.dart';
 import '../cubit/price_management_cubit.dart';
@@ -72,8 +73,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
             state.lastAddedPrice != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  'Price added: ${state.lastAddedPrice!.formattedPrice}'),
+              content:
+                  Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
               backgroundColor: AppColors.success,
             ),
           );
@@ -87,12 +88,14 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: HAppBar(
-          title: 'Add Price',
-          subtitle: 'මිල ඇතුළත් කරන්න',
-          onBack: () => context.pop(),
+      child: AppPageScaffold(
+        title: 'Add Price',
+        subtitle: 'මිල ඇතුළත් කරන්න',
+        onBack: () => context.pop(),
+        bottomBar: AppSubBottomBar(
+          centerLabel: 'Save Price',
+          centerIcon: Icons.save_rounded,
+          onCenter: _handleAddPrice,
         ),
         body: BlocBuilder<PriceManagementCubit, PriceManagementState>(
           builder: (context, state) {
@@ -236,8 +239,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                               value: 'basic', child: Text('Basic')),
                         ],
                         onChanged: (value) {
-                          setState(
-                              () => _selectedQualityGrade = value ?? 'standard');
+                          setState(() =>
+                              _selectedQualityGrade = value ?? 'standard');
                         },
                         decoration: InputDecoration(
                           border: OutlineInputBorder(
@@ -330,8 +333,7 @@ class _TypeButton extends StatelessWidget {
               label,
               style: TextStyle(
                 color: selected ? color : Colors.grey.shade600,
-                fontWeight:
-                    selected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 14,
               ),
             ),

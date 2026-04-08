@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart'; // Added import
@@ -65,6 +65,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.select((ProfileCubit c) => c.state.language);
     return BlocConsumer<CustomersCubit, CustomersState>(
       listenWhen: (previous, current) =>
           previous.formStatus != current.formStatus,
@@ -95,10 +96,19 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
         return Scaffold(
           backgroundColor: const Color(0xFFF4F6FA),
+          appBar: HAppBar(
+            title: SiStrings.customers,
+            subtitle: '${SiStrings.total} ${state.totalCustomers}',
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person_add_rounded, color: Colors.white),
+                onPressed: () => context.pushNamed('customerAdd'),
+                tooltip: SiStrings.addNewCustomer,
+              ),
+            ],
+          ),
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
-              _buildAppBar(state, innerBoxIsScrolled),
-              _buildStatsSection(state),
               _buildSearchAndFilter(state),
               _buildTabBar(state, buyerCount, sellerCount),
             ],
@@ -112,120 +122,32 @@ class _CustomersListScreenState extends State<CustomersListScreen>
             ),
           ),
           bottomNavigationBar: _buildBottomToolbar(state),
-          floatingActionButton: _buildFab(),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         );
       },
     );
   }
 
-  Widget _buildAppBar(CustomersState state, bool innerBoxIsScrolled) {
-    return SliverAppBar(
-      pinned: true,
-      floating: false,
-      expandedHeight: 120,
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      automaticallyImplyLeading: false,
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
-        child: FlexibleSpaceBar(
-          background: Stack(
-            children: [
-              Positioned(
-                right: -20,
-                top: -20,
-                child: Icon(
-                  Icons.people_rounded,
-                  size: 140,
-                  color: Colors.white.withOpacity(0.1),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                                color: Colors.white, size: 20),
-                            onPressed: () => context.pop(),
-                            style: IconButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.2),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  SiStrings.customers,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 22,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                Text(
-                                  'මුළු ${state.totalCustomers} යි',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildBottomToolbar(CustomersState state) {
     return BottomAppBar(
-      height: 70,
+      height: 56,
       color: Colors.white,
-      notchMargin: 8,
-      shape: const CircularNotchedRectangle(),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            _buildToolbarAction(
-              icon: Icons.sort_rounded,
-              label: 'Sort',
-              onTap: () => _showSortOptions(context),
-            ),
-            const SizedBox(width: 16),
-            _buildToolbarAction(
-              icon: Icons.filter_list_rounded,
-              label: 'Filter',
-              hasBadge: state.hasActiveFilters,
-              onTap: () => _showFilterOptions(context, state),
-            ),
-            const Spacer(),
-          ],
-        ),
+      elevation: 8,
+      child: Row(
+        children: [
+          _buildToolbarAction(
+            icon: Icons.sort_rounded,
+            label: SiStrings.isSinhala ? 'අනුපිළිවෙල' : 'Sort',
+            onTap: () => _showSortOptions(context),
+          ),
+          const SizedBox(width: 8),
+          _buildToolbarAction(
+            icon: Icons.filter_list_rounded,
+            label: SiStrings.isSinhala ? 'පෙරහන' : 'Filter',
+            hasBadge: state.hasActiveFilters,
+            onTap: () => _showFilterOptions(context, state),
+          ),
+        ],
       ),
     );
   }
@@ -238,16 +160,16 @@ class _CustomersListScreenState extends State<CustomersListScreen>
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(icon, color: AppColors.textPrimary, size: 24),
+                Icon(icon, color: AppColors.textPrimary, size: 20),
                 if (hasBadge)
                   Positioned(
                     right: -2,
@@ -263,12 +185,12 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   ),
               ],
             ),
-            const SizedBox(height: 2),
+            const SizedBox(width: 6),
             Text(
               label,
               style: const TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 10,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -278,89 +200,6 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     );
   }
 
-  Widget _buildStatsSection(CustomersState state) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Row(
-          children: [
-            Expanded(
-              child: _buildModernStatCard(
-                'ලැබිය යුතු (Receivable)',
-                'Rs.${_formatNumber(state.totalReceivables)}',
-                const Color(0xFF2E7D32),
-                Icons.call_received_rounded,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildModernStatCard(
-                'ගෙවිය යුතු (Payable)',
-                'Rs.${_formatNumber(state.totalPayables)}',
-                const Color(0xFFE53935),
-                Icons.call_made_rounded,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernStatCard(
-      String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFFE8E8EE), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              color: const Color(0xFF1C1C2E),
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF8E8E93),
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSearchAndFilter(CustomersState state) {
     return SliverToBoxAdapter(
@@ -379,8 +218,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     );
   }
 
-  Widget _buildTabBar(
-      CustomersState state, int buyerCount, int sellerCount) {
+  Widget _buildTabBar(CustomersState state, int buyerCount, int sellerCount) {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _TabBarDelegate(
@@ -408,15 +246,18 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               fontWeight: FontWeight.w600,
             ),
             tabs: [
-              Tab(child: Padding(
+              Tab(
+                  child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text('සියල්ල (${state.customers.length})'),
               )), // All
-              Tab(child: Padding(
+              Tab(
+                  child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text('සැපයුම්කරුවන් ($sellerCount)'),
               )), // Sellers
-              Tab(child: Padding(
+              Tab(
+                  child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text('ගැනුම්කරුවන් ($buyerCount)'),
               )), // Buyers
@@ -504,18 +345,6 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     );
   }
 
-  Widget _buildFab() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 32),
-      child: FloatingActionButton(
-        onPressed: () => context.pushNamed('customerAdd'),
-        backgroundColor: AppColors.primary,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.person_add_rounded, color: Colors.white),
-      ),
-    );
-  }
 
   void _showSortOptions(BuildContext context) {
     final cubit = context.read<CustomersCubit>();
@@ -734,9 +563,6 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     debugPrint('Messaging $phone');
   }
 
-  String _formatNumber(double value) {
-    return NumberFormatter.formatInteger(value);
-  }
 }
 
 /// Tab bar delegate for persistent header

@@ -21,4 +21,3 @@ class PaddyConstants {
     'කීරි සම්බා', // Keeri Samba Rice
   ];
 }
-

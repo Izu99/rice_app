@@ -113,10 +113,14 @@ class RecentExpenses extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
-  
+  Widget _buildLoadingState() => const Center(
+      child: Padding(
+          padding: EdgeInsets.all(20), child: CircularProgressIndicator()));
+
   Widget _buildEmptyState() => Container(
-    padding: const EdgeInsets.all(20),
-    child: Center(child: Text('No recent expenses', style: TextStyle(color: Colors.grey.shade400))),
-  );
+        padding: const EdgeInsets.all(20),
+        child: Center(
+            child: Text('No recent expenses',
+                style: TextStyle(color: Colors.grey.shade400))),
+      );
 }

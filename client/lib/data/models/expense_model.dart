@@ -26,12 +26,14 @@ class ExpenseModel {
       title: json['title'] ?? '',
       category: ExpenseCategory.fromString(json['category'] ?? 'other'),
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      date: json['expenseDate'] != null 
-          ? DateTime.parse(json['expenseDate']) 
+      date: json['expenseDate'] != null
+          ? DateTime.parse(json['expenseDate'])
           : DateTime.now(),
       notes: json['notes'],
-      createdByName: json['createdBy'] != null 
-          ? (json['createdBy'] is Map ? json['createdBy']['name'] : json['createdBy'].toString())
+      createdByName: json['createdBy'] != null
+          ? (json['createdBy'] is Map
+              ? json['createdBy']['name']
+              : json['createdBy'].toString())
           : null,
     );
   }

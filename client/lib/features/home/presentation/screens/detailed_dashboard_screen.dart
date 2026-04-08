@@ -213,7 +213,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04), // Cleaner, more subtle shadow
+              color:
+                  Colors.black.withOpacity(0.04), // Cleaner, more subtle shadow
               blurRadius: 15,
               offset: const Offset(0, 10),
             ),
@@ -253,7 +254,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                   child: Icon(data.icon, color: Colors.white, size: 22),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: data.color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -736,8 +738,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
-                          badgeWidget:
-                              _buildPieBadge(SiStrings.paddy, AppColors.warning),
+                          badgeWidget: _buildPieBadge(
+                              SiStrings.paddy, AppColors.warning),
                           badgePositionPercentageOffset: 1.4,
                         ),
                         PieChartSectionData(
@@ -838,7 +840,8 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
               AppColors.info),
           _buildMetricRow(
               SiStrings.millingOutput, '95%', 'ඉතා හොඳයි', AppColors.success),
-          _buildMetricRow(SiStrings.wasteRatio, '2.5%', 'ප්‍රශස්තයි', AppColors.warning),
+          _buildMetricRow(
+              SiStrings.wasteRatio, '2.5%', 'ප්‍රශස්තයි', AppColors.warning),
         ],
       ),
     );

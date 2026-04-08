@@ -1,5 +1,8 @@
 // lib/features/auth/presentation/cubit/auth_cubit.dart
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../domain/repositories/auth_repository.dart';
@@ -31,26 +34,35 @@ class AuthCubit extends Cubit<AuthState> {
     required AuthRepository authRepository,
   })  : _authRepository = authRepository,
         super(AuthState.initial()) {
+    debugPrint('>>> [AUTH CUBIT] created');
     _initializeGoogleSignIn();
     checkAuthStatus();
   }
 
   /// Initialize Google Sign-In with required configuration
   Future<void> _initializeGoogleSignIn() async {
-    // Note: Use the 'Web Client ID' from Google Cloud Console here as serverClientId.
-    // This is required to obtain an idToken for backend verification.
-    await _googleSignIn.initialize(
-      serverClientId: '816656670559-ucfdqo2gn4h9gst50rtfi9sjlm8428ja.apps.googleusercontent.com',
-    );
-    
-    // Listen to authentication events for reactive UI/State updates
-    _googleSignIn.authenticationEvents.listen(
-      _handleGoogleAuthEvent,
-      onError: (error) => _handleGoogleAuthError(error),
-    );
+    // Google Sign-In is not supported on Windows/Linux desktop
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) return;
 
-    // Try to recover a previous silent sign-in if any
-    _googleSignIn.attemptLightweightAuthentication();
+    try {
+      // Note: Use the 'Web Client ID' from Google Cloud Console here as serverClientId.
+      // This is required to obtain an idToken for backend verification.
+      await _googleSignIn.initialize(
+        serverClientId:
+            '816656670559-ucfdqo2gn4h9gst50rtfi9sjlm8428ja.apps.googleusercontent.com',
+      );
+
+      // Listen to authentication events for reactive UI/State updates
+      _googleSignIn.authenticationEvents.listen(
+        _handleGoogleAuthEvent,
+        onError: (error) => _handleGoogleAuthError(error),
+      );
+
+      // Try to recover a previous silent sign-in if any
+      _googleSignIn.attemptLightweightAuthentication();
+    } catch (e) {
+      Log.w('Google Sign-In initialization failed: $e', tag: 'AUTH');
+    }
   }
 
   void _handleGoogleAuthEvent(GoogleSignInAuthenticationEvent? event) async {
@@ -60,12 +72,15 @@ class AuthCubit extends Cubit<AuthState> {
       final user = event.user;
       // If we are not currently in a loading state for login,
       // this might be a background sign-in or lightweight auth
-      if (state.loginStatus != LoginStatus.loading && state.authStatus != AuthStatus.authenticated) {
+      if (state.loginStatus != LoginStatus.loading &&
+          state.authStatus != AuthStatus.authenticated) {
         final auth = await user.authentication;
         if (auth.idToken != null) {
-          final result = await _authRepository.googleLogin(idToken: auth.idToken!);
+          final result =
+              await _authRepository.googleLogin(idToken: auth.idToken!);
           result.fold(
-            (failure) => Log.e('Google Auto-Login failed: ${failure.message}', tag: 'AUTH'),
+            (failure) => Log.e('Google Auto-Login failed: ${failure.message}',
+                tag: 'AUTH'),
             (userEntity) {
               emit(state.copyWith(
                 authStatus: AuthStatus.authenticated,
@@ -88,6 +103,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Check if user is already logged in
   Future<void> checkAuthStatus() async {
+    debugPrint('>>> [AUTH CUBIT] checkAuthStatus start');
     // Try to load from cache first for immediate UI update
     final cachedUserResult = await _authRepository.getCurrentUser();
     final cachedUser = cachedUserResult.fold((l) => null, (r) => r);
@@ -218,7 +234,8 @@ class AuthCubit extends Cubit<AuthState> {
       },
       (user) async {
         // Get company
-        Log.auth('User authenticated: ${user.name}, CompanyID: ${user.companyId}');
+        Log.auth(
+            'User authenticated: ${user.name}, CompanyID: ${user.companyId}');
         final companyResult = await _authRepository.getCompany();
         final company = companyResult.fold((l) => null, (r) => r);
 
@@ -237,6 +254,15 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Login with Google
   Future<void> googleLogin() async {
+    // Google Sign-In is not supported on Windows/Linux desktop
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+      emit(state.copyWith(
+        loginStatus: LoginStatus.failure,
+        errorMessage: 'Google Sign-In is not supported on this platform.',
+      ));
+      return;
+    }
+
     try {
       emit(state.copyWith(
         loginStatus: LoginStatus.loading,
@@ -246,12 +272,13 @@ class AuthCubit extends Cubit<AuthState> {
       // Use attemptLightweightAuthentication for "silent" sign-in check
       // This is the new way in 7.0+ instead of signInSilently()
       _googleSignIn.attemptLightweightAuthentication();
-      
+
       // For explicit sign-in, use supportsAuthenticate check
       if (!_googleSignIn.supportsAuthenticate()) {
         emit(state.copyWith(
           loginStatus: LoginStatus.failure,
-          errorMessage: 'Google Sign-In is not supported on this platform/configuration.',
+          errorMessage:
+              'Google Sign-In is not supported on this platform/configuration.',
         ));
         return;
       }
@@ -259,10 +286,11 @@ class AuthCubit extends Cubit<AuthState> {
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate(
         scopeHint: ['email', 'profile'],
       );
-      
+
       _currentGoogleUser = googleUser;
-      
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
@@ -279,10 +307,11 @@ class AuthCubit extends Cubit<AuthState> {
         (failure) async {
           // Check if message is related to account not found to show localized message
           String errorMsg = failure.message;
-          if (errorMsg.contains('Account not found') || errorMsg.contains('administrator to register')) {
+          if (errorMsg.contains('Account not found') ||
+              errorMsg.contains('administrator to register')) {
             errorMsg = SiStrings.accountNotFound;
           }
-          
+
           emit(state.copyWith(
             loginStatus: LoginStatus.failure,
             errorMessage: errorMsg,
@@ -302,7 +331,8 @@ class AuthCubit extends Cubit<AuthState> {
         },
       );
     } catch (e) {
-      if (e is GoogleSignInException && e.code == GoogleSignInExceptionCode.canceled) {
+      if (e is GoogleSignInException &&
+          e.code == GoogleSignInExceptionCode.canceled) {
         emit(state.copyWith(loginStatus: LoginStatus.initial));
         return;
       }
@@ -405,7 +435,8 @@ class AuthCubit extends Cubit<AuthState> {
       if (di.sl.isRegistered<ReportsCubit>()) di.sl<ReportsCubit>().reset();
       if (di.sl.isRegistered<AdminCubit>()) di.sl<AdminCubit>().reset();
       if (di.sl.isRegistered<ExpensesCubit>()) di.sl<ExpensesCubit>().reset();
-      if (di.sl.isRegistered<PriceManagementCubit>()) di.sl<PriceManagementCubit>().reset();
+      if (di.sl.isRegistered<PriceManagementCubit>())
+        di.sl<PriceManagementCubit>().reset();
     } catch (e) {
       Log.w('Error resetting cubits: $e', tag: 'AUTH');
     }

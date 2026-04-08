@@ -625,44 +625,70 @@ class BuyCubit extends Cubit<BuyState> {
       }
 
       debugPrint(
-          '🚀 [BuyCubit] Finalizing ${batchesToSave.length} batches (SEQUENTIAL)');
+          '🚀 [BuyCubit] Merging ${batchesToSave.length} batches into ONE transaction');
 
-      // 2. Save batches SEQUENTIALLY to avoid server overload/race conditions
-      final validBatches = batchesToSave.where((b) => b.customerId.isNotEmpty).toList();
+      // 2. Merge ALL batches into a single transaction with one ID
+      final validBatches =
+          batchesToSave.where((b) => b.customerId.isNotEmpty).toList();
+
+      if (validBatches.isEmpty) {
+        emit(state.copyWith(status: BuyStatus.initial));
+        return;
+      }
+
+      final mergedTransactionNumber =
+          '${AppConstants.buyTransactionPrefix}-${DateTime.now().millisecondsSinceEpoch}';
+
+      // Combine all items from all batches, updating transactionId to the shared one
+      final allItems = validBatches
+          .expand((batch) => batch.items
+              .map((item) => item.copyWith(transactionId: mergedTransactionNumber)))
+          .toList();
+
+      // Sum totals across all batches
+      double mergedTotalAmount = 0.0;
+      double mergedPaidAmount = 0.0;
+      for (final batch in validBatches) {
+        mergedTotalAmount += batch.totalAmount;
+        mergedPaidAmount += batch.paidAmount;
+      }
+
+      debugPrint(
+          '✅ [BuyCubit] Merged ${allItems.length} items, total: $mergedTotalAmount');
+
       int successCount = 0;
       String? firstError;
 
-      for (final batch in validBatches) {
-        try {
-          final result = await _transactionRepository.createBuyTransaction(
-            customerId: batch.customerId,
-            companyId: _companyId,
-            createdById: currentUserId,
-            items: batch.items,
-            discount: batch.discount,
-            paidAmount: batch.paidAmount,
-            paymentMethod: batch.paymentMethod ?? PaymentMethod.cash,
-            notes: batch.notes,
-            transactionNumber: batch.transactionNumber, // Pass the client-generated ID
-          );
+      try {
+        final result = await _transactionRepository.createBuyTransaction(
+          customerId: validBatches.first.customerId,
+          companyId: _companyId,
+          createdById: currentUserId,
+          items: allItems,
+          discount: 0,
+          paidAmount: mergedPaidAmount,
+          paymentMethod: PaymentMethod.cash,
+          notes: null,
+          transactionNumber: mergedTransactionNumber,
+        );
 
-          result.fold(
-            (failure) {
-              debugPrint('❌ [BuyCubit] Batch failed: ${failure.message}');
-              firstError ??= failure.message;
-            },
-            (saved) {
-              debugPrint('✅ [BuyCubit] Batch saved: ${saved.transactionNumber}');
-              successCount++;
-            },
-          );
-        } catch (e) {
-          debugPrint('❌ [BuyCubit] Batch exception: $e');
-          firstError ??= e.toString();
-        }
+        result.fold(
+          (failure) {
+            debugPrint('❌ [BuyCubit] Transaction failed: ${failure.message}');
+            firstError = failure.message;
+          },
+          (saved) {
+            debugPrint(
+                '✅ [BuyCubit] Transaction saved: ${saved.transactionNumber}');
+            successCount = 1;
+          },
+        );
+      } catch (e) {
+        debugPrint('❌ [BuyCubit] Transaction exception: $e');
+        firstError = e.toString();
       }
 
-      if (successCount == validBatches.length) {
+      if (successCount == 1) {
         // 3. ⚡ ALL SUCCESS - Show popup immediately
         final customerId = state.selectedCustomer!.id;
 
@@ -684,10 +710,9 @@ class BuyCubit extends Cubit<BuyState> {
         // 4. 🔄 Background cleanup & refresh (DON'T AWAIT - runs asynchronously)
         _cleanupAndRefreshInBackground(customerId);
       } else {
-        // PARTIAL OR TOTAL FAILURE
         emit(state.copyWith(
           status: BuyStatus.error,
-          errorMessage: 'Saved $successCount/${validBatches.length} batches. Error: $firstError',
+          errorMessage: firstError ?? 'Failed to save transaction',
         ));
       }
     } catch (e, stack) {
