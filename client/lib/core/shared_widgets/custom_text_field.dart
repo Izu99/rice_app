@@ -218,7 +218,6 @@ class PhoneTextField extends StatelessWidget {
   }
 }
 
-
 class _PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

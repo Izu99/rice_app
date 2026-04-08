@@ -302,6 +302,9 @@ class ApiEndpoints {
   /// Admin base endpoint
   static const String admin = '/admin';
 
+  /// Company profile (for regular company users)
+  static const String companyProfile = '/companies/profile';
+
   /// Companies
   static const String companies = '/admin/companies';
 

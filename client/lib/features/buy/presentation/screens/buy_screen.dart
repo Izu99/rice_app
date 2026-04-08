@@ -156,59 +156,61 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        Text(
-          'වී විස්තර', // Paddy Details
-          style: AppTextStyles.titleSmall.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+          Text(
+            'වී විස්තර', // Paddy Details
+            style: AppTextStyles.titleSmall.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-        // Modern Styled Dropdown
-        GestureDetector(
-          onTap: state.tempItems.isNotEmpty
-              ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('තවදුරටත් අයිතම වෙනස් කිරීමට පෙර තිබෙන අයිතම ඉවත් කරන්න.'),
-                      backgroundColor: AppColors.warning,
-                      behavior: SnackBarBehavior.fixed,
+          // Modern Styled Dropdown
+          GestureDetector(
+            onTap: state.tempItems.isNotEmpty
+                ? () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'තවදුරටත් අයිතම වෙනස් කිරීමට පෙර තිබෙන අයිතම ඉවත් කරන්න.'),
+                        backgroundColor: AppColors.warning,
+                        behavior: SnackBarBehavior.fixed,
+                      ),
+                    );
+                  }
+                : null,
+            child: AbsorbPointer(
+              absorbing: state.tempItems.isNotEmpty,
+              child: Opacity(
+                opacity: state.tempItems.isNotEmpty ? 0.6 : 1.0,
+                child: DropdownButtonFormField<String>(
+                  value: PaddyConstants.paddyVarieties
+                          .contains(state.selectedVariety)
+                      ? state.selectedVariety
+                      : null,
+                  decoration: InputDecoration(
+                    labelText: 'වී වර්ගය', // Paddy Variety
+                    prefixIcon:
+                        const Icon(Icons.grass, color: AppColors.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
                     ),
-                  );
-                }
-              : null,
-          child: AbsorbPointer(
-            absorbing: state.tempItems.isNotEmpty,
-            child: Opacity(
-              opacity: state.tempItems.isNotEmpty ? 0.6 : 1.0,
-              child: DropdownButtonFormField<String>(
-                value: PaddyConstants.paddyVarieties.contains(state.selectedVariety) 
-                    ? state.selectedVariety 
-                    : null,
-                decoration: InputDecoration(
-                  labelText: 'වී වර්ගය', // Paddy Variety
-                  prefixIcon:
-                      const Icon(Icons.grass, color: AppColors.primary),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                   ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 16),
-                ),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                    color: AppColors.primary),
-                borderRadius: BorderRadius.circular(16),
-                items: PaddyConstants.paddyVarieties.map((String variety) {
-                  return DropdownMenuItem<String>(
-                    value: variety,
-                    child: Text(variety,
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                  );
-                }).toList(),
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.primary),
+                  borderRadius: BorderRadius.circular(16),
+                  items: PaddyConstants.paddyVarieties.map((String variety) {
+                    return DropdownMenuItem<String>(
+                      value: variety,
+                      child: Text(variety,
+                          style: const TextStyle(fontWeight: FontWeight.w500)),
+                    );
+                  }).toList(),
                   onChanged: (value) {
                     if (value != null && value != state.selectedVariety) {
                       context.read<BuyCubit>().updateVariety(value);
@@ -385,7 +387,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
       actions: [
         if (state.hasItems && state.status != BuyStatus.reviewing)
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: Color(0xFF1C1C2E)),
+            icon: const Icon(Icons.delete_outline),
             onPressed: () => _showClearConfirmation(context),
             tooltip: 'සියල්ල ඉවත් කරන්න',
           ),
@@ -452,7 +454,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().addBatchToSession()
                     : null,
                 icon: const Icon(Icons.add_task),
-                label: const Text('ලැයිස්තුවට එක් කරන්න'), // ADD BATCH TO SESSION
+                label: Text(SiStrings.addBatchToList), // ADD BATCH TO SESSION
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -467,7 +469,8 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
 
           // Session Batches Table (Table 2)
           if (state.sessionBatches.isNotEmpty) ...[
-            _buildSectionHeader('වත්මන් ලැයිස්තුවේ අයිතම', 'තහවුරු නොකළ බර ප්‍රමාණයන්'),
+            _buildSectionHeader(
+                SiStrings.currentListItems, SiStrings.unconfirmedWeights),
             const SizedBox(height: 12),
             _buildRecentTransactionsSection(state),
             const SizedBox(height: 24),
@@ -480,13 +483,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
                     ? () => context.read<BuyCubit>().finalizeSessionToStock()
                     : null,
                 icon: const Icon(Icons.cloud_upload_outlined),
-                label: SizedBox(
-                  height: 24,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: const Text('තොගයට එක් කර අවසන් කරන්න'),
-                  ),
-                ), // FINALIZE & SAVE TO STOCK
+                label: Text(SiStrings.addToStock), // FINALIZE & SAVE TO STOCK
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.success,
                   foregroundColor: Colors.white,
@@ -1345,7 +1342,4 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
       ),
     );
   }
-
-
 }
-

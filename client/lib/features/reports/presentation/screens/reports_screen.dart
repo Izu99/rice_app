@@ -8,6 +8,7 @@ import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
@@ -56,6 +57,7 @@ class _ReportsScreenState extends State<ReportsScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.select((ProfileCubit c) => c.state.language);
     return BlocBuilder<ReportsCubit, ReportsState>(
       builder: (context, state) {
         return LoadingOverlay(
@@ -63,8 +65,8 @@ class _ReportsScreenState extends State<ReportsScreen>
           child: Scaffold(
             backgroundColor: AppColors.background,
             appBar: HAppBar(
-              title: 'Reports',
-              subtitle: SiStrings.reports,
+              title: SiStrings.reports,
+              subtitle: SiStrings.isSinhala ? 'Reports' : 'වාර්තා',
               showBack: false,
             ),
             body: RefreshIndicator(
@@ -83,25 +85,25 @@ class _ReportsScreenState extends State<ReportsScreen>
                     _buildQuickStats(state),
                     const SizedBox(height: 24),
                     Text(SiStrings.reports,
-                        style: AppTextStyles.titleMedium
-                            .copyWith(fontWeight: FontWeight.w600, fontSize: 18)),
+                        style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w600, fontSize: 18)),
                     const SizedBox(height: 12),
                     ReportCard(
-                      title: 'දෛනික වාර්තාව',
+                      title: SiStrings.dailyReportTitle,
                       icon: Icons.assessment,
                       color: AppColors.primary,
                       onTap: () => context.push('/reports/daily'),
                     ),
                     const SizedBox(height: 12),
                     ReportCard(
-                      title: 'තොග වාර්තාව',
+                      title: SiStrings.stockReport,
                       icon: Icons.inventory,
                       color: AppColors.warning,
                       onTap: () => context.push('/reports/stock'),
                     ),
                     const SizedBox(height: 12),
                     ReportCard(
-                      title: 'පාරිභෝගික වාර්තාව',
+                      title: SiStrings.customerReport,
                       icon: Icons.people,
                       color: AppColors.info,
                       onTap: () => context.push('/reports/customer'),
@@ -136,8 +138,8 @@ class _ReportsScreenState extends State<ReportsScreen>
         children: [
           Text(
             'වාර්තා කාල පරිමාණය',
-            style: AppTextStyles.titleSmall
-                .copyWith(fontWeight: FontWeight.bold),
+            style:
+                AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Row(
@@ -382,8 +384,10 @@ class _ReportsScreenState extends State<ReportsScreen>
             children: [
               _buildStatItem(SiStrings.sell,
                   'Rs. ${_format(today['totalSell'] ?? 0)}', Icons.trending_up),
-              _buildStatItem(SiStrings.buy,
-                  'Rs. ${_format(today['totalBuy'] ?? 0)}', Icons.trending_down),
+              _buildStatItem(
+                  SiStrings.buy,
+                  'Rs. ${_format(today['totalBuy'] ?? 0)}',
+                  Icons.trending_down),
               _buildStatItem('ලාභය', 'Rs. ${_format(today['profit'] ?? 0)}',
                   Icons.account_balance_wallet),
             ],

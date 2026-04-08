@@ -21,6 +21,8 @@ import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 import '../widgets/recent_transactions.dart';
 import '../widgets/recent_expenses.dart';
+import '../widgets/video_banner.dart';
+import '../../../store/presentation/screens/store_home_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,7 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _fadeAnimation = _animationController.drive(CurveTween(curve: Curves.easeInOut));
+    _fadeAnimation =
+        _animationController.drive(CurveTween(curve: Curves.easeInOut));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _animationController.forward();
@@ -85,18 +88,20 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-  // ─── Navigation items for drawer ────────────────────────────────────────
-  static const _drawerItems = [
-    _DrawerItem(Icons.dashboard_rounded,      'Dashboard',      '/home'),
-    _DrawerItem(Icons.shopping_bag_rounded,   'Buy Paddy',      '/buy'),
-    _DrawerItem(Icons.sell_rounded,           'Sell Rice',      '/sell'),
-    _DrawerItem(Icons.inventory_2_rounded,    'Stock',          '/stock'),
-    _DrawerItem(Icons.people_rounded,         'Customers',      '/customers'),
-    _DrawerItem(Icons.receipt_long_rounded,   'Expenses',       '/expenses'),
-    _DrawerItem(Icons.bar_chart_rounded,      'Reports',        '/reports'),
-    _DrawerItem(Icons.local_offer_rounded,    'Prices',         'prices'),
-    _DrawerItem(Icons.person_rounded,         'Profile',        '/profile'),
-  ];
+  // ─── Navigation items for drawer (dynamic so labels update with language) ──
+  List<_DrawerItem> get _drawerItems => [
+        _DrawerItem(Icons.dashboard_rounded, SiStrings.dashboard, '/home'),
+        _DrawerItem(Icons.shopping_bag_rounded, SiStrings.buyPaddy, '/buy'),
+        _DrawerItem(Icons.sell_rounded, SiStrings.sellRice, '/sell'),
+        _DrawerItem(Icons.inventory_2_rounded, SiStrings.stock, '/stock'),
+        _DrawerItem(Icons.people_rounded, SiStrings.customers, '/customers'),
+        _DrawerItem(
+            Icons.receipt_long_rounded, SiStrings.expenses, '/expenses'),
+        _DrawerItem(Icons.bar_chart_rounded, SiStrings.reports, '/reports'),
+        _DrawerItem(Icons.local_offer_rounded, SiStrings.prices, 'prices'),
+        _DrawerItem(Icons.person_rounded, SiStrings.profile, '/profile'),
+        _DrawerItem(Icons.storefront_rounded, SiStrings.marketplace, 'store'),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -114,71 +119,96 @@ class _HomeScreenState extends State<HomeScreen>
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: RefreshIndicator(
-                    onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
+                    onRefresh: () =>
+                        context.read<DashboardCubit>().refreshDashboard(),
                     color: AppColors.primary,
                     child: CustomScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
                         _buildStickyHeader(context, state, profileState),
                         SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 16),
-                                // Welcome + Today stats banner
-                                _buildWelcomeBanner(context, state),
-                                const SizedBox(height: 24),
-                                // Section: Quick Actions
-                                _buildSectionChip('Quick Actions'),
-                                const SizedBox(height: 14),
-                                _buildIconGrid(context, _quickActions(context)),
-                                const SizedBox(height: 24),
-                                // Section: Records
-                                _buildSectionChip('Records'),
-                                const SizedBox(height: 14),
-                                _buildIconGrid(context, _recordActions(context)),
-                                const SizedBox(height: 24),
-                                // Section: Reports & Tools
-                                _buildSectionChip('Reports & Tools'),
-                                const SizedBox(height: 14),
-                                _buildIconGrid(context, _reportActions(context)),
-                                const SizedBox(height: 24),
-                                // Today Summary strip
-                                _buildSectionChip('Today\'s Summary'),
-                                const SizedBox(height: 14),
-                                _buildTodayStrip(state),
-                                const SizedBox(height: 24),
-                                // Stock overview
-                                _buildSectionChip('Stock Overview'),
-                                const SizedBox(height: 14),
-                                _buildStockCard(state),
-                                const SizedBox(height: 24),
-                                // Recent transactions
-                                _buildSectionHeader(
-                                  'Recent Transactions',
-                                  onViewAll: () => context.pushNamed('reports'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 16),
+                                    // Promo video / banner - Large sized but inside padding
+                                    const VideoBanner(
+                                      assetPath:
+                                          'assets/videos/promo_video.mp4',
+                                      fullWidth: false,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    // Welcome + Today stats banner
+                                    _buildWelcomeBanner(context, state),
+                                    const SizedBox(height: 24),
+                                    // Section: Quick Actions
+                                    _buildSectionChip(SiStrings.quickActions),
+                                    const SizedBox(height: 14),
+                                    _buildIconGrid(
+                                        context, _quickActions(context)),
+                                    const SizedBox(height: 24),
+                                    // Section: Records
+                                    _buildSectionChip(SiStrings.records),
+                                    const SizedBox(height: 14),
+                                    _buildIconGrid(
+                                        context, _recordActions(context)),
+                                    const SizedBox(height: 24),
+                                    // Section: Reports & Tools
+                                    _buildSectionChip(
+                                        SiStrings.reportsAndTools),
+                                    const SizedBox(height: 14),
+                                    _buildIconGrid(
+                                        context, _reportActions(context)),
+                                    const SizedBox(height: 24),
+                                    // Marketplace Banner
+                                    _buildMarketplaceBanner(context),
+                                    const SizedBox(height: 24),
+                                    // Today Summary grid layout
+                                    _buildSectionChip(SiStrings.todaySummary),
+                                    const SizedBox(height: 14),
+                                    _buildTodayStrip(state),
+                                    const SizedBox(height: 24),
+                                    // Stock overview
+                                    _buildSectionChip(SiStrings.stockOverview),
+                                    const SizedBox(height: 14),
+                                    _buildStockCard(state),
+                                    const SizedBox(height: 24),
+                                    // Recent transactions
+                                    _buildSectionHeader(
+                                      SiStrings.recentTransactions,
+                                      onViewAll: () =>
+                                          context.pushNamed('reports'),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    RecentTransactions(
+                                      transactions: state.recentTransactions,
+                                      isLoading: state.isLoading &&
+                                          state.recentTransactions.isEmpty,
+                                    ),
+                                    const SizedBox(height: 20),
+                                    // Recent expenses
+                                    _buildSectionHeader(
+                                      SiStrings.recentExpenses,
+                                      onViewAll: () =>
+                                          context.push('/expenses'),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    RecentExpenses(
+                                      expenses: state.recentExpenses,
+                                      isLoading: state.isLoading &&
+                                          state.recentExpenses.isEmpty,
+                                    ),
+                                    const SizedBox(height: 100),
+                                  ],
                                 ),
-                                const SizedBox(height: 12),
-                                RecentTransactions(
-                                  transactions: state.recentTransactions,
-                                  isLoading: state.isLoading && state.recentTransactions.isEmpty,
-                                ),
-                                const SizedBox(height: 20),
-                                // Recent expenses
-                                _buildSectionHeader(
-                                  'Recent Expenses',
-                                  onViewAll: () => context.push('/expenses'),
-                                ),
-                                const SizedBox(height: 12),
-                                RecentExpenses(
-                                  expenses: state.recentExpenses,
-                                  isLoading: state.isLoading && state.recentExpenses.isEmpty,
-                                ),
-                                const SizedBox(height: 100),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -205,7 +235,8 @@ class _HomeScreenState extends State<HomeScreen>
       shadowColor: Colors.black12,
       leading: Builder(
         builder: (ctx) => IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 26),
+          icon: const Icon(Icons.menu_rounded,
+              color: AppColors.textPrimary, size: 26),
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
@@ -217,8 +248,9 @@ class _HomeScreenState extends State<HomeScreen>
           builder: (ctx, ps) {
             final isSi = ps.language == 'si';
             return GestureDetector(
-              onTap: () =>
-                  context.read<ProfileCubit>().changeLanguage(isSi ? 'en' : 'si'),
+              onTap: () => context
+                  .read<ProfileCubit>()
+                  .changeLanguage(isSi ? 'en' : 'si'),
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 2),
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
@@ -239,7 +271,8 @@ class _HomeScreenState extends State<HomeScreen>
           },
         ),
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 22),
+          icon: const Icon(Icons.notifications_outlined,
+              color: AppColors.textPrimary, size: 22),
           onPressed: () {},
           padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
@@ -281,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen>
                   controller: _searchController,
                   autofocus: true,
                   decoration: InputDecoration(
-                    hintText: 'Search features...',
+                    hintText: SiStrings.searchFeatures,
                     prefixIcon: const Icon(Icons.search_rounded, size: 20),
                     filled: true,
                     fillColor: const Color(0xFFF4F6FA),
@@ -375,7 +408,8 @@ class _HomeScreenState extends State<HomeScreen>
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
-                  ..._drawerItems.map((item) => _buildDrawerTile(context, item)),
+                  ..._drawerItems
+                      .map((item) => _buildDrawerTile(context, item)),
                   const Divider(height: 24, indent: 16, endIndent: 16),
                   ListTile(
                     leading: Container(
@@ -387,8 +421,8 @@ class _HomeScreenState extends State<HomeScreen>
                       child: const Icon(Icons.logout_rounded,
                           color: AppColors.error, size: 20),
                     ),
-                    title: const Text('Logout',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(SiStrings.logout,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
                     onTap: () {
                       Navigator.pop(context);
                       _handleLogout(context);
@@ -402,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen>
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Rice Mill ERP v1.0',
+                SiStrings.erpVersion,
                 style: TextStyle(color: AppColors.textHint, fontSize: 11),
               ),
             ),
@@ -420,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen>
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isCurrent
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primary.withValues(alpha: 0.1)
               : const Color(0xFFF4F6FA),
           borderRadius: BorderRadius.circular(10),
         ),
@@ -438,7 +472,10 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       onTap: () {
         Navigator.pop(context);
-        if (item.route.startsWith('/')) {
+        if (item.route == 'store') {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const StoreHomePage()));
+        } else if (item.route.startsWith('/')) {
           context.push(item.route);
         } else {
           context.pushNamed(item.route);
@@ -467,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.25),
+                color: AppColors.primary.withValues(alpha: 0.25),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -480,7 +517,8 @@ class _HomeScreenState extends State<HomeScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, ${(authState.user?.name ?? 'User').split(' ').first}',
+                      SiStrings.greetHello(
+                          (authState.user?.name ?? 'User').split(' ').first),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -489,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Today\'s profit',
+                      SiStrings.todayProfit,
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 4),
@@ -512,28 +550,46 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-              // Sync status
-              GestureDetector(
-                onTap: () => context.read<DashboardCubit>().syncData(),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(Icons.cloud_sync_outlined,
-                          color: Colors.white, size: 24),
-                      const SizedBox(height: 4),
-                      Text(
-                        state.pendingSyncCount > 0
-                            ? '${state.pendingSyncCount} pending'
-                            : 'Synced',
-                        style: const TextStyle(
-                            color: Colors.white70, fontSize: 9),
+              // Improved Sync status button
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => context.read<DashboardCubit>().syncData(),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        width: 1,
                       ),
-                    ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          state.status == DashboardStatus.loading
+                              ? Icons.sync_rounded
+                              : Icons.cloud_done_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          state.pendingSyncCount > 0
+                              ? SiStrings.pendingCount(state.pendingSyncCount)
+                              : 'Synced',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -564,21 +620,48 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // Section header with "View All"
+  // Section header with professional "View All" button
   Widget _buildSectionHeader(String label, {VoidCallback? onViewAll}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildSectionChip(label),
         if (onViewAll != null)
-          GestureDetector(
-            onTap: onViewAll,
-            child: Text(
-              'View All →',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onViewAll,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      SiStrings.viewAll,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 10,
+                      color: AppColors.primary,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -586,55 +669,31 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  // ─── Marketplace Banner ──────────────────────────────────────────────────
+  Widget _buildMarketplaceBanner(BuildContext context) {
+    return _MarketplaceBanner(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const StoreHomePage()),
+      ),
+    );
+  }
+
   // ─── Icon Grid (Helakuru-style) ──────────────────────────────────────────
   Widget _buildIconGrid(BuildContext context, List<_GridItem> items) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // On narrow screens (phones) use 4 columns; wider gets more space per icon
+    final iconSize = (screenWidth / 4 - 24).clamp(52.0, 72.0);
     return GridView.count(
       crossAxisCount: 4,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 6,
-      mainAxisSpacing: 8,
-      childAspectRatio: 0.63,
-      children: items.map((item) => _buildGridItem(item)).toList(),
-    );
-  }
-
-  Widget _buildGridItem(_GridItem item) {
-    return GestureDetector(
-      onTap: item.onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: item.color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: item.color.withValues(alpha: 0.25),
-                width: 1.5,
-              ),
-            ),
-            child: Center(
-              child: Icon(item.icon, color: item.color, size: 24),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            item.label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2C2C3E),
-              height: 1.2,
-            ),
-          ),
-        ],
-      ),
+      crossAxisSpacing: 4,
+      mainAxisSpacing: 12,
+      childAspectRatio: iconSize / (iconSize + 36),
+      children: items
+          .map((item) => _AnimatedGridItem(item: item, iconSize: iconSize))
+          .toList(),
     );
   }
 
@@ -642,7 +701,8 @@ class _HomeScreenState extends State<HomeScreen>
   List<_GridItem> _quickActions(BuildContext context) => [
         _GridItem(
           icon: Icons.shopping_bag_rounded,
-          label: 'Buy\nPaddy',
+          assetImage: 'assets/icons/buy.png',
+          label: SiStrings.buyPaddy,
           color: const Color(0xFF4CAF50),
           onTap: () async {
             final customer = await context.push<CustomerModel>('/buy');
@@ -655,7 +715,8 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _GridItem(
           icon: Icons.sell_rounded,
-          label: 'Sell\nRice',
+          assetImage: 'assets/icons/sell.png',
+          label: SiStrings.sellRice,
           color: const Color(0xFF2196F3),
           onTap: () async {
             final customer = await context.push<CustomerModel>(RouteNames.sell);
@@ -668,7 +729,8 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _GridItem(
           icon: Icons.inventory_2_rounded,
-          label: 'Stock',
+          assetImage: 'assets/icons/stock.png',
+          label: SiStrings.stock,
           color: const Color(0xFFFF9800),
           onTap: () async {
             await context.push('/stock');
@@ -677,7 +739,8 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _GridItem(
           icon: Icons.receipt_long_rounded,
-          label: 'Add\nExpense',
+          assetImage: 'assets/icons/add-expenses.png',
+          label: SiStrings.expenses,
           color: const Color(0xFFE53935),
           onTap: () async {
             await context.push('/expenses');
@@ -689,25 +752,29 @@ class _HomeScreenState extends State<HomeScreen>
   List<_GridItem> _recordActions(BuildContext context) => [
         _GridItem(
           icon: Icons.people_alt_rounded,
-          label: 'Customers',
+          assetImage: 'assets/icons/customers.png',
+          label: SiStrings.customers,
           color: const Color(0xFF9C27B0),
           onTap: () => context.push('/customers'),
         ),
         _GridItem(
           icon: Icons.compare_arrows_rounded,
-          label: 'Transactions',
+          assetImage: 'assets/icons/transactions.png',
+          label: SiStrings.transactions,
           color: const Color(0xFF00BCD4),
           onTap: () => context.pushNamed('reports'),
         ),
         _GridItem(
           icon: Icons.settings_suggest_rounded,
-          label: 'Milling',
+          assetImage: 'assets/icons/milling.png',
+          label: SiStrings.milling,
           color: const Color(0xFF795548),
           onTap: () => context.push('/stock'),
         ),
         _GridItem(
           icon: Icons.local_offer_rounded,
-          label: 'Prices',
+          assetImage: 'assets/icons/prices.png',
+          label: SiStrings.prices,
           color: const Color(0xFFFF5722),
           onTap: () async {
             await context.pushNamed('prices');
@@ -719,7 +786,8 @@ class _HomeScreenState extends State<HomeScreen>
   List<_GridItem> _reportActions(BuildContext context) => [
         _GridItem(
           icon: Icons.analytics_rounded,
-          label: 'Analytics',
+          assetImage: 'assets/icons/analitics.png',
+          label: SiStrings.analytics,
           color: const Color(0xFF3F51B5),
           onTap: () async {
             await context.pushNamed('detailedDashboard');
@@ -728,13 +796,15 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _GridItem(
           icon: Icons.summarize_rounded,
-          label: 'Daily\nReport',
+          assetImage: 'assets/icons/daily-report.png',
+          label: SiStrings.dailyReport,
           color: const Color(0xFF009688),
           onTap: () => context.pushNamed('reports'),
         ),
         _GridItem(
           icon: Icons.add_box_rounded,
-          label: 'Add Price',
+          assetImage: 'assets/icons/add-price.png',
+          label: SiStrings.addPrice,
           color: const Color(0xFFFFC107),
           onTap: () async {
             await context.pushNamed('addPrice');
@@ -743,7 +813,8 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         _GridItem(
           icon: Icons.person_rounded,
-          label: 'Profile',
+          assetImage: 'assets/icons/profile.png',
+          label: SiStrings.profile,
           color: const Color(0xFF607D8B),
           onTap: () => context.push('/profile'),
         ),
@@ -751,117 +822,114 @@ class _HomeScreenState extends State<HomeScreen>
 
   // ─── Today's Summary grid layout ─────────────────────────────────────────
   Widget _buildTodayStrip(DashboardState state) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                'Buy',
-                state.formattedTodayPurchases,
-                AppColors.error,
-                Icons.call_received_rounded,
-                state.isLoading,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                'Sell',
-                state.formattedTodaySales,
-                AppColors.success,
-                Icons.call_made_rounded,
-                state.isLoading,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                'Expenses',
-                state.formattedTodayExpenses,
-                AppColors.warning,
-                Icons.receipt_rounded,
-                state.isLoading,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                'Profit',
-                state.formattedTodayProfit,
-                state.todayProfit >= 0 ? AppColors.primary : AppColors.error,
-                Icons.monetization_on_rounded,
-                state.isLoading,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, Color color, IconData icon,
-      bool isLoading) {
     return Container(
-      height: 70,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 2.2,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 6),
-              Text(
+          _buildStatCard(
+            SiStrings.buyPaddy,
+            state.formattedTodayPurchases,
+            AppColors.error,
+            Icons.call_received_rounded,
+            state.isLoading,
+          ),
+          _buildStatCard(
+            SiStrings.sellRice,
+            state.formattedTodaySales,
+            AppColors.success,
+            Icons.call_made_rounded,
+            state.isLoading,
+          ),
+          _buildStatCard(
+            SiStrings.expenses,
+            state.formattedTodayExpenses,
+            AppColors.warning,
+            Icons.receipt_rounded,
+            state.isLoading,
+          ),
+          _buildStatCard(
+            SiStrings.netProfit,
+            state.formattedTodayProfit,
+            state.todayProfit >= 0 ? AppColors.primary : AppColors.error,
+            Icons.monetization_on_rounded,
+            state.isLoading,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+      String label, String value, Color color, IconData icon, bool isLoading) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(icon, color: color, size: 12),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Color(0xFF666688),
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          isLoading
-              ? Container(
-                  height: 18,
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF4F6FA),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                )
-              : FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        isLoading
+            ? Container(
+                height: 18,
+                width: 60,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F6FA),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              )
+            : FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-        ],
-      ),
+              ),
+      ],
     );
   }
 
@@ -874,7 +942,7 @@ class _HomeScreenState extends State<HomeScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -906,33 +974,57 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
           if (state.hasLowStock) ...[
-            const SizedBox(height: 14),
-            GestureDetector(
-              onTap: () => context.push('/stock'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.warningLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning_amber_rounded,
-                        color: AppColors.warning, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '${state.lowStockCount} items low on stock — Tap to view',
-                        style: const TextStyle(
-                          color: AppColors.warningDark,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+            const SizedBox(height: 16),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => context.push('/stock'),
+                borderRadius: BorderRadius.circular(12),
+                child: Ink(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.warning.withValues(alpha: 0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          color: AppColors.warningDark, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${state.lowStockCount} items are low on stock',
+                          style: const TextStyle(
+                            color: AppColors.warningDark,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.2,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(Icons.chevron_right_rounded,
-                        color: AppColors.warning, size: 18),
-                  ],
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.warningDark,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          'FIX NOW',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -954,7 +1046,7 @@ class _HomeScreenState extends State<HomeScreen>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 24),
@@ -990,25 +1082,107 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
+// ─── Animated grid icon ──────────────────────────────────────────────────────
+class _AnimatedGridItem extends StatefulWidget {
+  final _GridItem item;
+  final double iconSize;
+  const _AnimatedGridItem({required this.item, required this.iconSize});
+
+  @override
+  State<_AnimatedGridItem> createState() => _AnimatedGridItemState();
+}
+
+class _AnimatedGridItemState extends State<_AnimatedGridItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 0.82).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(_) => _ctrl.forward();
+  void _onTapUp(_) => _ctrl.reverse();
+  void _onTapCancel() => _ctrl.reverse();
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    final sz = widget.iconSize;
+    return GestureDetector(
+      onTap: item.onTap,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: sz,
+              height: sz,
+              child: Center(
+                child: item.assetImage != null
+                    ? Image.asset(
+                        item.assetImage!,
+                        width: sz * 0.85,
+                        height: sz * 0.85,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) =>
+                            Icon(item.icon, color: item.color, size: sz * 0.65),
+                      )
+                    : Icon(item.icon, color: item.color, size: sz * 0.65),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              item.label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: (sz * 0.18).clamp(10.0, 13.0),
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF2C2C3E),
+                height: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Helper models ──────────────────────────────────────────────────────────
 class _GridItem {
   final IconData icon;
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final String? assetImage; // optional PNG from assets/icons/
   const _GridItem(
       {required this.icon,
       required this.label,
       required this.color,
-      required this.onTap});
-}
-
-class _StatItem {
-  final String label;
-  final String value;
-  final Color color;
-  final IconData icon;
-  const _StatItem(this.label, this.value, this.color, this.icon);
+      required this.onTap,
+      this.assetImage});
 }
 
 class _DrawerItem {
@@ -1016,4 +1190,168 @@ class _DrawerItem {
   final String label;
   final String route;
   const _DrawerItem(this.icon, this.label, this.route);
+}
+
+// ─── Animated Marketplace Banner ─────────────────────────────────────────────
+class _MarketplaceBanner extends StatefulWidget {
+  final VoidCallback onTap;
+  const _MarketplaceBanner({required this.onTap});
+
+  @override
+  State<_MarketplaceBanner> createState() => _MarketplaceBannerState();
+}
+
+class _MarketplaceBannerState extends State<_MarketplaceBanner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _pulse = Tween<double>(begin: 1.0, end: 1.07).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF43A047)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF2E7D32).withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left icon circle
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3), width: 1.5),
+              ),
+              child: const Center(
+                child: Icon(Icons.storefront_rounded,
+                    color: Colors.white, size: 26),
+              ),
+            ),
+            const SizedBox(width: 14),
+            // Text section
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'සහල් වෙළෙඳපොළ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Rice Marketplace',
+                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 5,
+                    runSpacing: 4,
+                    children: [
+                      _tag('Paddy'),
+                      _tag('Rice'),
+                      _tag('+ More'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Animated Explore button — arrow only (no duplicate icon)
+            ScaleTransition(
+              scale: _pulse,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_forward_rounded,
+                        color: Color(0xFF2E7D32), size: 20),
+                    SizedBox(height: 4),
+                    Text(
+                      'Explore',
+                      style: TextStyle(
+                        color: Color(0xFF2E7D32),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _tag(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+            color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
 }

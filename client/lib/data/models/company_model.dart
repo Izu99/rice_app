@@ -93,34 +93,59 @@ class CompanyModel extends Equatable {
 
   /// Create from JSON
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
+    // Support both flat API response format and raw Mongoose document format
+    final subscription = json['subscription'] is Map
+        ? json['subscription'] as Map<String, dynamic>
+        : null;
+
     return CompanyModel(
-      id: json['id']?.toString() ?? '',
+      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
       serverId: json['server_id']?.toString(),
       name: json['name']?.toString() ?? '',
-      registrationNumber: json['registration_number']?.toString(),
-      taxNumber: json['tax_number']?.toString(),
+      registrationNumber: json['registrationNumber']?.toString() ??
+          json['registration_number']?.toString(),
+      taxNumber:
+          json['taxNumber']?.toString() ?? json['tax_number']?.toString(),
       address: json['address']?.toString() ?? '',
       district: json['district']?.toString() ?? json['District']?.toString(),
       phone: json['phone']?.toString() ?? '',
-      secondaryPhone: json['secondary_phone']?.toString(),
+      secondaryPhone: json['secondaryPhone']?.toString() ??
+          json['secondary_phone']?.toString(),
       email: json['email']?.toString(),
       website: json['website']?.toString(),
-      logoUrl: json['logo_url']?.toString(),
-      plan: _parseSubscriptionPlan(json['plan']),
-      subscriptionExpiresAt: _parseDateTime(json['subscription_expires_at']),
+      logoUrl:
+          json['logoUrl']?.toString() ?? json['logo_url']?.toString(),
+      plan: _parseSubscriptionPlan(
+          json['plan'] ?? subscription?['plan']),
+      subscriptionExpiresAt:
+          _parseDateTime(json['subscription_expires_at']),
       status: _parseCompanyStatus(json['status']),
-      isActive: json['is_active'] == true || json['is_active'] == 1,
-      isEmailVerified:
-          json['is_email_verified'] == true || json['is_email_verified'] == 1,
-      maxUsers: _parseInt(json['max_users'], defaultValue: 5),
-      currentUsers: _parseInt(json['current_users'], defaultValue: 1),
+      isActive: json['isActive'] == true ||
+          json['isActive'] == 1 ||
+          json['is_active'] == true ||
+          json['is_active'] == 1 ||
+          subscription?['isActive'] == true,
+      isEmailVerified: json['isEmailVerified'] == true ||
+          json['isEmailVerified'] == 1 ||
+          json['is_email_verified'] == true ||
+          json['is_email_verified'] == 1,
+      maxUsers: _parseInt(json['maxUsers'] ?? json['max_users'],
+          defaultValue: 5),
+      currentUsers: _parseInt(
+          json['currentUsers'] ?? json['current_users'],
+          defaultValue: 1),
       ownerId: json['ownerId']?.toString() ?? json['owner_id']?.toString(),
-      ownerName: json['ownerName']?.toString() ?? json['owner_name']?.toString(),
+      ownerName:
+          json['ownerName']?.toString() ?? json['owner_name']?.toString(),
       settings: json['settings'] is Map
           ? Map<String, dynamic>.from(json['settings'])
           : null,
-      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ?? DateTime.now(),
-      updatedAt: _parseDateTime(json['updated_at']) ?? DateTime.now(),
+      createdAt:
+          _parseDateTime(json['createdAt'] ?? json['created_at']) ??
+              DateTime.now(),
+      updatedAt:
+          _parseDateTime(json['updatedAt'] ?? json['updated_at']) ??
+              DateTime.now(),
       isSynced: json['is_synced'] == true || json['is_synced'] == 1,
       syncedAt: _parseDateTime(json['synced_at']),
     );

@@ -178,8 +178,8 @@ enum PaymentMethod {
 /// Sync status
 enum SyncStatus {
   pending('pending', 'Pending', 'බලාපොරොත්තු'),
-  syncing('syncing', 'Syncing', 'සමමුහුර්ත කරමින්'),
-  synced('synced', 'Synced', 'සමමුහුර්ත'),
+  syncing('syncing', 'Syncing', 'sync කරමින්'),
+  synced('synced', 'Synced', 'sync'),
   failed('failed', 'Failed', 'අසාර්ථක'),
   conflict('conflict', 'Conflict', 'ගැටුම');
 
@@ -320,7 +320,8 @@ enum ExpenseCategory {
   const ExpenseCategory(
       this.value, this.displayName, this.sinhalaName, this.icon);
 
-  String get displayNameLocal => SiStrings.isSinhala ? sinhalaName : displayName;
+  String get displayNameLocal =>
+      SiStrings.isSinhala ? sinhalaName : displayName;
 
   static ExpenseCategory fromString(String value) {
     return ExpenseCategory.values.firstWhere(

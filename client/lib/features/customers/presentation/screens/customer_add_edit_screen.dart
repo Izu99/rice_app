@@ -5,11 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../domain/entities/customer_entity.dart';
 import '../../../../core/constants/enums.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../cubit/customers_cubit.dart';
 import '../cubit/customers_state.dart';
 
@@ -68,7 +71,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     );
 
     if (_isEditing) {
-_loadCustomerData();
+      _loadCustomerData();
     }
 
     _phoneController.addListener(_onPhoneChanged);
@@ -355,20 +358,30 @@ _loadCustomerData();
         } else if (state.formStatus == CustomerFormStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.formErrorMessage ?? 'ගනුදෙනුකරු සුරැකීමේදී දෝෂයක් සිදු විය'),
+              content: Text(state.formErrorMessage ??
+                  'ගනුදෙනුකරු සුරැකීමේදී දෝෂයක් සිදු විය'),
               backgroundColor: AppColors.error,
             ),
           );
         }
       },
       builder: (context, state) {
+        context.select((ProfileCubit c) => c.state.language);
         return LoadingOverlay(
           isLoading: state.formStatus == CustomerFormStatus.submitting,
-          child: Scaffold(
-            backgroundColor: const Color(0xFFF4F6FA),
-            appBar: HAppBar(
-              title: _isEditing ? 'Edit Customer' : 'New Customer',
-              subtitle: _isEditing ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම' : 'නව ගනුදෙනුකරු',
+          child: AppPageScaffold(
+            title: _isEditing ? SiStrings.editCustomer : SiStrings.newCustomer,
+            subtitle: _isEditing
+                ? (SiStrings.isSinhala
+                    ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම'
+                    : 'Update customer')
+                : (SiStrings.isSinhala ? 'නව ගනුදෙනුකරු' : 'New customer'),
+            bottomBar: AppSubBottomBar(
+              centerLabel: _isEditing
+                  ? (SiStrings.isSinhala ? 'යාවත්කාලීන කරන්න' : 'Update')
+                  : (SiStrings.isSinhala ? 'සුරකින්න' : 'Save'),
+              centerIcon: Icons.save_rounded,
+              onCenter: _submit,
             ),
             body: Column(
               children: [
@@ -386,7 +399,9 @@ _loadCustomerData();
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        _isEditing ? 'තොරතුරු යාවත්කාලීන කිරීම' : 'නව ගිණුමක් සාදන්න',
+                        _isEditing
+                            ? 'තොරතුරු යාවත්කාලීන කිරීම'
+                            : 'නව ගිණුමක් සාදන්න',
                         style: AppTextStyles.bodyMedium
                             .copyWith(color: AppColors.textSecondary),
                       ),
@@ -477,8 +492,7 @@ _loadCustomerData();
                                   isExpanded: true,
                                   decoration: InputDecoration(
                                     labelText: 'භූමිකාව (අනිවාර්යයි)',
-                                    prefixIcon: Icon(
-                                        Icons.category_outlined,
+                                    prefixIcon: Icon(Icons.category_outlined,
                                         color: AppColors.primary),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
@@ -489,8 +503,7 @@ _loadCustomerData();
                                     contentPadding: EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 16),
                                   ),
-                                  icon: Icon(
-                                      Icons.keyboard_arrow_down_rounded,
+                                  icon: Icon(Icons.keyboard_arrow_down_rounded,
                                       color: AppColors.primary),
                                   borderRadius: BorderRadius.circular(16),
                                   items: [
@@ -523,7 +536,8 @@ _loadCustomerData();
                             TextFormField(
                               controller: _nameController,
                               decoration: _inputDecoration(
-                                  'සම්පූර්ණ නම (අනිවාර්යයි)', Icons.person_outline),
+                                  'සම්පූර්ණ නම (අනිවාර්යයි)',
+                                  Icons.person_outline),
                               textCapitalization: TextCapitalization.words,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
@@ -533,8 +547,7 @@ _loadCustomerData();
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _secondaryPhoneController,
-                              decoration: _inputDecoration(
-                                  'අමතර දුරකථන අංකය',
+                              decoration: _inputDecoration('අමතර දුරකථන අංකය',
                                   Icons.phone_android_outlined),
                               keyboardType: TextInputType.phone,
                               inputFormatters: [
@@ -557,8 +570,8 @@ _loadCustomerData();
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _cityController,
-                              decoration: _inputDecoration(
-                                  'නගරය (අනිවාර්යයි)', Icons.location_city_outlined),
+                              decoration: _inputDecoration('නගරය (අනිවාර්යයි)',
+                                  Icons.location_city_outlined),
                               textCapitalization: TextCapitalization.words,
                               validator: (value) =>
                                   (value == null || value.trim().isEmpty)
@@ -569,8 +582,7 @@ _loadCustomerData();
                             TextFormField(
                               controller: _notesController,
                               decoration: _inputDecoration(
-                                  'සටහන්',
-                                  Icons.note_alt_outlined),
+                                  'සටහන්', Icons.note_alt_outlined),
                               maxLines: 3,
                             ),
                             const SizedBox(height: 40),

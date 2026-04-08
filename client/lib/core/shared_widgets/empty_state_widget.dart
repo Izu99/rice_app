@@ -187,7 +187,6 @@ class EmptyStateWidget extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (compact) {

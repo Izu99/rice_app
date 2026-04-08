@@ -629,7 +629,8 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 color: AppColors.success.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: Column(
                 children: [
@@ -639,7 +640,8 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
                       color: AppColors.success.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check_circle_rounded, size: 32, color: AppColors.success),
+                    child: const Icon(Icons.check_circle_rounded,
+                        size: 32, color: AppColors.success),
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -696,16 +698,19 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
                     decoration: BoxDecoration(
                       color: Colors.orange.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange.withValues(alpha: 0.15)),
+                      border: Border.all(
+                          color: Colors.orange.withValues(alpha: 0.15)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, size: 20, color: Colors.orange),
+                        const Icon(Icons.warning_amber_rounded,
+                            size: 20, color: Colors.orange),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             'Please save these credentials securely. They will not be shown again.',
-                            style: TextStyle(color: Colors.orange.shade800, fontSize: 11),
+                            style: TextStyle(
+                                color: Colors.orange.shade800, fontSize: 11),
                           ),
                         ),
                       ],
@@ -720,7 +725,8 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Color(0xFFF4F6FA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius:
+                    BorderRadius.vertical(bottom: Radius.circular(24)),
               ),
               child: Row(
                 children: [
@@ -735,7 +741,8 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
                         foregroundColor: const Color(0xFF444466),
                         side: const BorderSide(color: Color(0xFFE8E8EE)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Done'),
                     ),
@@ -764,12 +771,14 @@ Please share these credentials with the company admin securely.
                         );
                       },
                       icon: const Icon(Icons.copy_rounded, size: 18),
-                      label: const Text('Copy', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: const Text('Copy',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.adminPrimary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
                     ),

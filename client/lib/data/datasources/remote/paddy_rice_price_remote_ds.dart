@@ -216,8 +216,8 @@ class PaddyRicePriceRemoteDataSourceImpl
             final List<dynamic> districtsList =
                 response.data['districts'] ?? [];
             return districtsList
-                .map((d) =>
-                    DistrictWithPricesResponse.fromJson(d as Map<String, dynamic>))
+                .map((d) => DistrictWithPricesResponse.fromJson(
+                    d as Map<String, dynamic>))
                 .toList();
           }
           throw ServerException(message: response.message ?? 'Unknown error');
@@ -324,8 +324,10 @@ class PaddyRicePriceRemoteDataSourceImpl
         'limit': limit.toString(),
         'page': page.toString(),
       };
-      if (district != null && district.isNotEmpty) queryParams['district'] = district;
-      if (priceType != null && priceType.isNotEmpty) queryParams['priceType'] = priceType;
+      if (district != null && district.isNotEmpty)
+        queryParams['district'] = district;
+      if (priceType != null && priceType.isNotEmpty)
+        queryParams['priceType'] = priceType;
 
       final either = await apiService.get(
         '$_endpoint/admin/all',

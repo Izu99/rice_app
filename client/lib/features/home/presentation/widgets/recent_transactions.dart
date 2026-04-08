@@ -82,33 +82,40 @@ class RecentTransactions extends StatelessWidget {
               height: 1,
               color: const Color(0xFFF0F0F5),
             ),
-            InkWell(
-              onTap: onViewAll ?? () => context.push('/reports'),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF9FAFC),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'View All History',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                        letterSpacing: 0.3,
+            Material(
+              color: const Color(0xFFF9FAFC),
+              child: InkWell(
+                onTap: onViewAll ?? () => context.push('/reports'),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'View Detailed History',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      color: AppColors.primary,
-                      size: 16,
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: AppColors.primary,
+                          size: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

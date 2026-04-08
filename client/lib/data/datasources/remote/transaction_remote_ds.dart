@@ -196,7 +196,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           if (response.success && response.data != null) {
             // Server returns: { transaction: {...}, customer: {...}, paymentHistory: [...] }
             // Extract the transaction object
-            final transactionData = response.data['transaction'] ?? response.data;
+            final transactionData =
+                response.data['transaction'] ?? response.data;
             return TransactionModel.fromJson(transactionData);
           }
 

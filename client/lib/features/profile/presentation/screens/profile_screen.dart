@@ -3,13 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/constants/districts.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../cubit/profile_cubit.dart';
@@ -81,21 +79,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 24),
 
                     // Account Section
-                    _buildSectionTitle('ගිණුම', 'Account'),
+                    _buildSectionTitle(SiStrings.profileTitle,
+                        SiStrings.isSinhala ? 'Account' : 'ගිණුම'),
                     const SizedBox(height: 12),
                     _buildAccountSection(state),
                     const SizedBox(height: 24),
 
                     // Settings Section
-                    _buildSectionTitle('සැකසුම්', 'Settings'),
+                    _buildSectionTitle(
+                        SiStrings.isSinhala ? 'සැකසුම්' : 'Settings',
+                        SiStrings.isSinhala ? 'Settings' : 'සැකසුම්'),
                     const SizedBox(height: 12),
                     _buildSettingsSection(state),
-                    const SizedBox(height: 24),
-
-                    // Support Section
-                    _buildSectionTitle('සහාය', 'Support'),
-                    const SizedBox(height: 12),
-                    _buildSupportSection(),
                     const SizedBox(height: 24),
 
                     // Logout Button
@@ -124,9 +119,9 @@ class _ProfileScreenState extends State<ProfileScreen>
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.black12,
       scrolledUnderElevation: 1,
-      title: const Text(
-        'Profile',
-        style: TextStyle(
+      title: Text(
+        SiStrings.profileTitle,
+        style: const TextStyle(
           color: Color(0xFF1C1C2E),
           fontWeight: FontWeight.w800,
           fontSize: 17,
@@ -193,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'පරිශීලකයා', // User
+                  user?.name ?? SiStrings.roleUser,
                   style: AppTextStyles.titleLarge.copyWith(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
@@ -246,15 +241,15 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   String _getRoleDisplayName(dynamic role) {
-    if (role == null) return 'ක්‍රියාකරු'; // Operator
+    if (role == null) return SiStrings.roleOperator;
     final roleStr = role.toString().split('.').last;
     switch (roleStr) {
       case 'admin':
-        return 'පරිපාලක'; // Admin
+        return SiStrings.roleAdmin;
       case 'operator':
-        return 'ක්‍රියාකරු'; // Operator
+        return SiStrings.roleOperator;
       default:
-        return 'ක්‍රියාකරු';
+        return SiStrings.roleOperator;
     }
   }
 
@@ -310,31 +305,16 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           ProfileMenuItem(
             icon: Icons.person_outline,
-            title: 'ගිණුම යාවත්කාලීන කරන්න', // Edit Profile
-            subtitle: 'නම, ඊමේල්, ඡායාරූපය වෙනස් කරන්න',
+            title: SiStrings.editProfile,
+            subtitle: SiStrings.editProfileSubtitle,
             onTap: () => _showEditProfileDialog(state),
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.lock_outline,
-            title: 'මුරපදය වෙනස් කරන්න', // Change Password
-            subtitle: 'ඔබගේ මුරපදය යාවත්කාලීන කරන්න',
+            title: SiStrings.changePassword,
+            subtitle: SiStrings.changePasswordSubtitle,
             onTap: _showChangePasswordDialog,
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
-            icon: Icons.business,
-            title: 'ආයතනයේ විස්තර', // Company Info
-            subtitle: state.company?.name ?? 'ඇතුළත් කර නැත',
-            onTap: () {
-              if (state.company != null) {
-                _showCompanyDialog(state);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('ආයතනයේ විස්තර ලබා ගත නොහැක')),
-                );
-              }
-            },
           ),
         ],
       ),
@@ -356,94 +336,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: Column(
         children: [
           ProfileMenuItem(
-            icon: Icons.dark_mode_outlined,
-            title: 'අඳුරු තේමාව', // Dark Mode
-            subtitle: 'Dark Mode සක්‍රීය කරන්න',
-            trailing: Switch(
-              value: state.isDarkMode,
-              onChanged: (value) {
-                context.read<ProfileCubit>().toggleDarkMode(value);
-              },
-              activeThumbColor: AppColors.primary,
-            ),
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
-            icon: Icons.notifications_outlined,
-            title: 'දැනුම්දීම්', // Notifications
-            subtitle: 'Push Notifications',
-            trailing: Switch(
-              value: state.notificationsEnabled,
-              onChanged: (value) {
-                context.read<ProfileCubit>().toggleNotifications(value);
-              },
-              activeThumbColor: AppColors.primary,
-            ),
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
-            icon: Icons.fingerprint,
-            title: 'Biometric Login',
-            subtitle: 'ඇඟිලි සලකුණු/මුහුණ හඳුනාගැනීම භාවිතා කරන්න',
-            trailing: Switch(
-              value: state.biometricEnabled,
-              onChanged: (value) {
-                context.read<ProfileCubit>().toggleBiometric(value);
-              },
-              activeThumbColor: AppColors.primary,
-            ),
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
             icon: Icons.language,
-            title: 'භාෂාව', // Language
+            title: SiStrings.language,
             subtitle: state.language == 'en' ? 'English' : 'සිංහල',
             onTap: _showLanguageDialog,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSupportSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ProfileMenuItem(
-            icon: Icons.help_outline,
-            title: 'උදව් සහ නිතර අසන පැණ', // Help & FAQ
-            subtitle: 'සහාය ලබා ගන්න',
-            onTap: () {
-              // TODO: Navigate to help
-            },
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
-            icon: Icons.description_outlined,
-            title: 'කොන්දේසි සහ රහස්‍යතාව', // Terms & Privacy
-            subtitle: 'අපගේ ප්‍රතිපත්ති කියවන්න',
-            onTap: () {
-              // TODO: Navigate to terms
-            },
-          ),
-          const Divider(height: 1),
-          ProfileMenuItem(
-            icon: Icons.feedback_outlined,
-            title: 'ප්‍රතිචාර එවන්න', // Send Feedback
-            subtitle: 'අපව වැඩිදියුණු කිරීමට උදව් වන්න',
-            onTap: () {
-              // TODO: Show feedback dialog
-            },
           ),
         ],
       ),
@@ -465,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: ProfileMenuItem(
         icon: Icons.logout,
         title: SiStrings.logout,
-        subtitle: 'ඔබගේ ගිණුමෙන් ඉවත් වන්න',
+        subtitle: SiStrings.logoutSubtitle,
         iconColor: AppColors.error,
         titleColor: AppColors.error,
         onTap: _handleLogout,
@@ -491,7 +387,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
           if (state.lastSyncTime != null)
             Text(
-              'අවසන් වරට සමමුහුර්ත කළේ: ${state.formattedLastSync}',
+              '${SiStrings.lastSynced} ${state.formattedLastSync}',
               style: AppTextStyles.bodySmall.copyWith(
                 color: AppColors.textHint,
               ),
@@ -505,111 +401,227 @@ class _ProfileScreenState extends State<ProfileScreen>
     final nameController = TextEditingController(text: state.user?.name);
     final emailController = TextEditingController(text: state.user?.email);
 
+    // Company fields
+    final companyNameController =
+        TextEditingController(text: state.company?.name);
+    final phoneController = TextEditingController(text: state.company?.phone);
+    final secondaryPhoneController =
+        TextEditingController(text: state.company?.secondaryPhone);
+    final addressController =
+        TextEditingController(text: state.company?.address);
+    final regNoController =
+        TextEditingController(text: state.company?.registrationNumber);
+    final taxNoController =
+        TextEditingController(text: state.company?.taxNumber);
+    final websiteController =
+        TextEditingController(text: state.company?.website);
+    String? selectedDistrict = state.company?.district;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: EdgeInsets.zero,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusL)),
+          contentPadding: EdgeInsets.zero,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with centered icon
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppDimensions.radiusL)),
+                ),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.edit_note_rounded,
+                        size: 40, color: AppColors.primary),
                   ),
-                  child: Icon(Icons.person_outline, size: 32, color: AppColors.primary),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ගිණුම යාවත්කාලීන කිරීම',
-                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'නම',
-                      prefixIcon: const Icon(Icons.person_outline),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'විද්‍යුත් තැපෑල (Email)',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(top: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF4F6FA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF444466),
-                        side: const BorderSide(color: Color(0xFFE8E8EE)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+              // Scrollable Body - Combined Profile & Company
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDialogSectionTitle(SiStrings.updateProfile),
+                      const SizedBox(height: 16),
+                      _buildDialogField(
+                          nameController, SiStrings.name, Icons.person_outline),
+                      const SizedBox(height: 12),
+                      _buildDialogField(emailController, SiStrings.email,
+                          Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress),
+
+                      const SizedBox(height: 24),
+                      _buildDialogSectionTitle(SiStrings.companyInfo),
+                      const SizedBox(height: 16),
+                      _buildDialogField(companyNameController,
+                          SiStrings.companyName, Icons.business_outlined),
+                      const SizedBox(height: 12),
+                      _buildDialogField(phoneController, SiStrings.phoneNumber,
+                          Icons.phone_outlined,
+                          keyboardType: TextInputType.phone),
+                      const SizedBox(height: 12),
+                      _buildDialogField(
+                          secondaryPhoneController,
+                          SiStrings.secondaryPhone,
+                          Icons.phone_android_outlined,
+                          keyboardType: TextInputType.phone),
+                      const SizedBox(height: 12),
+                      _buildDialogField(
+                          regNoController,
+                          SiStrings.registrationNumber,
+                          Icons.app_registration_rounded),
+                      const SizedBox(height: 12),
+                      _buildDialogField(taxNoController, SiStrings.taxNumber,
+                          Icons.receipt_long_outlined),
+                      const SizedBox(height: 12),
+
+                      // District Dropdown
+                      Text(
+                        SiStrings.district,
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary),
                       ),
-                      child: Text(SiStrings.cancel),
-                    ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedDistrict,
+                            isExpanded: true,
+                            hint: Text(SiStrings.district),
+                            items: SriLankanDistricts.sortedDistricts.map((d) {
+                              return DropdownMenuItem(value: d, child: Text(d));
+                            }).toList(),
+                            onChanged: (val) {
+                              setDialogState(() => selectedDistrict = val);
+                            },
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      _buildDialogField(addressController, SiStrings.address,
+                          Icons.location_on_outlined,
+                          maxLines: 2),
+                      const SizedBox(height: 12),
+                      _buildDialogField(websiteController, SiStrings.website,
+                          Icons.language_outlined,
+                          keyboardType: TextInputType.url),
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
+                ),
+              ),
+
+              // Footer
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF4F6FA),
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(AppDimensions.radiusL)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                         context.read<ProfileCubit>().updateProfile(
                               name: nameController.text,
                               email: emailController.text,
                             );
+                        context.read<ProfileCubit>().updateCompany(
+                              name: companyNameController.text,
+                              phone: phoneController.text,
+                              address: addressController.text,
+                              secondaryPhone: secondaryPhoneController.text,
+                              email: emailController.text,
+                              district: selectedDistrict,
+                              registrationNumber: regNoController.text,
+                              taxNumber: taxNoController.text,
+                              website: websiteController.text,
+                            );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: Text(SiStrings.save, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(SiStrings.save,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444466),
+                        side: const BorderSide(color: Color(0xFFE8E8EE)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Text(SiStrings.cancel,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDialogSectionTitle(String title) {
+    return Text(
+      title,
+      style: AppTextStyles.titleMedium.copyWith(
+        fontWeight: FontWeight.bold,
+        color: const Color(0xFF1C1C2E),
+      ),
+    );
+  }
+
+  Widget _buildDialogField(
+      TextEditingController controller, String label, IconData icon,
+      {TextInputType? keyboardType, int maxLines = 1}) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
@@ -634,134 +646,165 @@ class _ProfileScreenState extends State<ProfileScreen>
           },
           builder: (context, state) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusL)),
               contentPadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Header with centered icon
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 24),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(AppDimensions.radiusL)),
                     ),
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.lock_outline, size: 32, color: AppColors.primary),
+                        child: const Icon(Icons.lock_outline,
+                            size: 40, color: AppColors.primary),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          SiStrings.resetPassword,
-                          style: const TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: currentController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'වත්මන් මුරපදය',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: newController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'නව මුරපදය',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: confirmController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'මුරපදය නැවත ඇතුළත් කරන්න',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          ),
-                        ),
-                        if (state.errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Text(
-                              state.errorMessage!,
-                              style: const TextStyle(color: AppColors.error, fontSize: 12),
+
+                  // Scrollable Body
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            SiStrings.resetPassword,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1C1C2E),
                             ),
                           ),
-                      ],
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: currentController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: SiStrings.currentPassword,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: newController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: SiStrings.newPassword,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: confirmController,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: SiStrings.confirmPassword,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                          ),
+                          if (state.errorMessage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                state.errorMessage!,
+                                style: const TextStyle(
+                                    color: AppColors.error, fontSize: 12),
+                              ),
+                            ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
+
+                  // Footer
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     decoration: const BoxDecoration(
                       color: Color(0xFFF4F6FA),
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                      borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(AppDimensions.radiusL)),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(dialogContext),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF444466),
-                              side: const BorderSide(color: Color(0xFFE8E8EE)),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            child: Text(SiStrings.cancel),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: state.isChangingPassword
-                                ? null
-                                : () {
-                                    if (newController.text != confirmController.text) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('මුරපද එකිනෙකට නොගැලපේ'),
-                                          backgroundColor: AppColors.error,
-                                        ),
+                        ElevatedButton(
+                          onPressed: state.isChangingPassword
+                              ? null
+                              : () {
+                                  if (newController.text !=
+                                      confirmController.text) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            SiStrings.passwordsDoNotMatch),
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  context.read<ProfileCubit>().changePassword(
+                                        currentPassword: currentController.text,
+                                        newPassword: newController.text,
                                       );
-                                      return;
-                                    }
-                                    context.read<ProfileCubit>().changePassword(
-                                          currentPassword: currentController.text,
-                                          newPassword: newController.text,
-                                        );
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              elevation: 0,
-                            ),
-                            child: state.isChangingPassword
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                                : const Text('වෙනස් කරන්න', style: TextStyle(fontWeight: FontWeight.bold)),
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
                           ),
+                          child: state.isChangingPassword
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white))
+                              : Text(SiStrings.change,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF444466),
+                            side: const BorderSide(color: Color(0xFFE8E8EE)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: Colors.white,
+                          ),
+                          child: Text(SiStrings.cancel,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -775,140 +818,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  void _showCompanyDialog(ProfileState state) {
-    if (state.company == null) return;
-
-    final nameController = TextEditingController(text: state.company?.name);
-    final phoneController = TextEditingController(text: state.company?.phone);
-    final addressController = TextEditingController(text: state.company?.address);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: EdgeInsets.zero,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.business_outlined, size: 32, color: AppColors.primary),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'ආයතනයේ විස්තර',
-                      style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: 'ආයතනයේ නම',
-                        prefixIcon: const Icon(Icons.business_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'දුරකථන අංකය',
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: addressController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'ලිපිනය',
-                        prefixIcon: const Icon(Icons.location_on_outlined),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(top: 20),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF4F6FA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF444466),
-                        side: const BorderSide(color: Color(0xFFE8E8EE)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(SiStrings.cancel),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context.read<ProfileCubit>().updateCompany(
-                              name: nameController.text,
-                              phone: phoneController.text,
-                              address: addressController.text,
-                            );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(SiStrings.save, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showLanguageDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         contentPadding: EdgeInsets.zero,
         content: Column(
@@ -919,7 +832,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Center(
                 child: Container(
@@ -928,7 +842,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                     color: AppColors.primary.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.language_outlined, size: 32, color: AppColors.primary),
+                  child: Icon(Icons.language_outlined,
+                      size: 32, color: AppColors.primary),
                 ),
               ),
             ),
@@ -937,14 +852,17 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'භාෂාව තෝරන්න',
-                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                  Text(
+                    SiStrings.selectLanguage,
+                    style: const TextStyle(
+                        color: Color(0xFF1C1C2E),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  _buildLanguageTile('🇺🇸', 'English', 'en'),
+                  _buildLanguageTile('🇺🇸', 'English', 'en', dialogContext),
                   const SizedBox(height: 8),
-                  _buildLanguageTile('🇱🇰', 'සිංහල', 'si'),
+                  _buildLanguageTile('🇱🇰', 'සිංහල', 'si', dialogContext),
                 ],
               ),
             ),
@@ -954,10 +872,11 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildLanguageTile(String flag, String label, String code) {
+  Widget _buildLanguageTile(
+      String flag, String label, String code, BuildContext dialogContext) {
     return InkWell(
       onTap: () {
-        Navigator.pop(context);
+        Navigator.pop(dialogContext);
         context.read<ProfileCubit>().changeLanguage(code);
       },
       borderRadius: BorderRadius.circular(12),
@@ -995,4 +914,3 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 }
-

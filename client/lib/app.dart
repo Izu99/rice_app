@@ -17,7 +17,6 @@ import 'features/customers/presentation/cubit/customers_cubit.dart';
 import 'features/reports/presentation/cubit/reports_cubit.dart';
 import 'features/expenses/presentation/cubit/expenses_cubit.dart';
 import 'features/profile/presentation/cubit/profile_cubit.dart';
-import 'features/profile/presentation/cubit/profile_state.dart';
 import 'features/super_admin/presentation/cubit/admin_cubit.dart';
 import 'features/price_management/presentation/cubit/price_management_cubit.dart';
 
@@ -89,20 +88,13 @@ class RiceMillApp extends StatelessWidget {
           create: (_) => sl<PriceManagementCubit>(),
         ),
       ],
-      child: BlocBuilder<ProfileCubit, ProfileState>(
-        buildWhen: (previous, current) => previous.language != current.language,
-        builder: (context, state) {
-          return MaterialApp.router(
-            key: ValueKey(state.language),
-            title: 'ricemill',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.light,
-            routerConfig: sl<AppRouter>().router,
-            locale: Locale(state.language),
-          );
-        },
+      child: MaterialApp.router(
+        title: 'ricemill',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.light,
+        routerConfig: sl<AppRouter>().router,
       ),
     );
   }

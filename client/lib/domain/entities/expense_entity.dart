@@ -21,7 +21,8 @@ class ExpenseEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, title, category, amount, date, notes, createdByName];
+  List<Object?> get props =>
+      [id, title, category, amount, date, notes, createdByName];
 
   factory ExpenseEntity.empty() {
     return ExpenseEntity(

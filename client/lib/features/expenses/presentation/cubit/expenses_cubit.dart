@@ -26,22 +26,26 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(status: ExpensesStatus.error, errorMessage: failure.message)),
+      (failure) => emit(state.copyWith(
+          status: ExpensesStatus.error, errorMessage: failure.message)),
       (expenses) {
         summaryResult.fold(
-          (l) => emit(state.copyWith(status: ExpensesStatus.loaded, expenses: expenses)),
+          (l) => emit(state.copyWith(
+              status: ExpensesStatus.loaded, expenses: expenses)),
           (summary) {
             final Map<String, double> breakdown = {};
             if (summary['categoryBreakdown'] != null) {
               for (var item in summary['categoryBreakdown']) {
-                breakdown[item['_id']] = (item['totalAmount'] as num).toDouble();
+                breakdown[item['_id']] =
+                    (item['totalAmount'] as num).toDouble();
               }
             }
 
             emit(state.copyWith(
               status: ExpensesStatus.loaded,
               expenses: expenses,
-              totalMonthlyExpenses: (summary['totalExpenses'] as num?)?.toDouble() ?? 0.0,
+              totalMonthlyExpenses:
+                  (summary['totalExpenses'] as num?)?.toDouble() ?? 0.0,
               categoryBreakdown: breakdown,
             ));
           },
@@ -71,14 +75,17 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     final result = await _repository.createExpense(expense);
 
     result.fold(
-      (failure) => emit(state.copyWith(status: ExpensesStatus.error, errorMessage: failure.message)),
+      (failure) => emit(state.copyWith(
+          status: ExpensesStatus.error, errorMessage: failure.message)),
       (newExpense) {
         // Add to list immediately without a full reload
         final updatedExpenses = [newExpense, ...state.expenses];
         final updatedTotal = state.totalMonthlyExpenses + newExpense.amount;
-        final updatedBreakdown = Map<String, double>.from(state.categoryBreakdown);
+        final updatedBreakdown =
+            Map<String, double>.from(state.categoryBreakdown);
         updatedBreakdown[newExpense.category.value] =
-            (updatedBreakdown[newExpense.category.value] ?? 0) + newExpense.amount;
+            (updatedBreakdown[newExpense.category.value] ?? 0) +
+                newExpense.amount;
 
         emit(state.copyWith(
           status: ExpensesStatus.success,
@@ -107,12 +114,14 @@ class ExpensesCubit extends Cubit<ExpensesState> {
     );
 
     // Remove from UI immediately
-    final optimisticExpenses = previousExpenses.where((e) => e.id != id).toList();
+    final optimisticExpenses =
+        previousExpenses.where((e) => e.id != id).toList();
     final updatedTotal = state.totalMonthlyExpenses - deleted.amount;
     final updatedBreakdown = Map<String, double>.from(state.categoryBreakdown);
     if (deleted.id.isNotEmpty) {
       updatedBreakdown[deleted.category.value] =
-          ((updatedBreakdown[deleted.category.value] ?? 0) - deleted.amount).clamp(0, double.infinity);
+          ((updatedBreakdown[deleted.category.value] ?? 0) - deleted.amount)
+              .clamp(0, double.infinity);
     }
 
     emit(state.copyWith(

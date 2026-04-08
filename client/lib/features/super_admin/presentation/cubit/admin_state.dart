@@ -73,7 +73,8 @@ class AdminState extends Equatable {
       allCompanies.where((c) => c.status == CompanyStatus.pending).length;
 
   /// Helper to get consistent stats across pages
-  AdminDashboardStats get currentStats => dashboardStats?.copyWith(
+  AdminDashboardStats get currentStats =>
+      dashboardStats?.copyWith(
         totalCompanies: totalCompanies,
         activeCompanies: activeCompanies,
         inactiveCompanies: inactiveCompanies,

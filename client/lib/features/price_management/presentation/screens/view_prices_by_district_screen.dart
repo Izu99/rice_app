@@ -2,13 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../domain/entities/paddy_rice_price_entity.dart';
+import '../../../../data/models/paddy_rice_price_model.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
+import '../../../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../../../../features/auth/presentation/cubit/auth_state.dart';
 import '../../../../core/constants/si_strings.dart';
-import '../../../../data/models/paddy_rice_price_model.dart';
+import '../widgets/price_list_item.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
 
@@ -43,61 +49,104 @@ class _ViewPricesByDistrictScreenState
                     .contains(_searchDistrict.toLowerCase()))
                 .toList();
 
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: const HAppBar(
-            title: 'Paddy Prices',
-            subtitle: 'දිස්ත්‍රික්ක අනුව',
-            showBack: false,
-          ),
+        return AppPageScaffold(
+          title: 'Market Prices',
+          subtitle: 'Real-time Trends',
+          onBack: () => context.pop(),
+          actions: [
+            BlocBuilder<AuthCubit, AuthState>(
+              builder: (context, authState) {
+                if (authState.user?.isManagerOrHigher ?? false) {
+                  return IconButton(
+                    icon: const Icon(Icons.add_box_rounded, size: 24),
+                    onPressed: () => context.pushNamed('addPrice'),
+                    tooltip: 'Add Price',
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(width: 4),
+          ],
+          bottomBar: _buildBottomStatusBar(filteredDistricts.length),
           body: LoadingOverlay(
             isLoading: state.status == PriceManagementStatus.loadingDistricts,
-            message: 'Loading prices...',
+            message: 'Loading market data...',
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Search Box
-                Padding(
-                  padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-                  child: SearchAnchor(
-                    builder: (BuildContext context,
-                        SearchController searchController) {
-                      return SearchBar(
-                        controller: searchController,
+                // Modern Header & Search
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x08000000),
+                        blurRadius: 15,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'District Overview',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1A1A1A),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Select a district to view detailed prices',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Search Box
+                      TextField(
                         onChanged: (value) {
                           setState(() {
                             _searchDistrict = value;
                           });
                         },
-                        leading: const Icon(Icons.search),
-                        hintText: 'Search by district...',
-                      );
-                    },
-                    suggestionsBuilder: (BuildContext context,
-                        SearchController searchController) {
-                      final suggestions = state.districts
-                          .where((d) => d.district
-                              .toLowerCase()
-                              .contains(
-                                  searchController.text.toLowerCase()))
-                          .map((d) => d.district)
-                          .toList();
-                      return suggestions.map((district) {
-                        return ListTile(
-                          title: Text(district),
-                          onTap: () {
-                            searchController.closeView(district);
-                            setState(() {
-                              _searchDistrict = district;
-                            });
-                          },
-                        );
-                      }).toList();
-                    },
+                        decoration: InputDecoration(
+                          hintText: 'Search district...',
+                          hintStyle:
+                              TextStyle(color: Colors.grey[400], fontSize: 15),
+                          prefixIcon: const Icon(Icons.search_rounded,
+                              color: AppColors.primary),
+                          filled: true,
+                          fillColor: const Color(0xFFF3F4F6),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
+                const SizedBox(height: 8),
+
                 // Prices List
                 Expanded(
-                  child: filteredDistricts.isEmpty
+                  child: filteredDistricts.isEmpty &&
+                          state.status != PriceManagementStatus.loadingDistricts
                       ? _buildEmptyState()
                       : _buildPricesList(context, state, filteredDistricts),
                 ),
@@ -109,29 +158,92 @@ class _ViewPricesByDistrictScreenState
     );
   }
 
+  Widget _buildBottomStatusBar(int count) {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.location_city_rounded,
+                  size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Total Districts: $count',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
+            ],
+          ),
+          const Text(
+            'LKR/KG',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: AppColors.primary,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 64,
-            color: AppColors.grey500,
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.location_off_rounded,
+              size: 64,
+              color: Colors.grey[400],
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'No prices found',
-            style: AppTextStyles.titleMedium
-                .copyWith(color: AppColors.grey700),
+            'No districts found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.grey[800],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            _searchDistrict.isEmpty
-                ? 'No companies have added prices yet'
-                : 'No prices available in "$_searchDistrict"',
-            style:
-                AppTextStyles.bodyMedium.copyWith(color: AppColors.grey500),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              _searchDistrict.isEmpty
+                  ? 'There are no market prices available at the moment. Please check back later.'
+                  : 'We couldn\'t find any districts matching "$_searchDistrict". Try a different name.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey[500],
+                height: 1.5,
+              ),
+            ),
           ),
         ],
       ),
@@ -141,11 +253,13 @@ class _ViewPricesByDistrictScreenState
   Widget _buildPricesList(BuildContext context, PriceManagementState state,
       List<DistrictWithPricesResponse> filteredDistricts) {
     return RefreshIndicator(
-      onRefresh: () =>
-          context.read<PriceManagementCubit>().loadDistricts(),
+      onRefresh: () => context.read<PriceManagementCubit>().loadDistricts(),
       color: AppColors.primary,
+      backgroundColor: Colors.white,
       child: ListView.builder(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics()),
         itemCount: filteredDistricts.length,
         itemBuilder: (context, index) {
           final district = filteredDistricts[index];
@@ -157,101 +271,116 @@ class _ViewPricesByDistrictScreenState
 
   Widget _buildDistrictCard(
       BuildContext context, DistrictWithPricesResponse district) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppDimensions.paddingMedium),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: () {
-          context
-              .read<PriceManagementCubit>()
-              .loadPricesByDistrict(district.district);
-          _showPricesBottomSheet(context, district.district);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                district.district,
-                                style: AppTextStyles.titleMedium.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            context.pushNamed(
+              'pricesInDistrict',
+              pathParameters: {'district': district.district},
+            );
+          },
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.location_on_rounded,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        district.district,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${district.priceCount} price${district.priceCount == 1 ? '' : 's'} listed',
-                          style: AppTextStyles.bodySmall
-                              .copyWith(color: AppColors.grey600),
-                        ),
-                        if (district.lastUpdated != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             child: Text(
-                              'Updated: ${_formatDate(district.lastUpdated!)}',
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.grey500,
+                              '${district.priceCount} Listings',
+                              style: TextStyle(
                                 fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.grey[700],
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${district.priceCount}',
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                          const SizedBox(width: 8),
+                          if (district.lastUpdated != null)
+                            Expanded(
+                              child: Text(
+                                'Updated ${_formatRelativeTime(district.lastUpdated!)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[500],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              if (district.lastUpdated != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Last updated: ${district.lastUpdated!.toLocal().toString().split('.')[0]}',
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.grey500),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                  color: Colors.grey[300],
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _formatRelativeTime(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 
   void _showPricesBottomSheet(BuildContext context, String district) {
@@ -276,7 +405,8 @@ class _ViewPricesByDistrictScreenState
                   children: [
                     // Header
                     Padding(
-                      padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+                      padding:
+                          const EdgeInsets.all(AppDimensions.paddingMedium),
                       child: Column(
                         children: [
                           Container(
@@ -339,12 +469,11 @@ class _ViewPricesByDistrictScreenState
                       Expanded(
                         child: ListView.builder(
                           controller: scrollController,
-                          padding:
-                              const EdgeInsets.all(AppDimensions.paddingMedium),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                           itemCount: prices.length,
                           itemBuilder: (context, index) {
                             final price = prices[index];
-                            return _buildPriceCard(price);
+                            return PriceListItem(price: price);
                           },
                         ),
                       ),
@@ -356,122 +485,5 @@ class _ViewPricesByDistrictScreenState
         );
       },
     );
-  }
-
-  Widget _buildPriceCard(dynamic price) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppDimensions.paddingMedium),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Company and District
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        price.companyName ?? 'Unknown Company',
-                        style: AppTextStyles.titleSmall.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 14,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            price.district ?? 'N/A',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.grey600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    price.priceDisplay,
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.success,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppDimensions.paddingMedium),
-            // Quality Grade and Details
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Chip(
-                  label: Text(
-                    price.qualityGrade ?? 'standard',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  backgroundColor: AppColors.primary,
-                ),
-                Text(
-                  'Added: ${_formatDate(price.createdAt)}',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey500,
-                  ),
-                ),
-              ],
-            ),
-            if (price.notes != null && price.notes!.isNotEmpty) ...[
-              const SizedBox(height: AppDimensions.paddingM),
-              Text(
-                'Notes: ${price.notes}',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.grey600,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final dateOnly = DateTime(date.year, date.month, date.day);
-
-    if (dateOnly == today) {
-      return 'Today ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } else if (dateOnly == yesterday) {
-      return 'Yesterday ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
   }
 }

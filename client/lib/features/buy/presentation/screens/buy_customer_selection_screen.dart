@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart';
@@ -45,12 +46,10 @@ class _BuyCustomerSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      appBar: HAppBar(
-        title: SiStrings.selectCustomer,
-        subtitle: 'Select a seller to buy from',
-      ),
+    return AppPageScaffold(
+      title: SiStrings.selectCustomer,
+      subtitle: SiStrings.isSinhala ? 'Select Seller' : 'විකුණුම්කරු තෝරන්න',
+      bottomBar: const AppSubBottomBar(showBack: false),
       body: Column(
         children: [
           // Light info banner
@@ -113,7 +112,8 @@ class _BuyCustomerSelectionScreenState
                             return EmptyStateWidget(
                               icon: Icons.person_off_outlined,
                               title: SiStrings.noCustomersFound,
-                              subtitle: 'මිලදී ගැනීමක් ආරම්භ කිරීමට නව ගනුදෙනුකරුවෙකු එක් කරන්න',
+                              subtitle:
+                                  'මිලදී ගැනීමක් ආරම්භ කිරීමට නව ගනුදෙනුකරුවෙකු එක් කරන්න',
                               actionLabel: SiStrings.addNewCustomer,
                               onAction: () =>
                                   context.pushNamed('buyAddCustomer'),
@@ -162,16 +162,18 @@ class _BuyCustomerSelectionScreenState
                 color: AppColors.success, size: 22),
           ),
           const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(SiStrings.buyingFrom,
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.textSecondary)),
-              Text(SiStrings.searchOrSelect,
-                  style: AppTextStyles.titleSmall
-                      .copyWith(fontWeight: FontWeight.bold)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(SiStrings.buyingFrom,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.textSecondary)),
+                Text(SiStrings.searchOrSelect,
+                    style: AppTextStyles.titleSmall
+                        .copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ],
       ),
@@ -250,4 +252,3 @@ class _BuyCustomerSelectionScreenState
     );
   }
 }
-

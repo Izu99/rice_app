@@ -329,7 +329,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(SiStrings.completeSale,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
             ),
@@ -364,7 +365,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(SiStrings.total,
-                          style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 12)),
                     ),
                   ),
                   SizedBox(
@@ -428,7 +430,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
             ),
             const SizedBox(height: 24),
             Text(SiStrings.saleComplete,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () {
@@ -445,8 +448,8 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child:
-                  Text(SiStrings.newSale, style: const TextStyle(color: Colors.white)),
+              child: Text(SiStrings.newSale,
+                  style: const TextStyle(color: Colors.white)),
             ),
             TextButton(
               onPressed: () {
@@ -461,4 +464,3 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
     );
   }
 }
-

@@ -104,7 +104,8 @@ class ReportsCubit extends Cubit<ReportsState> {
     );
   }
 
-  Future<void> loadCustomerReport({String? customerId, DateTime? startDate, DateTime? endDate}) async {
+  Future<void> loadCustomerReport(
+      {String? customerId, DateTime? startDate, DateTime? endDate}) async {
     emit(state.copyWith(status: ReportsStatus.loading));
 
     final result = await _reportRepository.getCustomerReport(

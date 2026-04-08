@@ -111,7 +111,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                               // Section: Recent Companies
                               _buildSectionHeader(
                                 'Recent Companies',
-                                onViewAll: () => context.push('/admin/companies'),
+                                onViewAll: () =>
+                                    context.push('/admin/companies'),
                               ),
                               const SizedBox(height: 12),
                               _buildRecentCompaniesList(context, adminState),

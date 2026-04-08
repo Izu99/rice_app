@@ -48,6 +48,9 @@ dependencies:
   dartz: ^0.10.1
   logger: ^2.0.2+1
   url_launcher: ^6.2.5
+  media_kit: ^1.1.10
+  media_kit_video: ^1.2.4
+  media_kit_libs_video: ^1.0.4
 
   # Charts
   fl_chart: ^0.65.0
@@ -73,6 +76,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/videos/
     # - assets/fonts/  # Commented out until font files are added
 
   # Fonts are commented out until font files are added

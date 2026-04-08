@@ -558,10 +558,11 @@ class CustomersCubit extends Cubit<CustomersState> {
         if (state.selectedCustomer != null) {
           await loadCustomerDetail(state.selectedCustomer!.id);
         }
-        
+
         emit(state.copyWith(
           formStatus: CustomerFormStatus.success,
-          formSuccessMessage: 'ගෙවීම සාර්ථකව සිදු කරන ලදී', // Payment successful
+          formSuccessMessage:
+              'ගෙවීම සාර්ථකව සිදු කරන ලදී', // Payment successful
         ));
       },
     );

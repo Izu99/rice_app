@@ -3,6 +3,8 @@
 import 'package:equatable/equatable.dart';
 import '../../../../domain/entities/paddy_rice_price_entity.dart';
 import '../../../../data/models/paddy_rice_price_model.dart';
+import '../../../../data/models/paddy_rice_price_model.dart'
+    show DistrictWithPricesResponse;
 
 enum PriceManagementStatus {
   initial,

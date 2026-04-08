@@ -121,111 +121,111 @@ class StockItemCard extends StatelessWidget {
                     // Edit Button
                     if (onEdit != null)
                       IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: onEdit,
-                      color: AppColors.textSecondary,
-                      iconSize: 20,
-                    ),
-                ],
-              ),
-
-              const Divider(height: AppDimensions.paddingL),
-
-              // Stock Details Row
-              Row(
-                children: [
-                  // Weight
-                  Expanded(
-                    child: _buildDetailColumn(
-                      icon: Icons.scale,
-                      label: 'Weight',
-                      value: '${item.totalWeightKg.toStringAsFixed(1)} kg',
-                      color: typeColor,
-                    ),
-                  ),
-
-                  // Vertical Divider
-                  Container(
-                    height: 40,
-                    width: 1,
-                    color: AppColors.grey200,
-                  ),
-
-                  // Bags
-                  Expanded(
-                    child: _buildDetailColumn(
-                      icon: Icons.inventory_2,
-                      label: 'Bags',
-                      value: '${item.totalBags}',
-                      color: typeColor,
-                    ),
-                  ),
-
-                  // Vertical Divider
-                  Container(
-                    height: 40,
-                    width: 1,
-                    color: AppColors.grey200,
-                  ),
-
-                  // Price
-                  Expanded(
-                    child: _buildDetailColumn(
-                      icon: Icons.attach_money,
-                      label: 'Price/kg',
-                      value: 'Rs.${item.pricePerKg.toStringAsFixed(0)}',
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Total Value
-              const SizedBox(height: AppDimensions.paddingM),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppDimensions.paddingS),
-                decoration: BoxDecoration(
-                  color: AppColors.grey100,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusS),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total Value',
-                      style: AppTextStyles.bodySmall.copyWith(
+                        icon: const Icon(Icons.edit_outlined),
+                        onPressed: onEdit,
                         color: AppColors.textSecondary,
+                        iconSize: 20,
+                      ),
+                  ],
+                ),
+
+                const Divider(height: AppDimensions.paddingL),
+
+                // Stock Details Row
+                Row(
+                  children: [
+                    // Weight
+                    Expanded(
+                      child: _buildDetailColumn(
+                        icon: Icons.scale,
+                        label: 'Weight',
+                        value: '${item.totalWeightKg.toStringAsFixed(1)} kg',
+                        color: typeColor,
                       ),
                     ),
-                    Text(
-                      'Rs. ${(item.totalWeightKg * item.pricePerKg).toStringAsFixed(2)}',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.bold,
+
+                    // Vertical Divider
+                    Container(
+                      height: 40,
+                      width: 1,
+                      color: AppColors.grey200,
+                    ),
+
+                    // Bags
+                    Expanded(
+                      child: _buildDetailColumn(
+                        icon: Icons.inventory_2,
+                        label: 'Bags',
+                        value: '${item.totalBags}',
+                        color: typeColor,
+                      ),
+                    ),
+
+                    // Vertical Divider
+                    Container(
+                      height: 40,
+                      width: 1,
+                      color: AppColors.grey200,
+                    ),
+
+                    // Price
+                    Expanded(
+                      child: _buildDetailColumn(
+                        icon: Icons.attach_money,
+                        label: 'Price/kg',
+                        value: 'Rs.${item.pricePerKg.toStringAsFixed(0)}',
                         color: AppColors.primary,
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              // Last Updated
-              ...[
-                const SizedBox(height: AppDimensions.paddingS),
-                Text(
-                  'Updated: ${_formatDate(item.updatedAt)}',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textTertiary,
-                    fontSize: 11,
+                // Total Value
+                const SizedBox(height: AppDimensions.paddingM),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppDimensions.paddingS),
+                  decoration: BoxDecoration(
+                    color: AppColors.grey100,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total Value',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        'Rs. ${(item.totalWeightKg * item.pricePerKg).toStringAsFixed(2)}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
+                // Last Updated
+                ...[
+                  const SizedBox(height: AppDimensions.paddingS),
+                  Text(
+                    'Updated: ${_formatDate(item.updatedAt)}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textTertiary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _buildDetailColumn({

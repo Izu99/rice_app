@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -61,7 +62,8 @@ import 'features/reports/reports_injection.dart';
 import 'features/profile/profile_injection.dart';
 import 'features/expenses/expenses_injection.dart';
 import 'features/super_admin/admin_injection.dart';
-import 'features/price_management/price_management_injection.dart' as PriceManagementInjection;
+import 'features/price_management/price_management_injection.dart'
+    as PriceManagementInjection;
 
 // Routes
 import 'routes/app_router.dart';
@@ -98,8 +100,15 @@ Future<void> initDependencies() async {
 
 /// Initialize external dependencies (SharedPreferences, etc.)
 Future<void> _initExternalDependencies() async {
-  // SharedPreferences
-  final sharedPreferences = await SharedPreferences.getInstance();
+  // SharedPreferences — if the file is corrupted, clear and retry
+  SharedPreferences sharedPreferences;
+  try {
+    sharedPreferences = await SharedPreferences.getInstance();
+  } catch (e) {
+    debugPrint('SharedPreferences corrupted ($e), clearing and retrying...');
+    SharedPreferences.resetStatic();
+    sharedPreferences = await SharedPreferences.getInstance();
+  }
   sl.registerSingleton<SharedPreferences>(sharedPreferences);
 
   // Connectivity

@@ -31,7 +31,8 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
-  Future<Either<Failure, ExpenseEntity>> createExpense(ExpenseEntity expense) async {
+  Future<Either<Failure, ExpenseEntity>> createExpense(
+      ExpenseEntity expense) async {
     try {
       final model = await remoteDataSource.createExpense(
         ExpenseModel(

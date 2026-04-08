@@ -71,7 +71,7 @@ class SummaryCard extends StatelessWidget {
                         size: 18,
                       ),
                     ),
-                    if (trend != null) 
+                    if (trend != null)
                       Flexible(
                         child: _buildTrendBadge(),
                       ),

@@ -10,6 +10,8 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../data/models/customer_model.dart';
 import '../cubit/buy_cubit.dart';
 import '../cubit/customer_cubit.dart';
@@ -89,35 +91,18 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         return LoadingOverlay(
           isLoading: state.isAdding,
           message: 'Adding customer...',
-          child: Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              backgroundColor: AppColors.primary,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Customer',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'පාරිභෝගිකයෙකු එක් කරන්න',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.white.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.white),
-                onPressed: () {
-                  context.read<CustomerCubit>().resetForm();
-                  context.go('/buy');
-                },
-              ),
+          child: AppPageScaffold(
+            title: SiStrings.newCustomer,
+            subtitle:
+                SiStrings.isSinhala ? 'Add Customer' : 'ගනුදෙනුකරු එක් කිරීම',
+            onBack: () {
+              context.read<CustomerCubit>().resetForm();
+              context.go('/buy');
+            },
+            bottomBar: AppSubBottomBar(
+              centerLabel: SiStrings.isSinhala ? 'සුරකින්න' : 'Save',
+              centerIcon: Icons.person_add_rounded,
+              onCenter: _onSubmit,
             ),
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(AppDimensions.paddingMedium),
@@ -396,7 +381,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 color: AppColors.warning.withValues(alpha: 0.08),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Center(
                 child: Container(
@@ -405,7 +391,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     color: AppColors.warning.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.phone_in_talk_outlined, size: 32, color: AppColors.warning),
+                  child: Icon(Icons.phone_in_talk_outlined,
+                      size: 32, color: AppColors.warning),
                 ),
               ),
             ),
@@ -415,12 +402,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 children: [
                   const Text(
                     'Phone Already Exists',
-                    style: TextStyle(color: Color(0xFF1C1C2E), fontSize: 17, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Color(0xFF1C1C2E),
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'A customer with this phone number already exists:',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style:
+                        TextStyle(color: AppColors.textSecondary, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -454,8 +445,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(customer.name, style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold)),
-                              Text(customer.formattedPhone, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                              Text(customer.name,
+                                  style: AppTextStyles.titleSmall
+                                      .copyWith(fontWeight: FontWeight.bold)),
+                              Text(customer.formattedPhone,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.textSecondary)),
                             ],
                           ),
                         ),
@@ -470,7 +465,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               margin: const EdgeInsets.only(top: 20),
               decoration: const BoxDecoration(
                 color: Color(0xFFF4F6FA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius:
+                    BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
               child: Column(
                 children: [
@@ -486,10 +482,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: const Text('Select This Customer', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: const Text('Select This Customer',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -504,7 +502,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         foregroundColor: const Color(0xFF444466),
                         side: const BorderSide(color: Color(0xFFE8E8EE)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text('Use Different Phone'),
                     ),

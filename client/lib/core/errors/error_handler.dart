@@ -396,7 +396,6 @@ class ErrorHandler {
     );
   }
 
-
   /// Show success snackbar
   static void showSuccessSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();

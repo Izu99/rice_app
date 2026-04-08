@@ -584,7 +584,8 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
           }
 
           throw ServerException(
-            message: response.message ?? 'Failed to fetch customer transactions',
+            message:
+                response.message ?? 'Failed to fetch customer transactions',
             statusCode: response.statusCode,
           );
         },

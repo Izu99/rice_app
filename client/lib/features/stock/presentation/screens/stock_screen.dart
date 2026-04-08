@@ -5,10 +5,12 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/sync_status_indicator.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../../core/sync/sync_status.dart';
 import '../../../../core/constants/enums.dart';
 import '../cubit/stock_cubit.dart';
 import '../cubit/stock_state.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 
 class StockScreen extends StatefulWidget {
   const StockScreen({super.key});
@@ -41,6 +43,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    context.select((ProfileCubit c) => c.state.language);
     return BlocConsumer<StockCubit, StockState>(
       listener: (context, state) {
         if (state.errorMessage != null) {
@@ -56,103 +59,46 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
       builder: (context, state) {
         return LoadingOverlay(
           isLoading: state.status == StockStatus.loading,
-          child: Scaffold(
-            backgroundColor: const Color(0xFFF4F6FA),
+          child: AppPageScaffold(
+            title: SiStrings.liveStock,
+            subtitle:
+                SiStrings.isSinhala ? 'Stock Overview' : 'තොග දළ විශ්ලේෂණය',
+            actions: [
+              SyncStatusIndicator(
+                status: state.isSynced
+                    ? SyncStatusModel.success()
+                    : SyncStatusModel.idle(),
+              ),
+              const SizedBox(width: 4),
+            ],
             body: RefreshIndicator(
               onRefresh: () => context.read<StockCubit>().refreshStock(),
               color: AppColors.primary,
-              child: CustomScrollView(
+              child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  _buildSliverAppBar(state),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 24),
-                          _buildSummaryGrid(state),
-                          const SizedBox(height: 32),
-                          if (state.filterType == StockFilterType.all ||
-                              state.filterType == StockFilterType.paddy)
-                            _buildPaddyStockSection(state),
-                          if (state.filterType == StockFilterType.all)
-                            const SizedBox(height: 32),
-                          if (state.filterType == StockFilterType.all ||
-                              state.filterType == StockFilterType.rice)
-                            _buildRiceStockSection(state),
-                          const SizedBox(height: 100),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    _buildSummaryGrid(state),
+                    const SizedBox(height: 32),
+                    if (state.filterType == StockFilterType.all ||
+                        state.filterType == StockFilterType.paddy)
+                      _buildPaddyStockSection(state),
+                    if (state.filterType == StockFilterType.all)
+                      const SizedBox(height: 32),
+                    if (state.filterType == StockFilterType.all ||
+                        state.filterType == StockFilterType.rice)
+                      _buildRiceStockSection(state),
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSliverAppBar(StockState state) {
-    return SliverAppBar(
-      expandedHeight: 180,
-      pinned: true,
-      stretch: true,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1C1C2E)),
-        onPressed: () => Navigator.pop(context),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        stretchModes: const [StretchMode.zoomBackground],
-        centerTitle: false,
-        titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-        title: Text(
-          'වත්මන් තොග', // Live Stock
-          style: AppTextStyles.titleLarge.copyWith(
-            color: const Color(0xFF1C1C2E),
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary.withOpacity(0.05), Colors.white],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-            Positioned(
-              right: -20,
-              top: -20,
-              child: Icon(
-                Icons.inventory_2_rounded,
-                size: 200,
-                color: AppColors.primary.withOpacity(0.03),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        SyncStatusIndicator(
-          status: state.isSynced
-              ? SyncStatusModel.success()
-              : SyncStatusModel.idle(),
-        ),
-        const SizedBox(width: 8),
-      ],
     );
   }
 
@@ -179,7 +125,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionChip('Stock Overview'),
+        _buildSectionChip(SiStrings.stockOverview),
         const SizedBox(height: 14),
         Row(
           children: [
@@ -324,7 +270,8 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Paddy Stock Varieties', Icons.inventory_2_rounded),
+        _buildSectionHeader(
+            SiStrings.paddyStockVarieties, Icons.inventory_2_rounded),
         const SizedBox(height: 16),
         _buildStockTable(paddyItems, AppColors.paddy),
       ],
@@ -340,7 +287,8 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Rice Stock Varieties', Icons.auto_awesome_rounded),
+        _buildSectionHeader(
+            SiStrings.riceStockVarieties, Icons.auto_awesome_rounded),
         const SizedBox(height: 16),
         _buildStockTable(riceItems, AppColors.riceAccent),
       ],
@@ -477,11 +425,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                 const Divider(height: 1, color: Color(0xFFF1F1F1)),
             itemBuilder: (context, index) {
               final item = items[index];
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _showItemOptions(item),
-                  child: Padding(
+              return Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 20),
                     child: Row(
@@ -548,9 +492,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
-                  ),
-                ),
-              );
+                  );
             },
           ),
         ],
@@ -558,152 +500,4 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
     );
   }
 
-  void _showItemOptions(dynamic item) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    item.type == ItemType.paddy
-                        ? Icons.grass_rounded
-                        : Icons.rice_bowl_rounded,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.variety,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1C1C2E),
-                        ),
-                      ),
-                      Text(
-                        'Stock Details & Actions',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            _buildOptionButton(
-              icon: Icons.history_rounded,
-              label: 'View Stock History',
-              subtitle: 'Track recent quantity movements',
-              color: const Color(0xFF5856D6),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildOptionButton(
-              icon: Icons.edit_note_rounded,
-              label: 'Update Threshold',
-              subtitle: 'Change low stock alert level',
-              color: const Color(0xFF007AFF),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionButton({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: const Color(0xFFF8F9FB),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: Color(0xFF1C1C2E),
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
-

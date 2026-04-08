@@ -190,7 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           await SiStrings.toggleLanguage();
                           setState(() {});
                         },
-                        icon: const Icon(Icons.language, size: 20, color: AppColors.primary),
+                        icon: const Icon(Icons.language,
+                            size: 20, color: AppColors.primary),
                         label: Text(
                           SiStrings.isSinhala ? 'English' : 'සිංහල',
                           style: AppTextStyles.bodySmall.copyWith(
@@ -199,7 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           backgroundColor: AppColors.primary.withOpacity(0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -221,8 +223,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Image.asset(
                         'assets/icons/google_logo.png',
                         height: 24,
-                        errorBuilder: (context, error, stackTrace) => 
-                          const Icon(Icons.account_circle_outlined, color: AppColors.textHint, size: 24),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.account_circle_outlined,
+                                color: AppColors.textHint, size: 24),
                       ),
                       label: Text(SiStrings.signInWithGoogle),
                       style: OutlinedButton.styleFrom(
@@ -244,7 +247,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             SiStrings.or,
-                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textHint),
+                            style: AppTextStyles.bodySmall
+                                .copyWith(color: AppColors.textHint),
                           ),
                         ),
                         const Expanded(child: Divider()),
@@ -352,7 +356,8 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text(
               SiStrings.registerPrompt,
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(color: AppColors.textSecondary),
             ),
             TextButton(
               onPressed: () => context.go(RouteNames.register),
@@ -406,7 +411,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 state.passwordResetStatus == PasswordResetStatus.otpVerified;
 
             return AlertDialog(
-              title: Text(isOtpVerified ? SiStrings.newPassword : SiStrings.enterOtp),
+              title: Text(
+                  isOtpVerified ? SiStrings.newPassword : SiStrings.enterOtp),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -539,7 +545,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(isOtpVerified ? SiStrings.resetPassword : SiStrings.verify),
+                      : Text(isOtpVerified
+                          ? SiStrings.resetPassword
+                          : SiStrings.verify),
                 ),
               ],
             );
@@ -549,4 +557,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

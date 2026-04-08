@@ -234,7 +234,8 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String label, {String? subtitle, VoidCallback? onViewAll}) {
+  Widget _buildSectionHeader(String label,
+      {String? subtitle, VoidCallback? onViewAll}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -594,7 +595,8 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
           labelText: 'New Password',
           prefixIcon: const Icon(Icons.lock_outline),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     ).then((confirmed) {
@@ -640,9 +642,12 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            _buildSortTile(Icons.sort_by_alpha, 'Name (A-Z)', () => Navigator.pop(context)),
-            _buildSortTile(Icons.access_time, 'Recently Added', () => Navigator.pop(context)),
-            _buildSortTile(Icons.circle_outlined, 'Status', () => Navigator.pop(context)),
+            _buildSortTile(Icons.sort_by_alpha, 'Name (A-Z)',
+                () => Navigator.pop(context)),
+            _buildSortTile(Icons.access_time, 'Recently Added',
+                () => Navigator.pop(context)),
+            _buildSortTile(
+                Icons.circle_outlined, 'Status', () => Navigator.pop(context)),
           ],
         ),
       ),
@@ -818,15 +823,16 @@ class _CompanyDetailsSheet extends StatelessWidget {
 
                 // Details
                 _buildDetailSection('Company Information', [
+                  _buildDetailRow(Icons.person_outline_rounded, 'Owner',
+                      company.ownerName ?? 'N/A'),
                   _buildDetailRow(
-                      Icons.person_outline_rounded, 'Owner', company.ownerName ?? 'N/A'),
-                  _buildDetailRow(Icons.email_outlined, 'Email', company.email ?? 'N/A'),
+                      Icons.email_outlined, 'Email', company.email ?? 'N/A'),
                   _buildDetailRow(Icons.phone_outlined, 'Phone', company.phone),
                   _buildDetailRow(
                       Icons.location_on_outlined, 'Address', company.address),
                   if (company.registrationNumber != null)
-                    _buildDetailRow(
-                        Icons.numbers_rounded, 'Reg. No', company.registrationNumber!),
+                    _buildDetailRow(Icons.numbers_rounded, 'Reg. No',
+                        company.registrationNumber!),
                 ]),
 
                 const SizedBox(height: 20),
@@ -870,12 +876,15 @@ class _CompanyDetailsSheet extends StatelessWidget {
                             onTap: () => onStatusChange(status),
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(status).withValues(alpha: 0.08),
+                                color: _getStatusColor(status)
+                                    .withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: _getStatusColor(status).withValues(alpha: 0.15),
+                                  color: _getStatusColor(status)
+                                      .withValues(alpha: 0.15),
                                 ),
                               ),
                               child: Row(
@@ -913,7 +922,8 @@ class _CompanyDetailsSheet extends StatelessWidget {
                           foregroundColor: const Color(0xFF444466),
                           side: const BorderSide(color: Color(0xFFE8E8EE)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
                         ),
                       ),
                     ),
@@ -927,7 +937,8 @@ class _CompanyDetailsSheet extends StatelessWidget {
                           foregroundColor: const Color(0xFF444466),
                           side: const BorderSide(color: Color(0xFFE8E8EE)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14)),
                         ),
                       ),
                     ),
@@ -942,7 +953,8 @@ class _CompanyDetailsSheet extends StatelessWidget {
                       backgroundColor: AppColors.error.withValues(alpha: 0.08),
                       foregroundColor: AppColors.error,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                       elevation: 0,
                     ),
                     icon: const Icon(Icons.delete_outline_rounded, size: 18),

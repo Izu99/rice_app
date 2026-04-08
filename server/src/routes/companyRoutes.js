@@ -37,16 +37,25 @@ router.get('/profile', async (req, res) => {
       company: {
         id: company._id,
         name: company.name,
+        ownerName: company.ownerName,
         email: company.email,
         phone: company.phone,
+        secondaryPhone: company.secondaryPhone || null,
         address: company.address,
-        registrationNumber: company.registrationNumber,
+        district: company.district,
+        registrationNumber: company.registrationNumber || null,
+        taxNumber: company.taxNumber || null,
+        website: company.website || null,
+        logoUrl: company.logoUrl || null,
         status: company.status,
-        plan: company.plan,
+        plan: company.subscription?.plan || 'free',
         maxUsers: company.maxUsers,
         currentUsers: company.currentUsers,
-        isActive: company.isActive,
-        createdAt: company.createdAt
+        isActive: company.isActive !== false,
+        isEmailVerified: company.isEmailVerified || false,
+        settings: company.settings || null,
+        createdAt: company.createdAt,
+        updatedAt: company.updatedAt
       }
     }
 
@@ -70,7 +79,8 @@ router.put('/profile', validateCompanyUpdate, async (req, res) => {
     }
 
     const allowedUpdates = [
-      'name', 'phone', 'address', 'district', 'registrationNumber'
+      'name', 'phone', 'secondaryPhone', 'address', 'district',
+      'registrationNumber', 'taxNumber', 'website', 'email', 'ownerName'
     ]
 
     const updates = {}
@@ -90,7 +100,33 @@ router.put('/profile', validateCompanyUpdate, async (req, res) => {
       return errorResponse(res, 'Company not found', 404)
     }
 
-    return successResponse(res, 'Company profile updated successfully', { company })
+    const data = {
+      company: {
+        id: company._id,
+        name: company.name,
+        ownerName: company.ownerName,
+        email: company.email,
+        phone: company.phone,
+        secondaryPhone: company.secondaryPhone || null,
+        address: company.address,
+        district: company.district,
+        registrationNumber: company.registrationNumber || null,
+        taxNumber: company.taxNumber || null,
+        website: company.website || null,
+        logoUrl: company.logoUrl || null,
+        status: company.status,
+        plan: company.subscription?.plan || 'free',
+        maxUsers: company.maxUsers,
+        currentUsers: company.currentUsers,
+        isActive: company.isActive !== false,
+        isEmailVerified: company.isEmailVerified || false,
+        settings: company.settings || null,
+        createdAt: company.createdAt,
+        updatedAt: company.updatedAt
+      }
+    }
+
+    return successResponse(res, 'Company profile updated successfully', data)
   } catch (error) {
     console.error('Update Company Profile Error:', error)
     return errorResponse(res, 'Error updating company profile', 500, error.message)

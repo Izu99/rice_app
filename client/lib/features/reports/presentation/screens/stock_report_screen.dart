@@ -5,6 +5,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../cubit/reports_cubit.dart';
 import '../cubit/reports_state.dart';
 
@@ -28,18 +29,16 @@ class _StockReportScreenState extends State<StockReportScreen> {
       builder: (context, state) {
         return LoadingOverlay(
           isLoading: state.status == ReportsStatus.loading,
-          child: Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: HAppBar(
-              title: 'Stock Report',
-              subtitle: 'තොග වාර්තාව',
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: Color(0xFF1C1C2E)),
-                  onPressed: () => context.read<ReportsCubit>().loadStockReport(),
-                ),
-              ],
-            ),
+          child: AppPageScaffold(
+            title: SiStrings.stockReport,
+            subtitle: SiStrings.isSinhala ? 'Stock Report' : 'තොග වාර්තාව',
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () => context.read<ReportsCubit>().loadStockReport(),
+              ),
+            ],
+            bottomBar: AppSubBottomBar(),
             body: state.stockReport == null
                 ? _buildEmptyState()
                 : _buildReportContent(state.stockReport!),
@@ -58,7 +57,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
           const SizedBox(height: 16),
           Text(
             'තොග දත්ත පූරණය වෙමින් පවතී...',
-            style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyLarge
+                .copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -117,7 +117,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+      String label, String value, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -204,25 +205,36 @@ class _StockReportScreenState extends State<StockReportScreen> {
       ),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text(SiStrings.variety, style: _headerStyle())),
-          Expanded(flex: 2, child: Text(SiStrings.bags, textAlign: TextAlign.center, style: _headerStyle())),
-          Expanded(flex: 3, child: Text(SiStrings.weight, textAlign: TextAlign.right, style: _headerStyle())),
+          Expanded(
+              flex: 3, child: Text(SiStrings.variety, style: _headerStyle())),
+          Expanded(
+              flex: 2,
+              child: Text(SiStrings.bags,
+                  textAlign: TextAlign.center, style: _headerStyle())),
+          Expanded(
+              flex: 3,
+              child: Text(SiStrings.weight,
+                  textAlign: TextAlign.right, style: _headerStyle())),
         ],
       ),
     );
   }
 
-  TextStyle _headerStyle() => AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary);
+  TextStyle _headerStyle() => AppTextStyles.bodySmall
+      .copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondary);
 
   Widget _buildTableRow(Map<String, dynamic> item) {
-    final String variety = (item['variety'] as String? ?? '').replaceAll('Rice - ', '').replaceAll('Paddy - ', '');
+    final String variety = (item['variety'] as String? ?? '')
+        .replaceAll('Rice - ', '')
+        .replaceAll('Paddy - ', '');
     final int bags = (item['bags'] as num?)?.toInt() ?? 0;
     final double weight = (item['weight'] as num?)?.toDouble() ?? 0.0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.grey200, width: 0.5)),
+        border:
+            Border(bottom: BorderSide(color: AppColors.grey200, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -241,7 +253,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
             child: Text(
               '$bags',
               textAlign: TextAlign.center,
-              style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyMedium
+                  .copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(

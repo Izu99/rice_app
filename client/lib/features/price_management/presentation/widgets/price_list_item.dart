@@ -18,150 +18,163 @@ class PriceListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPaddy = price.priceType == 'paddy';
-    final typeColor = isPaddy ? const Color(0xFF8BC34A) : AppColors.primary;
+    final typeColor =
+        isPaddy ? const Color(0xFF4CAF50) : const Color(0xFF2196F3);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          price.companyName,
-                          style: AppTextStyles.titleMedium
-                              .copyWith(fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            // Price type badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: typeColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isPaddy
-                                        ? Icons.grass_rounded
-                                        : Icons.rice_bowl_rounded,
-                                    size: 12,
-                                    color: typeColor,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    isPaddy ? 'PADDY' : 'RICE',
-                                    style: AppTextStyles.bodySmall.copyWith(
-                                      color: typeColor,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (price.qualityGrade != null) ...[
-                              const SizedBox(width: 6),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: typeColor.withOpacity(0.1), width: 1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 3),
+                                    horizontal: 10, vertical: 5),
                                 decoration: BoxDecoration(
-                                  color: _getQualityColor(price.qualityGrade!)
-                                      .withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6),
+                                  color: typeColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  price.qualityGrade!.toUpperCase(),
-                                  style: AppTextStyles.bodySmall.copyWith(
-                                    color:
-                                        _getQualityColor(price.qualityGrade!),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
+                                  isPaddy ? 'PADDY' : 'RICE',
+                                  style: TextStyle(
+                                    color: typeColor,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                               ),
+                              if (price.qualityGrade != null) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF3F4F6),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    price.qualityGrade!.toUpperCase(),
+                                    style: TextStyle(
+                                      color: Colors.grey[700],
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            price.companyName,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Price display
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: typeColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
+                    const SizedBox(width: 12),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Rs.',
-                            style: AppTextStyles.bodySmall
-                                .copyWith(color: AppColors.grey600)),
-                        const SizedBox(height: 2),
+                        const Text(
+                          'Rs.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                          ),
+                        ),
                         Text(
                           price.priceDisplay,
-                          style: AppTextStyles.headlineSmall.copyWith(
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
                             color: typeColor,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Divider(height: 1, color: AppColors.grey300),
-              const SizedBox(height: 10),
-
-              // Footer row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Added: ${_formatDate(price.createdAt)}',
-                      style: AppTextStyles.bodySmall
-                          .copyWith(color: AppColors.grey600),
-                      overflow: TextOverflow.ellipsis,
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.access_time_rounded,
+                        size: 14, color: Colors.grey[400]),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Added ${_formatRelativeTime(price.createdAt)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  if (price.notes != null && price.notes!.isNotEmpty)
-                    Tooltip(
-                      message: price.notes!,
-                      child: Icon(Icons.info_outline,
-                          color: AppColors.grey600, size: 18),
-                    ),
-                ],
-              ),
-            ],
+                    if (price.notes != null && price.notes!.isNotEmpty) ...[
+                      const Spacer(),
+                      Text(
+                        price.notes!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[400],
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _formatRelativeTime(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 
   String _formatDate(DateTime date) {

@@ -49,7 +49,8 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                         const SizedBox(height: 12),
                         _buildReportCard(
                           title: 'Global Price Trends',
-                          subtitle: 'View average paddy and rice prices across all districts',
+                          subtitle:
+                              'View average paddy and rice prices across all districts',
                           icon: Icons.trending_up_rounded,
                           color: Colors.teal,
                           onTap: () {
@@ -60,7 +61,8 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                         const SizedBox(height: 12),
                         _buildReportCard(
                           title: 'District-wise Price Analysis',
-                          subtitle: 'Compare price differences between different regions',
+                          subtitle:
+                              'Compare price differences between different regions',
                           icon: Icons.map_rounded,
                           color: Colors.blue,
                           onTap: () {
@@ -72,7 +74,8 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                         const SizedBox(height: 12),
                         _buildReportCard(
                           title: 'Company Growth Report',
-                          subtitle: 'New registrations and active company metrics',
+                          subtitle:
+                              'New registrations and active company metrics',
                           icon: Icons.business_center_rounded,
                           color: Colors.indigo,
                           onTap: () {
@@ -82,7 +85,8 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                         const SizedBox(height: 12),
                         _buildReportCard(
                           title: 'Activity Summary',
-                          subtitle: 'Overview of system usage and company engagement',
+                          subtitle:
+                              'Overview of system usage and company engagement',
                           icon: Icons.assessment_rounded,
                           color: Colors.orange,
                           onTap: () {
