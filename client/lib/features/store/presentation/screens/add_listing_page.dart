@@ -1,9 +1,10 @@
-// lib/features/store/presentation/screens/add_listing_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/store_data.dart';
+import '../../../../domain/entities/store_listing_entity.dart';
+import '../cubit/store_cubit.dart';
+import '../cubit/store_state.dart';
 
 class AddListingPage extends StatefulWidget {
   final StoreCategory? preselectedCategory;
@@ -29,45 +30,19 @@ class _AddListingPageState extends State<AddListingPage> {
   final _descriptionCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   String? _selectedDistrict;
-  bool _isSaving = false;
 
   static const _categories = [
-    _CatOption(StoreCategory.paddy, 'Paddy (වී)', Icons.grass_rounded,
-        Color(0xFF2E7D32)),
-    _CatOption(StoreCategory.rice, 'Rice (සහල්)', Icons.rice_bowl_rounded,
-        Color(0xFFE65100)),
-    _CatOption(StoreCategory.riceMeal, 'Rice Bran / Flour (හාල් කුළු / පිටි)',
-        Icons.grain_rounded, Color(0xFF6D4C41)),
-    _CatOption(StoreCategory.other, 'Other (වෙනත්)', Icons.category_rounded,
-        Color(0xFF1565C0)),
+    _CatOption(StoreCategory.paddy, 'Paddy (වී)', Icons.grass_rounded, Color(0xFF2E7D32)),
+    _CatOption(StoreCategory.rice, 'Rice (සහල්)', Icons.rice_bowl_rounded, Color(0xFFE65100)),
+    _CatOption(StoreCategory.riceMeal, 'Rice Bran / Flour (හාල් කුළු / පිටි)', Icons.grain_rounded, Color(0xFF6D4C41)),
+    _CatOption(StoreCategory.other, 'Other (වෙනත්)', Icons.category_rounded, Color(0xFF1565C0)),
   ];
 
   static const _districts = [
-    'කොළඹ',
-    'ගම්පහ',
-    'කළුතර',
-    'කண්ඩි',
-    'මාතලේ',
-    'නුවරඑළිය',
-    'ගාල්ල',
-    'මාතර',
-    'හම්බන්තොට',
-    'යාපනය',
-    'කිලිනොච්චිය',
-    'මන්නාරම',
-    'මුලතිව්',
-    'වවුනියාව',
-    'ත්‍රිකුණාමලය',
-    'බත්තිකලෝව',
-    'අම්පාර',
-    'කුරුණෑගල',
-    'පුත්තලම',
-    'අනුරාධපුර',
-    'පොළොන්නරුව',
-    'බදුල්ල',
-    'මොණරාගල',
-    'රත්නපුර',
-    'කෑගල්ල',
+    'කොළඹ', 'ගම්පහ', 'කළුතර', 'කණ්ඩි', 'මාතලේ', 'නුවරඑළිය', 'ගාල්ල', 'මාතර',
+    'හම්බන්තොට', 'යාපනය', 'කිලිනොච්චිය', 'මන්නාරම', 'මුලතිව්', 'වවුනියාව',
+    'ත්‍රිකුණාමලය', 'බත්තිකලෝව', 'අම්පාර', 'කුරුණෑගල', 'පුත්තලම',
+    'අනුරාධපුර', 'පොළොන්නරුව', 'බදුල්ල', 'මොණරාගල', 'රත්නපුර', 'කෑගල්ල',
   ];
 
   @override
@@ -91,50 +66,40 @@ class _AddListingPageState extends State<AddListingPage> {
     return _categories.firstWhere((c) => c.category == _selectedCategory).color;
   }
 
-  void _save() async {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a category')));
       return;
     }
     if (_selectedDistrict == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a district')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a district')));
       return;
     }
 
-    setState(() => _isSaving = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    final newItem = StoreItem(
-      id: 'u${DateTime.now().millisecondsSinceEpoch}',
-      companyName: 'My Company', // In production, use logged-in company name
-      companyId: 'me',
+    final cubit = context.read<StoreCubit>();
+    final success = await cubit.addListing(
       category: _selectedCategory!,
       variety: _varietyCtrl.text.trim(),
+      district: _selectedDistrict!,
+      contactPhone: _phoneCtrl.text.trim(),
       quantityKg: double.tryParse(_quantityCtrl.text) ?? 0,
       pricePerKg: double.tryParse(_priceCtrl.text) ?? 0,
-      district: _selectedDistrict!,
       description: _descriptionCtrl.text.trim(),
-      contactPhone: _phoneCtrl.text.trim(),
-      postedDate: DateTime.now(),
-      isOwn: true,
     );
 
-    StoreRepository.instance.addItem(newItem);
+    if (!mounted) return;
 
-    if (mounted) {
-      setState(() => _isSaving = false);
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Listing added successfully!'),
-          backgroundColor: Color(0xFF2E7D32),
-        ),
+        const SnackBar(content: Text('Listing added successfully!'), backgroundColor: Color(0xFF2E7D32)),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
+    } else {
+      final state = cubit.state;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.errorMessage ?? 'Failed to add listing'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -151,158 +116,124 @@ class _AddListingPageState extends State<AddListingPage> {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'ලැයිස්තු කරන්න',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'Add New Listing',
-              style: TextStyle(color: Colors.white70, fontSize: 11),
-            ),
+            Text('ලැයිස්තු කරන්න', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Add New Listing', style: TextStyle(color: Colors.white70, fontSize: 11)),
           ],
         ),
         elevation: 0,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildSectionLabel('Category / කාණ්ඩය'),
-            const SizedBox(height: 8),
-            _buildCategorySelector(),
-            const SizedBox(height: 20),
-            _buildSectionLabel('Variety / ප්‍රභේදය'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _varietyCtrl,
-              hint: 'e.g. සම්බා, BG 252, Rice Bran...',
-              icon: Icons.grain_rounded,
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
-            ),
-            const SizedBox(height: 16),
-            Row(
+      body: BlocBuilder<StoreCubit, StoreState>(
+        builder: (context, state) {
+          final isSaving = state.status == StoreStatus.adding;
+          return Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('Quantity (kg)'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _quantityCtrl,
-                        hint: '0',
-                        icon: Icons.scale_rounded,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d*'))
+                _buildSectionLabel('Category / කාණ්ඩය'),
+                const SizedBox(height: 8),
+                _buildCategorySelector(),
+                const SizedBox(height: 20),
+                _buildSectionLabel('Variety / ප්‍රභේදය'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _varietyCtrl,
+                  hint: 'e.g. සම්බා, BG 252, Rice Bran...',
+                  icon: Icons.grain_rounded,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('Quantity (kg)'),
+                          const SizedBox(height: 8),
+                          _buildTextField(
+                            controller: _quantityCtrl,
+                            hint: '0',
+                            icon: Icons.scale_rounded,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionLabel('Price / kg (Rs.)'),
-                      const SizedBox(height: 8),
-                      _buildTextField(
-                        controller: _priceCtrl,
-                        hint: '0.00',
-                        icon: Icons.attach_money_rounded,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d*'))
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('Price / kg (Rs.)'),
+                          const SizedBox(height: 8),
+                          _buildTextField(
+                            controller: _priceCtrl,
+                            hint: '0.00',
+                            icon: Icons.attach_money_rounded,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+                          ),
                         ],
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildSectionLabel('District / දිස්ත්‍රික්කය'),
+                const SizedBox(height: 8),
+                _buildDistrictDropdown(),
+                const SizedBox(height: 16),
+                _buildSectionLabel('Contact Phone / දුරකථනය'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _phoneCtrl,
+                  hint: '07XXXXXXXX',
+                  icon: Icons.phone_rounded,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Required';
+                    if (v.length < 9) return 'Enter valid phone number';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildSectionLabel('Description / විස්තරය (Optional)'),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: _descriptionCtrl,
+                  hint: 'Additional details about the item...',
+                  icon: Icons.notes_rounded,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: isSaving ? null : _save,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _accentColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 0,
+                    ),
+                    child: isSaving
+                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Text('Post Listing', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                const SizedBox(height: 32),
               ],
             ),
-            const SizedBox(height: 16),
-            _buildSectionLabel('District / දිස්ත්‍රික්කය'),
-            const SizedBox(height: 8),
-            _buildDistrictDropdown(),
-            const SizedBox(height: 16),
-            _buildSectionLabel('Contact Phone / දුරකථනය'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _phoneCtrl,
-              hint: '07XXXXXXXX',
-              icon: Icons.phone_rounded,
-              keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Required';
-                if (v.length < 9) return 'Enter valid phone number';
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            _buildSectionLabel('Description / විස්තරය (Optional)'),
-            const SizedBox(height: 8),
-            _buildTextField(
-              controller: _descriptionCtrl,
-              hint: 'Additional details about the item...',
-              icon: Icons.notes_rounded,
-              maxLines: 3,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _accentColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Text(
-                        'Post Listing',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 32),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildSectionLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: Colors.black54,
-      ),
-    );
+    return Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54));
   }
 
   Widget _buildCategorySelector() {
@@ -319,34 +250,17 @@ class _AddListingPageState extends State<AddListingPage> {
             decoration: BoxDecoration(
               color: isSelected ? opt.color : Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected ? opt.color : Colors.grey.shade300,
-                width: 1.5,
-              ),
+              border: Border.all(color: isSelected ? opt.color : Colors.grey.shade300, width: 1.5),
               boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: opt.color.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      )
-                    ]
+                  ? [BoxShadow(color: opt.color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))]
                   : [],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(opt.icon,
-                    color: isSelected ? Colors.white : opt.color, size: 18),
+                Icon(opt.icon, color: isSelected ? Colors.white : opt.color, size: 18),
                 const SizedBox(width: 8),
-                Text(
-                  opt.label,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(opt.label, style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w600, fontSize: 12)),
               ],
             ),
           ),
@@ -376,55 +290,28 @@ class _AddListingPageState extends State<AddListingPage> {
         prefixIcon: Icon(icon, size: 20, color: Colors.black38),
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: _accentColor, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _accentColor, width: 1.5)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red, width: 1.5)),
+        focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Colors.red, width: 1.5)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
 
   Widget _buildDistrictDropdown() {
     return DropdownButtonFormField<String>(
-      initialValue: _selectedDistrict,
-      hint: const Text('Select district',
-          style: TextStyle(fontSize: 13, color: Colors.black38)),
+      value: _selectedDistrict,
+      hint: const Text('Select district', style: TextStyle(fontSize: 13, color: Colors.black38)),
       onChanged: (v) => setState(() => _selectedDistrict = v),
-      items: _districts
-          .map((d) => DropdownMenuItem(
-              value: d, child: Text(d, style: const TextStyle(fontSize: 13))))
-          .toList(),
+      items: _districts.map((d) => DropdownMenuItem(value: d, child: Text(d, style: const TextStyle(fontSize: 13)))).toList(),
       decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.location_on_rounded,
-            size: 20, color: Colors.black38),
+        prefixIcon: const Icon(Icons.location_on_rounded, size: 20, color: Colors.black38),
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: _accentColor, width: 1.5),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: _accentColor, width: 1.5)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

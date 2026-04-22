@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
  */
 exports.addPrice = async (req, res) => {
 	try {
-		const { price, priceRangeEnd, notes, qualityGrade, priceType } = req.body;
+		const { price, priceRangeEnd, notes, qualityGrade, priceType, variety } = req.body;
 		const companyId = req.companyId;
 		const userId = req.user.id;
 
@@ -37,6 +37,7 @@ exports.addPrice = async (req, res) => {
 			notes: notes || null,
 			qualityGrade: qualityGrade || "standard",
 			priceType: priceType || "paddy",
+			variety: variety || null,
 			isActive: true,
 		});
 

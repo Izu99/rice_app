@@ -11,9 +11,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
-import '../../../../features/auth/presentation/cubit/auth_cubit.dart';
-import '../../../../features/auth/presentation/cubit/auth_state.dart';
-import '../../../../core/constants/si_strings.dart';
+
 import '../widgets/price_list_item.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
@@ -53,22 +51,19 @@ class _ViewPricesByDistrictScreenState
           title: 'Market Prices',
           subtitle: 'Real-time Trends',
           onBack: () => context.pop(),
-          actions: [
-            BlocBuilder<AuthCubit, AuthState>(
-              builder: (context, authState) {
-                if (authState.user?.isManagerOrHigher ?? false) {
-                  return IconButton(
-                    icon: const Icon(Icons.add_box_rounded, size: 24),
-                    onPressed: () => context.pushNamed('addPrice'),
-                    tooltip: 'Add Price',
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            const SizedBox(width: 4),
-          ],
-          bottomBar: _buildBottomStatusBar(filteredDistricts.length),
+          bottomBar: AppSubBottomBar(
+            showBack: false,
+            centerLabel: 'Add Price',
+            centerIcon: Icons.add_circle_rounded,
+            onCenter: () => context.pushNamed('addPrice'),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => context.pushNamed('addPrice'),
+            backgroundColor: AppColors.primary,
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text('Add Price',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
           body: LoadingOverlay(
             isLoading: state.status == PriceManagementStatus.loadingDistricts,
             message: 'Loading market data...',
@@ -158,51 +153,6 @@ class _ViewPricesByDistrictScreenState
     );
   }
 
-  Widget _buildBottomStatusBar(int count) {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.location_city_rounded,
-                  size: 18, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Total Districts: $count',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: Color(0xFF1A1A1A),
-                ),
-              ),
-            ],
-          ),
-          const Text(
-            'LKR/KG',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 12,
-              color: AppColors.primary,
-              letterSpacing: 1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyState() {
     return Center(

@@ -1,8 +1,10 @@
-// lib/features/store/presentation/screens/store_home_page.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../data/store_data.dart';
+import '../../../../domain/entities/store_listing_entity.dart';
+import '../../../../injection_container.dart' as di;
+import '../cubit/store_cubit.dart';
+import '../cubit/store_state.dart';
 import 'category_listings_page.dart';
 
 class StoreHomePage extends StatelessWidget {
@@ -10,8 +12,18 @@ class StoreHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = StoreRepository.instance;
+    return BlocProvider(
+      create: (_) => di.sl<StoreCubit>()..loadStats(),
+      child: const _StoreHomeBody(),
+    );
+  }
+}
 
+class _StoreHomeBody extends StatelessWidget {
+  const _StoreHomeBody();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       body: CustomScrollView(
@@ -24,13 +36,13 @@ class StoreHomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  _buildWelcomeBanner(repo),
+                  _buildWelcomeBanner(),
                   const SizedBox(height: 24),
                   _buildSectionChip('ප්‍රධාන කාණ්ඩ · Categories'),
                   const SizedBox(height: 14),
-                  _buildCategoryGrid(context, repo),
+                  _buildCategoryGrid(context),
                   const SizedBox(height: 24),
-                  _buildInfoBanner(context, repo),
+                  _buildInfoBanner(context),
                   const SizedBox(height: 32),
                 ],
               ),
@@ -41,7 +53,6 @@ class StoreHomePage extends StatelessWidget {
     );
   }
 
-  // ─── App Bar ─────────────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
       pinned: true,
@@ -55,8 +66,7 @@ class StoreHomePage extends StatelessWidget {
         children: [
           Text(
             'සහල් වෙළෙඳපොළ',
-            style: TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
           ),
           Text(
             'Rice Marketplace',
@@ -67,58 +77,59 @@ class StoreHomePage extends StatelessWidget {
     );
   }
 
-  // ─── Welcome / Stats Banner ───────────────────────────────────────────────
-  Widget _buildWelcomeBanner(StoreRepository repo) {
-    final total = repo.getAll().length;
-    final companies = repo.getAll().map((e) => e.companyId).toSet().length;
-    final districts = repo.getAll().map((e) => e.district).toSet().length;
+  Widget _buildWelcomeBanner() {
+    return BlocBuilder<StoreCubit, StoreState>(
+      builder: (context, state) {
+        final total = state.totalListings;
+        final companies = state.totalCompanies;
+        final districts = state.totalDistricts;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.storefront_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Live Marketplace',
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500),
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.25),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildStatPill(Icons.inventory_2_rounded, '$total', 'Listings'),
-              const SizedBox(width: 10),
-              _buildStatPill(Icons.business_rounded, '$companies', 'Companies'),
-              const SizedBox(width: 10),
-              _buildStatPill(
-                  Icons.location_on_rounded, '$districts', 'Districts'),
+              const Row(
+                children: [
+                  Icon(Icons.storefront_rounded, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Live Marketplace',
+                    style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              state.status == StoreStatus.loading
+                  ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
+                  : Row(
+                      children: [
+                        _buildStatPill(Icons.inventory_2_rounded, '$total', 'Listings'),
+                        const SizedBox(width: 10),
+                        _buildStatPill(Icons.business_rounded, '$companies', 'Companies'),
+                        const SizedBox(width: 10),
+                        _buildStatPill(Icons.location_on_rounded, '$districts', 'Districts'),
+                      ],
+                    ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -136,22 +147,15 @@ class StoreHomePage extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 10),
-            ),
+            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10)),
           ],
         ),
       ),
     );
   }
 
-  // ─── Section Chip (matches home screen style) ─────────────────────────────
   Widget _buildSectionChip(String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -171,8 +175,7 @@ class StoreHomePage extends StatelessWidget {
     );
   }
 
-  // ─── Category Grid (Helakuru circular icon style) ─────────────────────────
-  Widget _buildCategoryGrid(BuildContext context, StoreRepository repo) {
+  Widget _buildCategoryGrid(BuildContext context) {
     final categories = [
       _CategoryItem(
         category: StoreCategory.paddy,
@@ -180,7 +183,6 @@ class StoreHomePage extends StatelessWidget {
         enLabel: 'Paddy',
         icon: Icons.grass_rounded,
         color: const Color(0xFF2E7D32),
-        count: repo.countByCategory(StoreCategory.paddy),
       ),
       _CategoryItem(
         category: StoreCategory.rice,
@@ -188,7 +190,6 @@ class StoreHomePage extends StatelessWidget {
         enLabel: 'Rice',
         icon: Icons.rice_bowl_rounded,
         color: const Color(0xFFE65100),
-        count: repo.countByCategory(StoreCategory.rice),
       ),
       _CategoryItem(
         category: StoreCategory.riceMeal,
@@ -196,7 +197,6 @@ class StoreHomePage extends StatelessWidget {
         enLabel: 'Bran / Flour',
         icon: Icons.grain_rounded,
         color: const Color(0xFF6D4C41),
-        count: repo.countByCategory(StoreCategory.riceMeal),
       ),
       _CategoryItem(
         category: StoreCategory.other,
@@ -204,22 +204,26 @@ class StoreHomePage extends StatelessWidget {
         enLabel: 'Other',
         icon: Icons.category_rounded,
         color: const Color(0xFF1565C0),
-        count: repo.countByCategory(StoreCategory.other),
       ),
     ];
 
-    return GridView.count(
-      crossAxisCount: 4,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 6,
-      mainAxisSpacing: 8,
-      childAspectRatio: 0.63,
-      children: categories.map((c) => _buildCategoryItem(context, c)).toList(),
+    return BlocBuilder<StoreCubit, StoreState>(
+      builder: (context, state) {
+        return GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 6,
+          mainAxisSpacing: 8,
+          childAspectRatio: 0.63,
+          children: categories.map((c) => _buildCategoryItem(context, c, state)).toList(),
+        );
+      },
     );
   }
 
-  Widget _buildCategoryItem(BuildContext context, _CategoryItem cat) {
+  Widget _buildCategoryItem(BuildContext context, _CategoryItem cat, StoreState state) {
+    final count = state.categoryCounts[cat.category] ?? 0;
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -242,14 +246,9 @@ class StoreHomePage extends StatelessWidget {
             decoration: BoxDecoration(
               color: cat.color.withValues(alpha: 0.12),
               shape: BoxShape.circle,
-              border: Border.all(
-                color: cat.color.withValues(alpha: 0.25),
-                width: 1.5,
-              ),
+              border: Border.all(color: cat.color.withValues(alpha: 0.25), width: 1.5),
             ),
-            child: Center(
-              child: Icon(cat.icon, color: cat.color, size: 24),
-            ),
+            child: Center(child: Icon(cat.icon, color: cat.color, size: 24)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -257,23 +256,14 @@ class StoreHomePage extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF2C2C3E),
-              height: 1.2,
-            ),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF2C2C3E), height: 1.2),
           ),
           Text(
             cat.enLabel,
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 9,
-              color: Colors.grey,
-              height: 1.2,
-            ),
+            style: const TextStyle(fontSize: 9, color: Colors.grey, height: 1.2),
           ),
           const SizedBox(height: 3),
           Container(
@@ -283,12 +273,8 @@ class StoreHomePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              '${cat.count}',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: cat.color,
-              ),
+              '$count',
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: cat.color),
             ),
           ),
         ],
@@ -296,8 +282,7 @@ class StoreHomePage extends StatelessWidget {
     );
   }
 
-  // ─── Info Banner ──────────────────────────────────────────────────────────
-  Widget _buildInfoBanner(BuildContext context, StoreRepository repo) {
+  Widget _buildInfoBanner(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -317,11 +302,7 @@ class StoreHomePage extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
           ],
         ),
         child: Row(
@@ -332,8 +313,7 @@ class StoreHomePage extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.info_outline_rounded,
-                  color: AppColors.primary, size: 22),
+              child: const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
             ),
             const SizedBox(width: 14),
             const Expanded(
@@ -342,11 +322,7 @@ class StoreHomePage extends StatelessWidget {
                 children: [
                   Text(
                     'ඔබගේ නිෂ්පාදන ලැයිස්තු කරන්න',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark, fontSize: 13),
                   ),
                   SizedBox(height: 2),
                   Text(
@@ -356,8 +332,7 @@ class StoreHomePage extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.primary, size: 20),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 20),
           ],
         ),
       ),
@@ -365,14 +340,12 @@ class StoreHomePage extends StatelessWidget {
   }
 }
 
-// ─── Model ────────────────────────────────────────────────────────────────────
 class _CategoryItem {
   final StoreCategory category;
   final String siLabel;
   final String enLabel;
   final IconData icon;
   final Color color;
-  final int count;
 
   const _CategoryItem({
     required this.category,
@@ -380,6 +353,5 @@ class _CategoryItem {
     required this.enLabel,
     required this.icon,
     required this.color,
-    required this.count,
   });
 }

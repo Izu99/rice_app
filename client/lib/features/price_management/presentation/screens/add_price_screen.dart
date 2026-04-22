@@ -8,10 +8,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
-import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
-import '../../../profile/presentation/cubit/profile_cubit.dart';
-import '../../../profile/presentation/cubit/profile_state.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
 
@@ -30,6 +29,29 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
 
   String _selectedPriceType = 'paddy';
   String _selectedQualityGrade = 'standard';
+  String? _selectedVariety;
+
+  static const List<String> _paddyVarieties = [
+    'සම්බා',
+    'නාඩු',
+    'කීරි සම්බා',
+    'සුවඳැල්',
+    'පච්චපෙරුමාල්',
+    'රතු හීනටි',
+    'මඩතවාලු',
+  ];
+
+  static const List<String> _riceVarieties = [
+    'සම්බා සහල්',
+    'නාඩු සහල්',
+    'කීරි සම්බා සහල්',
+    'රතු සහල්',
+    'සුදු සහල්',
+    'බාස්මතී',
+  ];
+
+  List<String> get _varieties =>
+      _selectedPriceType == 'paddy' ? _paddyVarieties : _riceVarieties;
 
   @override
   void dispose() {
@@ -59,6 +81,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
           priceRangeEnd: priceRangeEnd,
           qualityGrade: _selectedQualityGrade,
           priceType: _selectedPriceType,
+          variety: _selectedVariety,
           notes: _notesController.text.trim().isEmpty
               ? null
               : _notesController.text.trim(),
@@ -73,8 +96,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
             state.lastAddedPrice != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
+              content: Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
               backgroundColor: AppColors.success,
             ),
           );
@@ -93,8 +115,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
         subtitle: 'මිල ඇතුළත් කරන්න',
         onBack: () => context.pop(),
         bottomBar: AppSubBottomBar(
-          centerLabel: 'Save Price',
-          centerIcon: Icons.save_rounded,
+          centerLabel: 'Add Price',
+          centerIcon: Icons.add_circle_rounded,
           onCenter: _handleAddPrice,
         ),
         body: BlocBuilder<PriceManagementCubit, PriceManagementState>(
@@ -109,22 +131,22 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // District display (read-only)
-                      BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, profileState) {
+                      // District display (top, read-only from company)
+                      BlocBuilder<AuthCubit, AuthState>(
+                        builder: (context, authState) {
                           final district =
-                              profileState.company?.district ?? 'Not Set';
+                              authState.company?.district ?? 'Not Set';
                           return Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.08),
+                              color: AppColors.primary.withValues(alpha: 0.08),
                               border: Border.all(
                                   color: AppColors.primary, width: 1.5),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.location_on,
+                                const Icon(Icons.location_on,
                                     color: AppColors.primary, size: 22),
                                 const SizedBox(width: 12),
                                 Column(
@@ -160,8 +182,10 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                               icon: Icons.grass_rounded,
                               selected: _selectedPriceType == 'paddy',
                               color: const Color(0xFF8BC34A),
-                              onTap: () =>
-                                  setState(() => _selectedPriceType = 'paddy'),
+                              onTap: () => setState(() {
+                                _selectedPriceType = 'paddy';
+                                _selectedVariety = null;
+                              }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -171,11 +195,39 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                               icon: Icons.rice_bowl_rounded,
                               selected: _selectedPriceType == 'rice',
                               color: AppColors.primary,
-                              onTap: () =>
-                                  setState(() => _selectedPriceType = 'rice'),
+                              onTap: () => setState(() {
+                                _selectedPriceType = 'rice';
+                                _selectedVariety = null;
+                              }),
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Variety dropdown
+                      Text('Variety',
+                          style: AppTextStyles.labelMedium
+                              .copyWith(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: _selectedVariety,
+                        hint: const Text('Select variety'),
+                        items: _varieties
+                            .map((v) => DropdownMenuItem(
+                                  value: v,
+                                  child: Text(v),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() => _selectedVariety = value);
+                        },
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                        ),
                       ),
                       const SizedBox(height: 20),
 
@@ -209,7 +261,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                         prefixIcon: Icons.currency_rupee,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return null; // Optional
+                            return null;
                           }
                           final max = double.tryParse(value.trim());
                           if (max == null) return 'Enter a valid number';
@@ -260,29 +312,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                         maxLength: 200,
                         showCounter: true,
                       ),
-                      const SizedBox(height: 28),
-
-                      // Submit
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton.icon(
-                          onPressed: _handleAddPrice,
-                          icon: const Icon(Icons.add, color: Colors.white),
-                          label: const Text(
-                            'Add Price',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -318,7 +348,7 @@ class _TypeButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? color.withOpacity(0.12) : Colors.white,
+          color: selected ? color.withValues(alpha: 0.12) : Colors.white,
           border: Border.all(
             color: selected ? color : Colors.grey.shade300,
             width: selected ? 2 : 1,

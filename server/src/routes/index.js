@@ -14,6 +14,7 @@ const reportRoutes = require("./reportRoutes");
 const syncRoutes = require("./syncRoutes");
 const paddyTypeRoutes = require("./paddyType");
 const paddyRicePriceRoutes = require("./paddyRicePriceRoutes");
+const storeListingRoutes = require("./storeListingRoutes");
 const purchaseRoutes = require("./purchase");
 const setupRoutes = require("./setupRoutes");
 
@@ -66,6 +67,7 @@ router.use("/reports", reportRoutes);
 router.use("/sync", syncRoutes);
 router.use("/paddy-types", paddyTypeRoutes);
 router.use("/paddy-rice-price", paddyRicePriceRoutes);
+router.use("/store", storeListingRoutes);
 router.use("/purchases", purchaseRoutes);
 router.use("/setup", setupRoutes);
 
