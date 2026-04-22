@@ -41,10 +41,9 @@ class _MainWrapperScreenState extends State<MainWrapperScreen> {
   void _onDestinationSelected(int index) {
     widget.navigationShell.goBranch(
       index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+      initialLocation: true,
     );
 
-    // Automatically refresh dashboard when navigating back to home
     if (index == 0) {
       context.read<DashboardCubit>().loadDashboard();
     }

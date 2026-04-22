@@ -1,0 +1,6 @@
+{
+  "autoCompact": true,
+  "env": {
+    "CLAUDE_COMPACT_THRESHOLD": "0.65"
+  }
+}

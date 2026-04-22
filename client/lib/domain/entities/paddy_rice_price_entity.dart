@@ -12,6 +12,7 @@ class PaddyRicePriceEntity extends Equatable {
   final double? priceRangeEnd;
   final String? qualityGrade;
   final String priceType; // 'paddy' or 'rice'
+  final String? variety;
   final String? notes;
   final String? createdByName;
   final String? createdByEmail;
@@ -28,6 +29,7 @@ class PaddyRicePriceEntity extends Equatable {
     this.priceRangeEnd,
     this.qualityGrade = 'standard',
     this.priceType = 'paddy',
+    this.variety,
     this.notes,
     this.createdByName,
     this.createdByEmail,
@@ -57,6 +59,7 @@ class PaddyRicePriceEntity extends Equatable {
         priceRangeEnd,
         qualityGrade,
         priceType,
+        variety,
         notes,
         createdByName,
         createdByEmail,

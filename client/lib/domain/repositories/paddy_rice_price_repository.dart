@@ -23,6 +23,7 @@ abstract class PaddyRicePriceRepository {
     String qualityGrade = 'standard',
     String priceType = 'paddy',
     String? notes,
+    String? variety,
   });
 
   /// Get paddy rice prices by district

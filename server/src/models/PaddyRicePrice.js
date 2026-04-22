@@ -70,6 +70,13 @@ const PaddyRicePriceSchema = new mongoose.Schema(
 			enum: ["premium", "standard", "basic"],
 			default: "standard",
 		},
+
+		// Paddy/rice variety (optional)
+		variety: {
+			type: String,
+			trim: true,
+			maxlength: [100, "Variety name cannot exceed 100 characters"],
+		},
 	},
 	{
 		timestamps: true,
@@ -95,13 +102,14 @@ PaddyRicePriceSchema.methods.toPublicJSON = function () {
 	return {
 		id: this._id,
 		companyId: this.companyId,
-		company: this.company, // Populated if included in query
+		company: this.companyId, // populated via .populate("companyId", "name")
 		district: this.district,
 		price: this.price,
 		priceRangeEnd: this.priceRangeEnd,
 		priceDisplay: this.getPriceDisplay(),
 		priceType: this.priceType,
 		qualityGrade: this.qualityGrade,
+		variety: this.variety,
 		notes: this.notes,
 		createdBy: this.createdBy,
 		createdAt: this.createdAt,

@@ -15,6 +15,7 @@ abstract class PaddyRicePriceRemoteDataSource {
     String qualityGrade = 'standard',
     String priceType = 'paddy',
     String? notes,
+    String? variety,
   });
 
   /// Get prices by district
@@ -68,7 +69,7 @@ class PaddyRicePriceRemoteDataSourceImpl
 
   PaddyRicePriceRemoteDataSourceImpl({required this.apiService});
 
-  static const String _endpoint = '/api/paddy-rice-price';
+  static const String _endpoint = '/paddy-rice-price';
 
   /// Helper method to convert Failure to appropriate exception
   Exception _mapFailureToException(Failure failure) {
@@ -103,6 +104,7 @@ class PaddyRicePriceRemoteDataSourceImpl
     String qualityGrade = 'standard',
     String priceType = 'paddy',
     String? notes,
+    String? variety,
   }) async {
     try {
       final body = {
@@ -116,6 +118,9 @@ class PaddyRicePriceRemoteDataSourceImpl
       }
       if (notes != null && notes.isNotEmpty) {
         body['notes'] = notes;
+      }
+      if (variety != null && variety.isNotEmpty) {
+        body['variety'] = variety;
       }
 
       final either = await apiService.post(

@@ -121,11 +121,16 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  /// Wraps action icons to ensure they appear white on the gradient bg
+  /// Wraps action icons to ensure they appear white on the gradient bg (M3-safe)
   Widget _tintAction(Widget action) {
-    return IconTheme(
-      data: const IconThemeData(color: Colors.white, size: 22),
-      child: action,
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: Colors.white),
+      ),
+      child: IconTheme(
+        data: const IconThemeData(color: Colors.white, size: 22),
+        child: action,
+      ),
     );
   }
 }

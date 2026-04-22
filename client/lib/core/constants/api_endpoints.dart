@@ -365,6 +365,13 @@ class ApiEndpoints {
   /// Delete account
   static const String deleteAccount = '/auth/delete';
 
+  // ==================== STORE ====================
+
+  static const String storeListings = '/store/listings';
+  static const String storeStats = '/store/listings/stats';
+  static const String storeMyListings = '/store/listings/my';
+  static String storeListing(String id) => '/store/listings/$id';
+
   // ==================== UTILITIES ====================
 
   /// Health check

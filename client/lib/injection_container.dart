@@ -64,6 +64,7 @@ import 'features/expenses/expenses_injection.dart';
 import 'features/super_admin/admin_injection.dart';
 import 'features/price_management/price_management_injection.dart'
     as PriceManagementInjection;
+import 'features/store/store_injection.dart' as StoreInjection;
 
 // Routes
 import 'routes/app_router.dart';
@@ -249,6 +250,7 @@ Future<void> _initFeatures() async {
   await ProfileInjection.init();
   initAdminInjection(sl);
   await PriceManagementInjection.initializePriceManagementDependencies();
+  await StoreInjection.initializeStoreDependencies();
 }
 
 /// Initialize routes

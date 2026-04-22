@@ -12,6 +12,7 @@ class PaddyRicePriceModel extends Equatable {
   final double? priceRangeEnd;
   final String qualityGrade;
   final String priceType; // 'paddy' or 'rice'
+  final String? variety;
   final String? notes;
   final String? createdByName;
   final String? createdByEmail;
@@ -28,6 +29,7 @@ class PaddyRicePriceModel extends Equatable {
     this.priceRangeEnd,
     this.qualityGrade = 'standard',
     this.priceType = 'paddy',
+    this.variety,
     this.notes,
     this.createdByName,
     this.createdByEmail,
@@ -49,6 +51,7 @@ class PaddyRicePriceModel extends Equatable {
           : null,
       qualityGrade: json['qualityGrade'] ?? 'standard',
       priceType: json['priceType'] ?? 'paddy',
+      variety: json['variety']?.toString(),
       notes: json['notes']?.toString(),
       createdByName: json['createdBy'] is Map
           ? json['createdBy']['name']?.toString()
@@ -90,6 +93,7 @@ class PaddyRicePriceModel extends Equatable {
       priceRangeEnd: priceRangeEnd,
       qualityGrade: qualityGrade,
       priceType: priceType,
+      variety: variety,
       notes: notes,
       createdByName: createdByName,
       createdByEmail: createdByEmail,
@@ -110,6 +114,7 @@ class PaddyRicePriceModel extends Equatable {
       priceRangeEnd: entity.priceRangeEnd,
       qualityGrade: entity.qualityGrade ?? 'standard',
       priceType: entity.priceType,
+      variety: entity.variety,
       notes: entity.notes,
       createdByName: entity.createdByName,
       createdByEmail: entity.createdByEmail,
@@ -140,6 +145,7 @@ class PaddyRicePriceModel extends Equatable {
         priceRangeEnd,
         qualityGrade,
         priceType,
+        variety,
         notes,
         createdByName,
         createdByEmail,

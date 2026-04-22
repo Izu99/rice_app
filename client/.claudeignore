@@ -1,0 +1,15 @@
+node_modules/
+.next/
+dist/
+build/
+.dart_tool/
+.gradle/
+__pycache__/
+.venv/
+*.lock
+*.log
+*.g.dart
+*.class
+*.pyc
+*.min.*
+*.map

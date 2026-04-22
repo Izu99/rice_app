@@ -25,6 +25,7 @@ class PaddyRicePriceRepositoryImpl implements PaddyRicePriceRepository {
     String qualityGrade = 'standard',
     String priceType = 'paddy',
     String? notes,
+    String? variety,
   }) async {
     if (!await networkInfo.isConnected) return const Left(NetworkFailure());
     try {
@@ -34,6 +35,7 @@ class PaddyRicePriceRepositoryImpl implements PaddyRicePriceRepository {
         qualityGrade: qualityGrade,
         priceType: priceType,
         notes: notes,
+        variety: variety,
       );
       return Right(model.toEntity());
     } catch (e) {

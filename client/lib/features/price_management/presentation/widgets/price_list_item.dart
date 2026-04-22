@@ -53,6 +53,7 @@ class PriceListItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -71,21 +72,26 @@ class PriceListItem extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (price.qualityGrade != null) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF3F4F6),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    price.qualityGrade!.toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
+                              if (price.variety != null &&
+                                  price.variety!.isNotEmpty) ...[
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF3F4F6),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      price.variety!.toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ),
                                 ),
@@ -107,26 +113,33 @@ class PriceListItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'Rs.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 115),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'Rs.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                        Text(
-                          price.priceDisplay,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: typeColor,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              price.priceDisplay,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: typeColor,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -146,19 +159,30 @@ class PriceListItem extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (price.notes != null && price.notes!.isNotEmpty) ...[
-                      const Spacer(),
+                    const Spacer(),
+                    if (price.notes != null && price.notes!.isNotEmpty)
+                      Flexible(
+                        child: Text(
+                          price.notes!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[400],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    else if (price.qualityGrade != null)
                       Text(
-                        price.notes!,
+                        price.qualityGrade![0].toUpperCase() +
+                            price.qualityGrade!.substring(1),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[400],
                           fontStyle: FontStyle.italic,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
                   ],
                 ),
               ],
