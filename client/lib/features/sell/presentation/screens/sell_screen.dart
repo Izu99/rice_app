@@ -98,10 +98,11 @@ class _SellScreenState extends State<SellScreen> with WidgetsBindingObserver {
 
   PreferredSizeWidget _buildAppBar(SellState state) {
     return HAppBar(
-      title: 'Sell Rice',
-      subtitle: state.currentStep == SellStep.review
+      title: state.currentStep == SellStep.review
           ? SiStrings.reviewSale
           : SiStrings.sellRice,
+      subtitle: 'Sell Rice',
+      onRefresh: () => context.read<SellCubit>().initialize(),
       onBack: () {
         if (state.currentStep == SellStep.review) {
           context.read<SellCubit>().goBackToItems();

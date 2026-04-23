@@ -106,6 +106,66 @@ class StoreCubit extends Cubit<StoreState> {
     );
   }
 
+  Future<bool> updateListing(
+    String id, {
+    String? variety,
+    double? quantityKg,
+    double? pricePerKg,
+    String? district,
+    String? description,
+    String? contactPhone,
+  }) async {
+    emit(state.copyWith(status: StoreStatus.updating));
+
+    final result = await _repository.updateListing(
+      id,
+      variety: variety,
+      quantityKg: quantityKg,
+      pricePerKg: pricePerKg,
+      district: district,
+      description: description,
+      contactPhone: contactPhone,
+    );
+
+    return result.fold(
+      (failure) {
+        emit(state.copyWith(status: StoreStatus.error, errorMessage: failure.message));
+        return false;
+      },
+      (updated) {
+        final updatedListings =
+            state.listings.map((l) => l.id == id ? updated : l).toList();
+        emit(state.copyWith(status: StoreStatus.success, listings: updatedListings));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> deleteListing(String id) async {
+    final result = await _repository.deleteListing(id);
+    return result.fold(
+      (failure) {
+        emit(state.copyWith(status: StoreStatus.error, errorMessage: failure.message));
+        return false;
+      },
+      (_) {
+        final updated = state.listings.where((l) => l.id != id).toList();
+        final cat = state.currentCategory;
+        final updatedCounts = Map<StoreCategory, int>.from(state.categoryCounts);
+        if (cat != null && updatedCounts.containsKey(cat)) {
+          updatedCounts[cat] = ((updatedCounts[cat] ?? 1) - 1).clamp(0, 999999);
+        }
+        emit(state.copyWith(
+          status: StoreStatus.success,
+          listings: updated,
+          totalListings: (state.totalListings - 1).clamp(0, 999999),
+          categoryCounts: updatedCounts,
+        ));
+        return true;
+      },
+    );
+  }
+
   Future<void> refreshCategory() async {
     if (state.currentCategory != null) {
       await loadListingsByCategory(state.currentCategory!);

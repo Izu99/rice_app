@@ -8,11 +8,11 @@ import '../../../../data/models/paddy_rice_price_model.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
-import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
 
 import '../widgets/price_list_item.dart';
+import '../../../../core/shared_widgets/app_fab.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
 
@@ -47,112 +47,111 @@ class _ViewPricesByDistrictScreenState
                     .contains(_searchDistrict.toLowerCase()))
                 .toList();
 
-        return AppPageScaffold(
-          title: 'Market Prices',
-          subtitle: 'Real-time Trends',
-          onBack: () => context.pop(),
-          bottomBar: AppSubBottomBar(
-            showBack: false,
-            centerLabel: 'Add Price',
-            centerIcon: Icons.add_circle_rounded,
-            onCenter: () => context.pushNamed('addPrice'),
+        return Scaffold(
+          backgroundColor: const Color(0xFFF4F6FA),
+          body: CustomScrollView(
+            slivers: [
+              HSliverAppBar(
+                title: 'Market Prices',
+                subtitle: 'District Overview',
+                onRefresh: () =>
+                    context.read<PriceManagementCubit>().loadDistricts(),
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    if (state.isRefreshing ||
+                        (state.status ==
+                                PriceManagementStatus.loadingDistricts &&
+                            state.districts.isNotEmpty))
+                      const LinearProgressIndicator(minHeight: 3),
+                    _buildSearchBar(),
+                  ],
+                ),
+              ),
+              if (state.status == PriceManagementStatus.loadingDistricts &&
+                  state.districts.isEmpty)
+                const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()))
+              else if (filteredDistricts.isEmpty)
+                SliverFillRemaining(child: _buildEmptyState())
+              else
+                SliverFillRemaining(child: _buildPricesList(context, state, filteredDistricts)),
+            ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
+          floatingActionButton: AppFab(
+            label: 'Add Price',
             onPressed: () => context.pushNamed('addPrice'),
-            backgroundColor: AppColors.primary,
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text('Add Price',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-          body: LoadingOverlay(
-            isLoading: state.status == PriceManagementStatus.loadingDistricts,
-            message: 'Loading market data...',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Modern Header & Search
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0x08000000),
-                        blurRadius: 15,
-                        offset: Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'District Overview',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1A1A1A),
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Select a district to view detailed prices',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // Search Box
-                      TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            _searchDistrict = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Search district...',
-                          hintStyle:
-                              TextStyle(color: Colors.grey[400], fontSize: 15),
-                          prefixIcon: const Icon(Icons.search_rounded,
-                              color: AppColors.primary),
-                          filled: true,
-                          fillColor: const Color(0xFFF3F4F6),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Prices List
-                Expanded(
-                  child: filteredDistricts.isEmpty &&
-                          state.status != PriceManagementStatus.loadingDistricts
-                      ? _buildEmptyState()
-                      : _buildPricesList(context, state, filteredDistricts),
-                ),
-              ],
-            ),
           ),
         );
       },
     );
   }
 
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'District Overview',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Select a district to view detailed prices',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchDistrict = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search district...',
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              prefixIcon:
+                  const Icon(Icons.search_rounded, color: AppColors.primary),
+              filled: true,
+              fillColor: const Color(0xFFF3F4F6),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildEmptyState() {
     return Center(
@@ -222,17 +221,18 @@ class _ViewPricesByDistrictScreenState
   Widget _buildDistrictCard(
       BuildContext context, DistrictWithPricesResponse district) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
+        border: Border.all(color: Colors.grey.withOpacity(0.05), width: 1),
       ),
       child: Material(
         color: Colors.transparent,
@@ -243,25 +243,25 @@ class _ViewPricesByDistrictScreenState
               pathParameters: {'district': district.district},
             );
           },
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.location_on_rounded,
                     color: AppColors.primary,
-                    size: 28,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,25 +269,25 @@ class _ViewPricesByDistrictScreenState
                       Text(
                         district.district,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                           color: Color(0xFF1A1A1A),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF3F4F6),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '${district.priceCount} Listings',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.grey[700],
                               ),
@@ -299,7 +299,7 @@ class _ViewPricesByDistrictScreenState
                               child: Text(
                                 'Updated ${_formatRelativeTime(district.lastUpdated!)}',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   color: Colors.grey[500],
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -314,7 +314,7 @@ class _ViewPricesByDistrictScreenState
                 ),
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  size: 18,
+                  size: 14,
                   color: Colors.grey[300],
                 ),
               ],

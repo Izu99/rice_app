@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
 
-enum StoreStatus { initial, loading, adding, success, error }
+enum StoreStatus { initial, loading, adding, updating, success, error }
 
 class StoreState extends Equatable {
   final StoreStatus status;

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
+import '../../../../core/shared_widgets/app_fab.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../domain/entities/customer_entity.dart';
@@ -49,7 +50,7 @@ class _BuyCustomerSelectionScreenState
     return AppPageScaffold(
       title: SiStrings.selectCustomer,
       subtitle: SiStrings.isSinhala ? 'Select Seller' : 'විකුණුම්කරු තෝරන්න',
-      bottomBar: const AppSubBottomBar(showBack: false),
+      onRefresh: () => context.read<CustomersCubit>().loadCustomers(),
       body: Column(
         children: [
           // Light info banner
@@ -138,11 +139,9 @@ class _BuyCustomerSelectionScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: AppFab(
+        label: SiStrings.addNewCustomer,
         onPressed: () => context.pushNamed('buyAddCustomer'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
       ),
     );
   }

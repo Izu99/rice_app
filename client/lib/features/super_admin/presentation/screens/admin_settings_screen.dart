@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../cubit/admin_cubit.dart';
 
 class AdminSettingsScreen extends StatelessWidget {
@@ -85,25 +86,10 @@ class AdminSettingsScreen extends StatelessWidget {
   }
 
   Widget _buildStickyHeader(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-        onPressed: () => context.pop(),
-      ),
-      title: const Text(
-        'Admin Settings',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
+      title: 'Admin Settings',
+      subtitle: 'System & global configurations',
     );
   }
 

@@ -33,14 +33,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
             title: SiStrings.customerReport,
             subtitle:
                 SiStrings.isSinhala ? 'Customer Report' : 'පාරිභෝගික වාර්තාව',
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: () =>
-                    context.read<ReportsCubit>().loadCustomerReport(),
-              ),
-            ],
-            bottomBar: AppSubBottomBar(),
+            onRefresh: () => context.read<ReportsCubit>().loadCustomerReport(),
             body: state.customerReport == null
                 ? _buildEmptyState()
                 : _buildReportContent(state.customerReport!),

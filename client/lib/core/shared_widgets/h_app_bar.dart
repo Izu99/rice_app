@@ -13,6 +13,7 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showBack;
   final VoidCallback? onBack;
+  final VoidCallback? onRefresh;
   final Widget? bottom;
   final double bottomHeight;
 
@@ -23,6 +24,7 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.showBack = true,
     this.onBack,
+    this.onRefresh,
     this.bottom,
     this.bottomHeight = 0,
   });
@@ -58,55 +60,73 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: Row(
                   children: [
                     // Back button
-                    if (showBack) _AnimatedBackButton(onBack: onBack),
+                    if (showBack) 
+                      _AnimatedBackButton(
+                        onBack: onBack,
+                      ),
                     if (!showBack) const SizedBox(width: 16),
 
                     // Title
                     Expanded(
-                      child: subtitle != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  title,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 17,
-                                    letterSpacing: 0.1,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: showBack ? 0 : 8),
+                        child: subtitle != null
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 18,
+                                      letterSpacing: -0.2,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  subtitle!,
-                                  style: const TextStyle(
-                                    color: Color(0xCCFFFFFF),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w400,
+                                  Text(
+                                    subtitle!,
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.75),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.1,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                ],
+                              )
+                            : Text(
+                                title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18,
+                                  letterSpacing: -0.2,
                                 ),
-                              ],
-                            )
-                          : Text(
-                              title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 17,
-                                letterSpacing: 0.1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                      ),
                     ),
 
                     // Actions
-                    if (actions != null) ...[
-                      ...actions!.map((a) => _tintAction(a)),
-                      const SizedBox(width: 4),
-                    ] else
-                      const SizedBox(width: 16),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (onRefresh != null)
+                          _tintAction(
+                            IconButton(
+                              icon: const Icon(Icons.refresh_rounded),
+                              onPressed: onRefresh,
+                              tooltip: 'Refresh',
+                            ),
+                          ),
+                        if (actions != null) 
+                          ...actions!.map((a) => _tintAction(a)),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -135,11 +155,152 @@ class HAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
+// ─── Sliver AppBar ────────────────────────────────────────────────────────────
+
+class HSliverAppBar extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final List<Widget>? actions;
+  final bool showBack;
+  final VoidCallback? onBack;
+  final VoidCallback? onRefresh;
+  final PreferredSizeWidget? bottom;
+  final bool pinned;
+  final bool floating;
+  final double? expandedHeight;
+  final Widget? flexibleSpace;
+  final bool transparent;
+  final Widget? leading;
+
+  const HSliverAppBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actions,
+    this.showBack = true,
+    this.onBack,
+    this.onRefresh,
+    this.bottom,
+    this.pinned = true,
+    this.floating = false,
+    this.expandedHeight,
+    this.flexibleSpace,
+    this.transparent = false,
+    this.leading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      pinned: pinned,
+      floating: floating,
+      expandedHeight: expandedHeight,
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      leading: leading ??
+          (showBack
+              ? Center(child: _AnimatedBackButton(onBack: onBack))
+              : null),
+      leadingWidth: (leading != null || showBack) ? 64 : 16,
+      title: subtitle != null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                    letterSpacing: -0.2,
+                    shadows: transparent
+                        ? const [Shadow(color: Color(0x66000000), blurRadius: 8)]
+                        : null,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.1,
+                    shadows: transparent
+                        ? const [Shadow(color: Color(0x66000000), blurRadius: 6)]
+                        : null,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            )
+          : Text(
+              title,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+                letterSpacing: -0.2,
+                shadows: transparent
+                    ? const [Shadow(color: Color(0x66000000), blurRadius: 8)]
+                    : null,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+      actions: [
+        if (onRefresh != null)
+          _tintAction(
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: onRefresh,
+              tooltip: 'Refresh',
+            ),
+          ),
+        if (actions != null) ...actions!.map((a) => _tintAction(a)),
+        const SizedBox(width: 8),
+      ],
+      bottom: bottom,
+      flexibleSpace: transparent
+          ? null
+          : (flexibleSpace ??
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 12,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+              )),
+    );
+  }
+
+  Widget _tintAction(Widget action) {
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: Colors.white),
+      ),
+      child: IconTheme(
+        data: const IconThemeData(color: Colors.white, size: 22),
+        child: action,
+      ),
+    );
+  }
+}
+
 // ─── Animated back button ────────────────────────────────────────────────────
 
 class _AnimatedBackButton extends StatefulWidget {
   final VoidCallback? onBack;
-  const _AnimatedBackButton({this.onBack});
+  final String? label;
+  const _AnimatedBackButton({this.onBack, this.label});
 
   @override
   State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
@@ -158,7 +319,7 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton>
       duration: const Duration(milliseconds: 120),
       reverseDuration: const Duration(milliseconds: 200),
     );
-    _scale = Tween<double>(begin: 1.0, end: 0.78).animate(
+    _scale = Tween<double>(begin: 1.0, end: 0.94).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
     );
   }
@@ -181,17 +342,33 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton>
       child: ScaleTransition(
         scale: _scale,
         child: Container(
-          width: 44,
-          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           margin: const EdgeInsets.only(left: 8, right: 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 18,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: Colors.white,
+                size: 14,
+              ),
+              if (widget.label != null) ...[
+                const SizedBox(width: 6),
+                Text(
+                  widget.label!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),

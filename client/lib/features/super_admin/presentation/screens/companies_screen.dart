@@ -6,6 +6,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../data/models/company_model.dart';
 import '../cubit/admin_cubit.dart';
@@ -151,33 +152,19 @@ class _CompaniesScreenState extends State<CompaniesScreen> {
   }
 
   Widget _buildStickyHeader(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Color(0xFF1C1C2E)),
-        onPressed: () => context.pop(),
-      ),
-      title: const Text(
-        'Companies',
-        style: TextStyle(
-          color: Color(0xFF1C1C2E),
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
+      onRefresh: () => context.read<AdminCubit>().refreshCompanies(),
+      title: 'Companies',
+      subtitle: 'Manage rice mill companies',
       actions: [
         IconButton(
-          icon: const Icon(Icons.sort, color: Color(0xFF1C1C2E)),
+          icon: const Icon(Icons.sort, color: Colors.white),
           onPressed: _showSortOptions,
           tooltip: 'Sort',
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Color(0xFF1C1C2E)),
+          icon: const Icon(Icons.more_vert, color: Colors.white),
           onSelected: (value) {
             switch (value) {
               case 'export':

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
 import '../../../../injection_container.dart' as di;
 import '../cubit/store_cubit.dart';
 import '../cubit/store_state.dart';
 import 'add_listing_page.dart';
 import 'listing_detail_page.dart';
+import '../../../../core/shared_widgets/app_fab.dart';
 
 class CategoryListingsPage extends StatefulWidget {
   final StoreCategory category;
@@ -87,14 +89,51 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (ctx, i) => _buildListingCard(context, items[i]),
+                        (ctx, i) {
+                          final item = items[i];
+                          if (item.isOwn) {
+                            return Dismissible(
+                              key: Key(item.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade400,
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 24),
+                                child: const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        color: Colors.white, size: 26),
+                                    SizedBox(height: 4),
+                                    Text('Remove',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                              confirmDismiss: (_) =>
+                                  _confirmRemoveListing(context),
+                              onDismissed: (_) => _cubit.deleteListing(item.id),
+                              child: _buildListingCard(context, item),
+                            );
+                          }
+                          return _buildListingCard(context, item);
+                        },
                         childCount: items.length,
                       ),
                     ),
                   ),
               ],
             ),
-            floatingActionButton: FloatingActionButton.extended(
+            floatingActionButton: AppFab(
+              label: 'Add Listing',
+              color: widget.color,
               onPressed: () async {
                 final added = await Navigator.push<bool>(
                   context,
@@ -112,9 +151,6 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
                   _cubit.refreshCategory();
                 }
               },
-              backgroundColor: widget.color,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text('Add Listing', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
             ),
           );
         },
@@ -123,66 +159,50 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
   }
 
   Widget _buildAppBar(BuildContext context, int count) {
-    return SliverAppBar(
-      expandedHeight: 130,
+    return HSliverAppBar(
       pinned: true,
-      backgroundColor: widget.color,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [widget.color.withOpacity(0.9), widget.color, widget.color.withOpacity(0.7)],
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 48, 20, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(widget.icon, color: Colors.white, size: 26),
-                  ),
-                  const SizedBox(width: 14),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(widget.siLabel, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                      Text(widget.enLabel, style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                    ],
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '$count listings',
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      onRefresh: () => _cubit.refreshCategory(),
+      title: widget.siLabel,
+      subtitle: '${widget.enLabel} • $count listings',
+    );
+  }
+
+  void _openEdit(BuildContext context, StoreListingEntity item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: _cubit,
+          child: AddListingPage(
+            preselectedCategory: item.category,
+            categoryColor: widget.color,
+            existingListing: item,
           ),
         ),
       ),
     );
   }
+
+  Future<bool?> _confirmRemoveListing(BuildContext context) =>
+      showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Remove Listing?'),
+          content: const Text(
+              'This listing will be removed. Other companies will no longer see it. You can add a new one anytime.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
 
   Widget _buildSearchBar() {
     return Padding(
@@ -307,10 +327,27 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
                     ),
                   ),
                   if (item.isOwn)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                      child: const Text('My Listing', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                          child: const Text('My Listing', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () => _openEdit(context, item),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: widget.color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(Icons.edit_rounded, size: 14, color: widget.color),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),

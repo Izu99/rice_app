@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/repositories/paddy_rice_price_repository.dart';
 import '../../../../domain/repositories/auth_repository.dart';
+import '../../../../data/models/paddy_rice_price_model.dart';
 import 'price_management_state.dart';
 
 class PriceManagementCubit extends Cubit<PriceManagementState> {
@@ -19,7 +20,11 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
   }
 
   Future<void> loadDistricts() async {
-    emit(state.copyWith(status: PriceManagementStatus.loadingDistricts));
+    if (state.districts.isEmpty) {
+      emit(state.copyWith(status: PriceManagementStatus.loadingDistricts));
+    } else {
+      emit(state.copyWith(isRefreshing: true));
+    }
 
     final result = await _priceRepository.getDistrictsList();
 
@@ -27,13 +32,14 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
       (failure) {
         emit(state.copyWith(
           status: PriceManagementStatus.error,
+          isRefreshing: false,
           errorMessage: failure.message,
-          districts: const [],
         ));
       },
       (districts) {
         emit(state.copyWith(
           status: PriceManagementStatus.success,
+          isRefreshing: false,
           districts: districts,
         ));
       },
@@ -45,10 +51,16 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
     int page = 1,
     int limit = 50,
   }) async {
-    emit(state.copyWith(
-      status: PriceManagementStatus.loadingPrices,
-      selectedDistrict: district,
-    ));
+    final hasData =
+        state.prices.isNotEmpty && state.selectedDistrict == district;
+    if (hasData) {
+      emit(state.copyWith(isRefreshing: true, selectedDistrict: district));
+    } else {
+      emit(state.copyWith(
+        status: PriceManagementStatus.loadingPrices,
+        selectedDistrict: district,
+      ));
+    }
 
     final result = await _priceRepository.getPricesByDistrict(
       district,
@@ -60,12 +72,14 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
       (failure) {
         emit(state.copyWith(
           status: PriceManagementStatus.error,
+          isRefreshing: false,
           errorMessage: failure.message,
         ));
       },
       (response) {
         emit(state.copyWith(
           status: PriceManagementStatus.success,
+          isRefreshing: false,
           prices: response.prices.map((m) => m.toEntity()).toList(),
           currentPage: response.page,
           totalPages: response.pages,
@@ -131,11 +145,33 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
         ));
       },
       (addedPrice) {
+        // Prepend to my prices list
         final updatedMyPrices = [addedPrice, ...state.myPrices];
+
+        // If currently viewing the same district, prepend to that list too
+        final updatedPrices =
+            state.selectedDistrict == addedPrice.district
+                ? [addedPrice, ...state.prices]
+                : state.prices;
+
+        // Bump the count on the district card so UI updates immediately
+        final updatedDistricts = state.districts.map((d) {
+          if (d.district == addedPrice.district) {
+            return DistrictWithPricesResponse(
+              district: d.district,
+              priceCount: d.priceCount + 1,
+              lastUpdated: DateTime.now(),
+            );
+          }
+          return d;
+        }).toList();
+
         emit(state.copyWith(
           status: PriceManagementStatus.success,
           lastAddedPrice: addedPrice,
           myPrices: updatedMyPrices,
+          prices: updatedPrices,
+          districts: updatedDistricts,
         ));
       },
     );
@@ -189,9 +225,11 @@ class PriceManagementCubit extends Cubit<PriceManagementState> {
       },
       (_) {
         final updatedMyPrices = state.myPrices.where((p) => p.id != id).toList();
+        final updatedPrices = state.prices.where((p) => p.id != id).toList();
         emit(state.copyWith(
           status: PriceManagementStatus.success,
           myPrices: updatedMyPrices,
+          prices: updatedPrices,
         ));
       },
     );

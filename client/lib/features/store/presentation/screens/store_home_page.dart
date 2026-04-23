@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
 import '../../../../injection_container.dart' as di;
 import '../cubit/store_cubit.dart';
@@ -54,26 +55,11 @@ class _StoreHomeBody extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      backgroundColor: AppColors.primary,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'සහල් වෙළෙඳපොළ',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            'Rice Marketplace',
-            style: TextStyle(color: Colors.white70, fontSize: 11),
-          ),
-        ],
-      ),
+      onRefresh: () => context.read<StoreCubit>().loadStats(),
+      title: 'සහල් වෙළෙඳපොළ',
+      subtitle: 'Rice Marketplace',
     );
   }
 

@@ -59,6 +59,7 @@ class _MillingScreenState extends State<MillingScreen>
     return AppPageScaffold(
       title: SiStrings.milling,
       subtitle: SiStrings.isSinhala ? 'Milling' : 'වී කෙටීම',
+      onRefresh: () => context.read<MillingCubit>().loadAvailablePaddy(),
       actions: [
         IconButton(
           icon: const Icon(Icons.refresh),
@@ -69,7 +70,6 @@ class _MillingScreenState extends State<MillingScreen>
           tooltip: 'නැවත මුල සිට',
         ),
       ],
-      bottomBar: AppSubBottomBar(),
       body: BlocConsumer<MillingCubit, MillingState>(
         listener: (context, state) {
           try {

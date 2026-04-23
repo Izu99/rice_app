@@ -21,3 +21,8 @@
 
 # AndroidX Credentials
 -keep class androidx.credentials.** { *; }
+
+# Play Core (referenced by Flutter deferred components — not used in this app)
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.**

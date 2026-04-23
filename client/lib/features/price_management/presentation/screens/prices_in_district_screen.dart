@@ -6,9 +6,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
-import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/cubit/auth_state.dart';
 import '../cubit/price_management_cubit.dart';
 import '../cubit/price_management_state.dart';
 import '../widgets/price_list_item.dart';
@@ -47,50 +48,116 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
       },
       child: BlocBuilder<PriceManagementCubit, PriceManagementState>(
         builder: (context, state) {
-          return AppPageScaffold(
-            title: widget.district,
-            subtitle: 'Market Prices',
-            onBack: () => context.pop(),
-            bottomBar: _buildBottomStatusBar(state.prices.length),
-            body: LoadingOverlay(
-              isLoading: state.status == PriceManagementStatus.loadingPrices,
-              message: 'Loading market data...',
-              child: Column(
-                children: [
-                  // Info Summary Strip
-                  if (state.prices.isNotEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                      color: AppColors.primary.withOpacity(0.05),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline_rounded,
-                              size: 16,
-                              color: AppColors.primary.withOpacity(0.7)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Displaying ${state.prices.length} price listings in ${widget.district}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary.withOpacity(0.8),
-                            ),
+          return Scaffold(
+            backgroundColor: const Color(0xFFF4F6FA),
+            body: CustomScrollView(
+              slivers: [
+                HSliverAppBar(
+                  title: widget.district,
+                  subtitle: 'Market Prices',
+                  onRefresh: () => context
+                      .read<PriceManagementCubit>()
+                      .loadPricesByDistrict(widget.district),
+                ),
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      if (state.isRefreshing ||
+                          (state.status ==
+                                  PriceManagementStatus.loadingPrices &&
+                              state.prices.isNotEmpty))
+                        const LinearProgressIndicator(minHeight: 3),
+                      // Info Summary Strip
+                      if (state.prices.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          color: AppColors.primary.withValues(alpha: 0.05),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: AppColors.primary.withValues(alpha: 0.7)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Displaying ${state.prices.length} price listings in ${widget.district}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                    ],
+                  ),
+                ),
+                if (state.status == PriceManagementStatus.loadingPrices &&
+                    state.prices.isEmpty)
+                  const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()))
+                else if (state.prices.isEmpty)
+                  SliverFillRemaining(child: _buildEmptyState())
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final price = state.prices[index];
+                          return BlocBuilder<AuthCubit, AuthState>(
+                            builder: (context, authState) {
+                              final companyId = authState.user?.companyId;
+                              final isOwn =
+                                  companyId != null && price.companyId == companyId;
+
+                              if (isOwn) {
+                                return Dismissible(
+                                  key: Key(price.id),
+                                  direction: DismissDirection.endToStart,
+                                  background: Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade400,
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    alignment: Alignment.centerRight,
+                                    padding: const EdgeInsets.only(right: 24),
+                                    child: const Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.delete_rounded,
+                                            color: Colors.white, size: 28),
+                                        SizedBox(height: 4),
+                                        Text('Remove',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600)),
+                                      ],
+                                    ),
+                                  ),
+                                  confirmDismiss: (_) => _confirmRemove(context),
+                                  onDismissed: (_) => context
+                                      .read<PriceManagementCubit>()
+                                      .deletePrice(price.id),
+                                  child: PriceListItem(price: price),
+                                );
+                              }
+
+                              return PriceListItem(price: price);
+                            },
+                          );
+                        },
+                        childCount: state.prices.length,
                       ),
                     ),
-
-                  Expanded(
-                    child: state.prices.isEmpty &&
-                            state.status != PriceManagementStatus.loadingPrices
-                        ? _buildEmptyState()
-                        : _buildPricesList(context, state),
                   ),
-                ],
-              ),
+              ],
             ),
+            bottomNavigationBar: _buildBottomStatusBar(state.prices.length),
           );
         },
       ),
@@ -188,6 +255,8 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
   }
 
   Widget _buildPricesList(BuildContext context, PriceManagementState state) {
+    final companyId = context.read<AuthCubit>().state.company?.id;
+
     return RefreshIndicator(
       onRefresh: () => context
           .read<PriceManagementCubit>()
@@ -201,9 +270,64 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
         itemCount: state.prices.length,
         itemBuilder: (context, index) {
           final price = state.prices[index];
+          final isOwn =
+              companyId != null && price.companyId == companyId;
+
+          if (isOwn) {
+            return Dismissible(
+              key: Key(price.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade400,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 24),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.delete_rounded, color: Colors.white, size: 28),
+                    SizedBox(height: 4),
+                    Text('Remove',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+              confirmDismiss: (_) => _confirmRemove(context),
+              onDismissed: (_) =>
+                  context.read<PriceManagementCubit>().deletePrice(price.id),
+              child: PriceListItem(price: price),
+            );
+          }
+
           return PriceListItem(price: price);
         },
       ),
     );
   }
+
+  Future<bool?> _confirmRemove(BuildContext context) => showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Remove Price?'),
+          content: const Text(
+              'This will remove your price listing. Other users will no longer see it. You can add a new updated price anytime.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
 }

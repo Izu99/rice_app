@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
@@ -33,6 +34,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
 
   static const List<String> _paddyVarieties = [
     'සම්බා',
+    'කකුළු',
     'නාඩු',
     'කීරි සම්බා',
     'සුවඳැල්',
@@ -96,7 +98,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
             state.lastAddedPrice != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
+              content:
+                  Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
               backgroundColor: AppColors.success,
             ),
           );
@@ -110,14 +113,12 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
           );
         }
       },
-      child: AppPageScaffold(
-        title: 'Add Price',
-        subtitle: 'මිල ඇතුළත් කරන්න',
-        onBack: () => context.pop(),
-        bottomBar: AppSubBottomBar(
-          centerLabel: 'Add Price',
-          centerIcon: Icons.add_circle_rounded,
-          onCenter: _handleAddPrice,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF4F6FA),
+        appBar: HAppBar(
+          title: 'Add Price',
+          subtitle: 'මිල ඇතුළත් කරන්න',
+          onBack: () => context.pop(),
         ),
         body: BlocBuilder<PriceManagementCubit, PriceManagementState>(
           builder: (context, state) {
@@ -312,7 +313,27 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                         maxLength: 200,
                         showCounter: true,
                       ),
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _handleAddPrice,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: const Text(
+                            'මිල සුරකින්න',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),

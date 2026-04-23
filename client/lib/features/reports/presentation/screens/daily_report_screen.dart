@@ -222,6 +222,7 @@ class _DailyReportScreenState extends State<DailyReportScreen> {
       child: AppPageScaffold(
         title: 'Daily Report',
         subtitle: 'දෛනික වාර්තාව',
+        onRefresh: _loadData,
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today_rounded),

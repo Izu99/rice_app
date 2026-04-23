@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/app_page_scaffold.dart';
+import '../../../../core/shared_widgets/app_fab.dart';
 import '../../../../core/shared_widgets/empty_state_widget.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/constants/enums.dart';
@@ -50,7 +51,7 @@ class _SellCustomerSelectionScreenState
     return AppPageScaffold(
       title: SiStrings.selectCustomer,
       subtitle: SiStrings.isSinhala ? 'Select Buyer' : 'ගනුදෙනුකරු තෝරන්න',
-      bottomBar: AppSubBottomBar(),
+      onRefresh: () => context.read<CustomersCubit>().loadCustomers(),
       body: Column(
         children: [
           // Light info banner
@@ -139,11 +140,9 @@ class _SellCustomerSelectionScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: AppFab(
+        label: SiStrings.addNewCustomer,
         onPressed: () => context.pushNamed('sellAddCustomer'),
-        backgroundColor: AppColors.info,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
       ),
     );
   }

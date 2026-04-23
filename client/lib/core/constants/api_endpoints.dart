@@ -24,7 +24,7 @@ class ApiEndpoints {
   // For production, we use the Live VPS IP.
   // For local development, we use devBaseUrl.
   // Note: For Android emulator, use 'http://10.0.2.2:5000/api'
-  static const String baseUrl = devBaseUrl;
+  static const String baseUrl = liveBaseUrl;
 
   // ==================== AUTH ====================
 
