@@ -32,13 +32,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: AppPageScaffold(
             title: SiStrings.stockReport,
             subtitle: SiStrings.isSinhala ? 'Stock Report' : 'තොග වාර්තාව',
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: () => context.read<ReportsCubit>().loadStockReport(),
-              ),
-            ],
-            bottomBar: AppSubBottomBar(),
+            onRefresh: () => context.read<ReportsCubit>().loadStockReport(),
             body: state.stockReport == null
                 ? _buildEmptyState()
                 : _buildReportContent(state.stockReport!),

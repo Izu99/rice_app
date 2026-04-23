@@ -71,6 +71,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return AppPageScaffold(
       title: SiStrings.transactionDetails,
       subtitle: _transaction?.transactionNumber,
+      onRefresh: _loadTransaction,
       actions: [
         if (_transaction != null)
           IconButton(

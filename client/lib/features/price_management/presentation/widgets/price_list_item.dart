@@ -22,31 +22,31 @@ class PriceListItem extends StatelessWidget {
         isPaddy ? const Color(0xFF4CAF50) : const Color(0xFF2196F3);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: typeColor.withOpacity(0.1), width: 1),
+        border: Border.all(color: typeColor.withOpacity(0.08), width: 1),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
@@ -57,16 +57,16 @@ class PriceListItem extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: typeColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   isPaddy ? 'PADDY' : 'RICE',
                                   style: TextStyle(
                                     color: typeColor,
-                                    fontSize: 10,
+                                    fontSize: 9,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 0.5,
                                   ),
@@ -74,20 +74,20 @@ class PriceListItem extends StatelessWidget {
                               ),
                               if (price.variety != null &&
                                   price.variety!.isNotEmpty) ...[
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 4),
                                 Flexible(
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
+                                        horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFF3F4F6),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       price.variety!.toUpperCase(),
                                       style: TextStyle(
                                         color: Colors.grey[700],
-                                        fontSize: 10,
+                                        fontSize: 9,
                                         fontWeight: FontWeight.w700,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -98,12 +98,12 @@ class PriceListItem extends StatelessWidget {
                               ],
                             ],
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 6),
                           Text(
                             price.companyName,
                             style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
                               color: Color(0xFF1A1A1A),
                             ),
                             maxLines: 1,
@@ -113,48 +113,47 @@ class PriceListItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 115),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            'Rs.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              price.priceDisplay,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: typeColor,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: 'Rs. ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey,
+                                ),
                               ),
-                            ),
+                              TextSpan(
+                                text: price.priceDisplay,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: typeColor,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+                const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Icon(Icons.access_time_rounded,
-                        size: 14, color: Colors.grey[400]),
-                    const SizedBox(width: 6),
+                        size: 12, color: Colors.grey[400]),
+                    const SizedBox(width: 4),
                     Text(
-                      'Added ${_formatRelativeTime(price.createdAt)}',
+                      _formatRelativeTime(price.createdAt),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: Colors.grey[500],
                         fontWeight: FontWeight.w500,
                       ),
@@ -165,7 +164,7 @@ class PriceListItem extends StatelessWidget {
                         child: Text(
                           price.notes!,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: Colors.grey[400],
                             fontStyle: FontStyle.italic,
                           ),
@@ -178,7 +177,7 @@ class PriceListItem extends StatelessWidget {
                         price.qualityGrade![0].toUpperCase() +
                             price.qualityGrade!.substring(1),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Colors.grey[400],
                           fontStyle: FontStyle.italic,
                         ),

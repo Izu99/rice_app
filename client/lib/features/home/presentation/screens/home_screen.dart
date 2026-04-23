@@ -8,6 +8,7 @@ import '../../../../injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
 import '../../../buy/presentation/cubit/buy_cubit.dart';
@@ -223,112 +224,85 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ─── Sticky App Bar ──────────────────────────────────────────────────────
   Widget _buildStickyHeader(
       BuildContext context, DashboardState state, ProfileState profileState) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
+      title: SiStrings.dashboard,
+      subtitle: 'Rice Mill Management',
+      onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
+      showBack: false,
       leading: Builder(
         builder: (ctx) => IconButton(
-          icon: const Icon(Icons.menu_rounded,
-              color: AppColors.textPrimary, size: 26),
+          icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 26),
           onPressed: () => Scaffold.of(ctx).openDrawer(),
         ),
       ),
-      titleSpacing: 0,
-      title: null,
       actions: [
         // Language toggle
-        BlocBuilder<ProfileCubit, ProfileState>(
-          builder: (ctx, ps) {
-            final isSi = ps.language == 'si';
-            return GestureDetector(
-              onTap: () => context
-                  .read<ProfileCubit>()
-                  .changeLanguage(isSi ? 'en' : 'si'),
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 2),
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primary),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  isSi ? 'EN' : 'සිං',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        _buildLanguageToggle(context, profileState),
         IconButton(
-          icon: const Icon(Icons.notifications_outlined,
-              color: AppColors.textPrimary, size: 22),
+          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           onPressed: () {},
-          padding: const EdgeInsets.symmetric(horizontal: 4),
         ),
         // Profile avatar
-        BlocBuilder<AuthCubit, AuthState>(
-          builder: (ctx, authState) {
-            return GestureDetector(
-              onTap: () => context.push('/profile'),
-              child: Container(
-                margin: const EdgeInsets.only(right: 10, top: 10, bottom: 10),
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primaryLight, width: 2),
-                ),
-                child: Center(
-                  child: Text(
-                    authState.user?.initials ?? 'U',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        _buildProfileAvatar(context),
       ],
-      bottom: _showSearch
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: SiStrings.searchFeatures,
-                    prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                    filled: true,
-                    fillColor: const Color(0xFFF4F6FA),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  ),
-                  onChanged: (_) => setState(() {}),
+      flexibleSpace: null, // Reset default gradient if needed
+    );
+  }
+
+  Widget _buildLanguageToggle(BuildContext context, ProfileState ps) {
+    final isSi = ps.language == 'si';
+    return GestureDetector(
+      onTap: () =>
+          context.read<ProfileCubit>().changeLanguage(isSi ? 'en' : 'si'),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.white70),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          isSi ? 'EN' : 'සිං',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 11,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar(BuildContext context) {
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (ctx, authState) {
+        return GestureDetector(
+          onTap: () => context.push('/profile'),
+          child: Container(
+            margin: const EdgeInsets.only(right: 12, top: 10, bottom: 10),
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white30),
+            ),
+            child: Center(
+              child: Text(
+                authState.user?.initials ?? 'U',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
                 ),
               ),
-            )
-          : null,
+            ),
+          ),
+        );
+      },
     );
   }
 

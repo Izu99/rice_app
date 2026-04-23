@@ -369,8 +369,9 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
     }
 
     return HAppBar(
-      title: 'Buy Paddy',
-      subtitle: title,
+      title: title,
+      subtitle: 'Buy Paddy',
+      onRefresh: () => context.read<BuyCubit>().initialize(),
       onBack: () {
         if (state.status == BuyStatus.reviewing) {
           context.read<BuyCubit>().backToAddingItems();

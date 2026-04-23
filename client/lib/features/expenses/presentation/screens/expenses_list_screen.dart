@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
+import '../../../../core/shared_widgets/app_fab.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/constants/si_strings.dart';
@@ -36,6 +37,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         title: SiStrings.expenses,
         subtitle: SiStrings.operationalExpenses,
         showBack: false,
+        onRefresh: () => context.read<ExpensesCubit>().loadExpenses(),
       ),
       body: BlocBuilder<ExpensesCubit, ExpensesState>(
         builder: (context, state) {
@@ -63,12 +65,9 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: AppFab(
+        label: SiStrings.addExpense,
         onPressed: () => context.pushNamed('expenseAdd'),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text(SiStrings.addExpense,
-            style: const TextStyle(color: Colors.white)),
       ),
     );
   }

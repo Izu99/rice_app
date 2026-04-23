@@ -30,6 +30,8 @@ class PriceManagementState extends Equatable {
   final int totalPages;
   final int totalPrices;
   final String? selectedDistrict;
+  // True when silently refreshing in background while showing existing data
+  final bool isRefreshing;
 
   const PriceManagementState({
     this.status = PriceManagementStatus.initial,
@@ -42,6 +44,7 @@ class PriceManagementState extends Equatable {
     this.totalPages = 1,
     this.totalPrices = 0,
     this.selectedDistrict,
+    this.isRefreshing = false,
   });
 
   PriceManagementState copyWith({
@@ -55,6 +58,7 @@ class PriceManagementState extends Equatable {
     int? totalPages,
     int? totalPrices,
     String? selectedDistrict,
+    bool? isRefreshing,
   }) {
     return PriceManagementState(
       status: status ?? this.status,
@@ -67,6 +71,7 @@ class PriceManagementState extends Equatable {
       totalPages: totalPages ?? this.totalPages,
       totalPrices: totalPrices ?? this.totalPrices,
       selectedDistrict: selectedDistrict ?? this.selectedDistrict,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
 
@@ -82,5 +87,6 @@ class PriceManagementState extends Equatable {
         totalPages,
         totalPrices,
         selectedDistrict,
+        isRefreshing,
       ];
 }

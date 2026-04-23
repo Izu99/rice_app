@@ -7,6 +7,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/constants/districts.dart';
 import '../../../../data/models/company_model.dart';
 import '../cubit/admin_cubit.dart';
@@ -80,17 +81,9 @@ class _AddCompanyScreenState extends State<AddCompanyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
-      appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Company' : 'Add New Company'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        scrolledUnderElevation: 2,
-        shadowColor: Colors.black12,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+      appBar: HAppBar(
+        title: _isEditMode ? 'Edit Company' : 'Add New Company',
+        subtitle: _isEditMode ? 'Modify company details' : 'Register a new rice mill',
       ),
       body: BlocConsumer<AdminCubit, AdminState>(
         listener: (context, state) {

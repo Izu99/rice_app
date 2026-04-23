@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
@@ -98,55 +99,17 @@ class _DetailedDashboardScreenState extends State<DetailedDashboardScreen>
   }
 
   Widget _buildSliverAppBar(BuildContext context, bool isDesktop) {
-    return SliverAppBar(
-      expandedHeight: isDesktop ? 120 : 100,
-      floating: true,
+    return HSliverAppBar(
       pinned: true,
-      backgroundColor: AppColors.primary,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/home');
-          }
-        },
-      ),
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          SiStrings.analytics,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 22,
-            color: Colors.white,
-          ),
-        ),
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary,
-                AppColors.primaryDark,
-              ],
-            ),
-          ),
-        ),
-      ),
+      onRefresh: () => context.read<DashboardCubit>().refreshDashboard(),
+      title: SiStrings.analytics,
+      subtitle: 'System performance & metrics',
       actions: [
         IconButton(
-          icon: const Icon(Icons.filter_list_rounded),
+          icon: const Icon(Icons.filter_list_rounded, color: Colors.white),
           onPressed: () {},
           tooltip: SiStrings.filter,
         ),
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded),
-          onPressed: () => context.read<DashboardCubit>().refreshDashboard(),
-          tooltip: SiStrings.refresh,
-        ),
-        const SizedBox(width: 8),
       ],
     );
   }

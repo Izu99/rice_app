@@ -6,6 +6,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../auth/presentation/cubit/auth_state.dart';
@@ -147,45 +148,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     );
   }
 
-  // --- Sticky App Bar ---
   Widget _buildStickyHeader(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: const Icon(Icons.admin_panel_settings,
-          color: AppColors.textPrimary, size: 26),
-      title: const Text(
-        'Super Admin',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
+      showBack: false,
+      onRefresh: () => context.read<AdminCubit>().loadDashboard(),
+      title: 'Super Admin',
+      subtitle: 'System management dashboard',
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined,
-              color: AppColors.textPrimary, size: 22),
+          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           onPressed: () {},
         ),
-        // Profile avatar (simplified for admin)
         BlocBuilder<AuthCubit, AuthState>(
           builder: (ctx, authState) {
             return GestureDetector(
               onTap: () => _showLogoutDialog(),
               child: Container(
-                margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
-                width: 34,
-                height: 34,
+                margin: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: AppColors.adminPrimary,
+                  color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                      color: AppColors.adminPrimary.withOpacity(0.2), width: 2),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
                 ),
                 child: Center(
                   child: Text(
@@ -193,7 +179,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 11,
                     ),
                   ),
                 ),

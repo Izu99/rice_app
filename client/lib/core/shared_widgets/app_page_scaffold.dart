@@ -19,6 +19,7 @@ class AppPageScaffold extends StatefulWidget {
   final Widget body;
   final List<Widget>? actions;
   final VoidCallback? onBack;
+  final VoidCallback? onRefresh;
   final Widget? bottomBar;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
@@ -32,6 +33,7 @@ class AppPageScaffold extends StatefulWidget {
     required this.body,
     this.subtitle,
     this.actions,
+    this.onRefresh,
     this.onBack,
     this.bottomBar,
     this.floatingActionButton,
@@ -80,6 +82,7 @@ class _AppPageScaffoldState extends State<AppPageScaffold>
       appBar: HAppBar(
         title: widget.title,
         subtitle: widget.subtitle,
+        onRefresh: widget.onRefresh,
         actions: widget.actions,
         onBack: widget.onBack,
         bottom: widget.appBarBottom,

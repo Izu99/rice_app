@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../cubit/admin_cubit.dart';
 import '../cubit/admin_state.dart';
 
@@ -107,32 +108,11 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   }
 
   Widget _buildStickyHeader(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      floating: false,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      scrolledUnderElevation: 2,
-      shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-        onPressed: () => context.pop(),
-      ),
-      title: const Text(
-        'Admin Reports',
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh, color: Color(0xFF1C1C2E)),
-          onPressed: () => context.read<AdminCubit>().loadDashboard(),
-          tooltip: 'Refresh',
-        ),
-      ],
+      onRefresh: () => context.read<AdminCubit>().loadDashboard(),
+      title: 'Admin Reports',
+      subtitle: 'System insights & metrics',
     );
   }
 

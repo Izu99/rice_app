@@ -99,6 +99,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
           appBar: HAppBar(
             title: SiStrings.customers,
             subtitle: '${SiStrings.total} ${state.totalCustomers}',
+            onRefresh: () => context.read<CustomersCubit>().loadCustomers(),
             actions: [
               IconButton(
                 icon: const Icon(Icons.person_add_rounded, color: Colors.white),

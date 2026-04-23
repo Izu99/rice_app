@@ -109,35 +109,15 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
     );
   }
 
+import '../../../../core/shared_widgets/h_app_bar.dart';
+
+// ... (in _SellWrapperScreenState)
+
   PreferredSizeWidget _buildAppBar(BuildContext context, SellState state) {
-    return AppBar(
-      backgroundColor: AppColors.primary,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => _handleBackPress(context, state),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            SiStrings.sell,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (state.selectedCustomer != null)
-            Text(
-              state.selectedCustomer!.name,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-            ),
-        ],
-      ),
+    return HAppBar(
+      title: SiStrings.sell,
+      subtitle: state.selectedCustomer?.name ?? 'Sell Rice',
+      onBack: () => _handleBackPress(context, state),
       actions: [
         // Sync status indicator
         SyncStatusIndicator(
@@ -148,33 +128,9 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
 
         // Cart badge
         if (state.sellItems.isNotEmpty)
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                onPressed: () => _showCartSummary(context, state),
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.accent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${state.sellItems.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          _CartBadge(
+            count: state.sellItems.length,
+            onTap: () => _showCartSummary(context, state),
           ),
 
         // More options
@@ -375,6 +331,45 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CartBadge extends StatelessWidget {
+  final int count;
+  final VoidCallback onTap;
+
+  const _CartBadge({required this.count, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.shopping_cart, color: Colors.white),
+          onPressed: onTap,
+        ),
+        Positioned(
+          right: 8,
+          top: 8,
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
+              color: AppColors.accent,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

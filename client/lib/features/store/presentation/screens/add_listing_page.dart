@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
 import '../cubit/store_cubit.dart';
 import '../cubit/store_state.dart';
@@ -9,12 +10,16 @@ import '../cubit/store_state.dart';
 class AddListingPage extends StatefulWidget {
   final StoreCategory? preselectedCategory;
   final Color categoryColor;
+  final StoreListingEntity? existingListing;
 
   const AddListingPage({
     super.key,
     this.preselectedCategory,
     this.categoryColor = AppColors.primary,
+    this.existingListing,
   });
+
+  bool get isEditing => existingListing != null;
 
   @override
   State<AddListingPage> createState() => _AddListingPageState();
@@ -48,7 +53,21 @@ class _AddListingPageState extends State<AddListingPage> {
   @override
   void initState() {
     super.initState();
-    _selectedCategory = widget.preselectedCategory;
+    final existing = widget.existingListing;
+    if (existing != null) {
+      // Edit mode — pre-fill all fields
+      _selectedCategory = existing.category;
+      _varietyCtrl.text = existing.variety;
+      _quantityCtrl.text =
+          existing.quantityKg > 0 ? existing.quantityKg.toStringAsFixed(0) : '';
+      _priceCtrl.text =
+          existing.pricePerKg > 0 ? existing.pricePerKg.toStringAsFixed(0) : '';
+      _descriptionCtrl.text = existing.description;
+      _phoneCtrl.text = existing.contactPhone;
+      _selectedDistrict = existing.district;
+    } else {
+      _selectedCategory = widget.preselectedCategory;
+    }
   }
 
   @override
@@ -78,27 +97,46 @@ class _AddListingPageState extends State<AddListingPage> {
     }
 
     final cubit = context.read<StoreCubit>();
-    final success = await cubit.addListing(
-      category: _selectedCategory!,
-      variety: _varietyCtrl.text.trim(),
-      district: _selectedDistrict!,
-      contactPhone: _phoneCtrl.text.trim(),
-      quantityKg: double.tryParse(_quantityCtrl.text) ?? 0,
-      pricePerKg: double.tryParse(_priceCtrl.text) ?? 0,
-      description: _descriptionCtrl.text.trim(),
-    );
+    final bool success;
+
+    if (widget.isEditing) {
+      success = await cubit.updateListing(
+        widget.existingListing!.id,
+        variety: _varietyCtrl.text.trim(),
+        district: _selectedDistrict,
+        contactPhone: _phoneCtrl.text.trim(),
+        quantityKg: double.tryParse(_quantityCtrl.text) ?? 0,
+        pricePerKg: double.tryParse(_priceCtrl.text) ?? 0,
+        description: _descriptionCtrl.text.trim(),
+      );
+    } else {
+      success = await cubit.addListing(
+        category: _selectedCategory!,
+        variety: _varietyCtrl.text.trim(),
+        district: _selectedDistrict!,
+        contactPhone: _phoneCtrl.text.trim(),
+        quantityKg: double.tryParse(_quantityCtrl.text) ?? 0,
+        pricePerKg: double.tryParse(_priceCtrl.text) ?? 0,
+        description: _descriptionCtrl.text.trim(),
+      );
+    }
 
     if (!mounted) return;
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Listing added successfully!'), backgroundColor: Color(0xFF2E7D32)),
+        SnackBar(
+          content: Text(widget.isEditing ? 'Listing updated!' : 'Listing added successfully!'),
+          backgroundColor: const Color(0xFF2E7D32),
+        ),
       );
       Navigator.of(context).pop(true);
     } else {
-      final state = cubit.state;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.errorMessage ?? 'Failed to add listing'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(cubit.state.errorMessage ?? (widget.isEditing ? 'Failed to update' : 'Failed to add listing')),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -107,24 +145,14 @@ class _AddListingPageState extends State<AddListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
-      appBar: AppBar(
-        backgroundColor: _accentColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('ලැයිස්තු කරන්න', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-            Text('Add New Listing', style: TextStyle(color: Colors.white70, fontSize: 11)),
-          ],
-        ),
-        elevation: 0,
+      appBar: HAppBar(
+        title: widget.isEditing ? 'සංස්කරණය කරන්න' : 'ලැයිස්තු කරන්න',
+        subtitle: widget.isEditing ? 'Edit Listing' : 'Add New Listing',
       ),
       body: BlocBuilder<StoreCubit, StoreState>(
         builder: (context, state) {
-          final isSaving = state.status == StoreStatus.adding;
+          final isSaving = state.status == StoreStatus.adding ||
+              state.status == StoreStatus.updating;
           return Form(
             key: _formKey,
             child: ListView(
@@ -132,7 +160,12 @@ class _AddListingPageState extends State<AddListingPage> {
               children: [
                 _buildSectionLabel('Category / කාණ්ඩය'),
                 const SizedBox(height: 8),
-                _buildCategorySelector(),
+                // Category is locked in edit mode — changing it would require
+                // a different API and breaks stock type consistency
+                if (widget.isEditing)
+                  _buildLockedCategory()
+                else
+                  _buildCategorySelector(),
                 const SizedBox(height: 20),
                 _buildSectionLabel('Variety / ප්‍රභේදය'),
                 const SizedBox(height: 8),
@@ -220,7 +253,10 @@ class _AddListingPageState extends State<AddListingPage> {
                     ),
                     child: isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Post Listing', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        : Text(
+                            widget.isEditing ? 'Update Listing' : 'Post Listing',
+                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -234,6 +270,34 @@ class _AddListingPageState extends State<AddListingPage> {
 
   Widget _buildSectionLabel(String text) {
     return Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black54));
+  }
+
+  Widget _buildLockedCategory() {
+    if (_selectedCategory == null) return const SizedBox.shrink();
+    final opt = _categories.firstWhere((c) => c.category == _selectedCategory);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: opt.color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: opt.color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(opt.icon, color: opt.color, size: 18),
+          const SizedBox(width: 8),
+          Text(opt.label,
+              style: TextStyle(
+                  color: opt.color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12)),
+          const SizedBox(width: 8),
+          Text('(cannot change)',
+              style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+        ],
+      ),
+    );
   }
 
   Widget _buildCategorySelector() {

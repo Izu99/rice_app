@@ -156,54 +156,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildAppBar(CustomerEntity customer) {
-    return SliverAppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded,
-            color: Colors.white, size: 20),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: Row(
-        children: [
-          CircleAvatar(
-            radius: 17,
-            backgroundColor: Colors.white.withOpacity(0.18),
-            child: Text(
-              customer.initials,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  customer.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  customer.customerType.sinhalaName,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return HSliverAppBar(
+      title: customer.name,
+      subtitle: customer.customerType.sinhalaName,
+      onRefresh: () =>
+          context.read<CustomersCubit>().loadCustomerDetail(customer.id),
       actions: [
         IconButton(
           icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
@@ -216,13 +173,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           onPressed: () => _deleteCustomer(customer),
           tooltip: 'මකා දමන්න',
         ),
-        const SizedBox(width: 4),
       ],
-      pinned: true,
-      elevation: 2,
-      backgroundColor: AppColors.primary,
-      surfaceTintColor: Colors.transparent,
-      iconTheme: const IconThemeData(color: Colors.white),
     );
   }
 

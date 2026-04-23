@@ -63,6 +63,7 @@ class _StockScreenState extends State<StockScreen> with WidgetsBindingObserver {
             title: SiStrings.liveStock,
             subtitle:
                 SiStrings.isSinhala ? 'Stock Overview' : 'තොග දළ විශ්ලේෂණය',
+            onRefresh: () => context.read<StockCubit>().refreshStock(),
             actions: [
               SyncStatusIndicator(
                 status: state.isSynced

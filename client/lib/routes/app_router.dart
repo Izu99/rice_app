@@ -149,6 +149,102 @@ class AppRouter {
                   ),
                 ],
               ),
+              // ==================== Price Management Routes ====================
+              GoRoute(
+                path: '/prices',
+                name: 'prices',
+                builder: (context, state) => const ViewPricesByDistrictScreen(),
+              ),
+              GoRoute(
+                path: '/prices/add',
+                name: 'addPrice',
+                builder: (context, state) => const AddPriceScreen(),
+              ),
+              GoRoute(
+                path: '/prices/district/:district',
+                name: 'pricesInDistrict',
+                builder: (context, state) {
+                  final district = state.pathParameters['district'] ?? '';
+                  return PricesInDistrictScreen(district: district);
+                },
+              ),
+
+              // ==================== Customers Routes ====================
+              GoRoute(
+                path: RouteNames.customers,
+                name: 'customers',
+                builder: (context, state) => const CustomersListScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'customerAdd',
+                    builder: (context, state) => const CustomerAddEditScreen(),
+                  ),
+                  GoRoute(
+                    path: 'detail/:id',
+                    name: 'customerDetail',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return CustomerDetailScreen(customerId: id);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'customerEdit',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return CustomerAddEditScreen(customerId: id);
+                    },
+                  ),
+                ],
+              ),
+
+              // ==================== Settings Route ====================
+              GoRoute(
+                path: RouteNames.settings,
+                name: 'settings',
+                builder: (context, state) => const SettingsScreen(),
+              ),
+
+              // ==================== Buy Routes ====================
+              GoRoute(
+                path: RouteNames.buy,
+                name: 'buy',
+                builder: (context, state) => const BuyCustomerSelectionScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'process',
+                    name: 'buyProcess',
+                    builder: (context, state) => const BuyScreen(),
+                  ),
+                  GoRoute(
+                    path: 'add-customer',
+                    name: 'buyAddCustomer',
+                    builder: (context, state) =>
+                        const CustomerAddEditScreen(initialType: CustomerType.both),
+                  ),
+                ],
+              ),
+
+              // ==================== Sell Routes ====================
+              GoRoute(
+                path: RouteNames.sell,
+                name: 'sell',
+                builder: (context, state) => const SellCustomerSelectionScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'process',
+                    name: 'sellProcess',
+                    builder: (context, state) => const SellScreen(),
+                  ),
+                  GoRoute(
+                    path: 'add-customer',
+                    name: 'sellAddCustomer',
+                    builder: (context, state) =>
+                        const CustomerAddEditScreen(initialType: CustomerType.both),
+                  ),
+                ],
+              ),
             ],
           ),
 
@@ -245,68 +341,6 @@ class AppRouter {
         ],
       ),
 
-      // ==================== Buy Routes (Outside Shell) ====================
-      GoRoute(
-        path: RouteNames.buy,
-        name: 'buy',
-        builder: (context, state) => const BuyCustomerSelectionScreen(),
-        routes: [
-          GoRoute(
-            path: 'process',
-            name: 'buyProcess',
-            builder: (context, state) => const BuyScreen(),
-          ),
-          GoRoute(
-            path: 'add-customer',
-            name: 'buyAddCustomer',
-            builder: (context, state) =>
-                const CustomerAddEditScreen(initialType: CustomerType.both),
-          ),
-        ],
-      ),
-
-      // Buy Receipt (Full Screen)
-      GoRoute(
-        path: '${RouteNames.buyReceipt}/:id',
-        name: 'buyReceipt',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return BuyReceiptScreen(transactionId: id);
-        },
-      ),
-
-      // Transaction Detail (Full Screen)
-      GoRoute(
-        path: '/transactions/:id',
-        name: 'transactionDetail',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return TransactionDetailScreen(transactionId: id);
-        },
-      ),
-
-      // ==================== Sell Routes ====================
-      GoRoute(
-        path: RouteNames.sell,
-        name: 'sell',
-        builder: (context, state) => const SellCustomerSelectionScreen(),
-        routes: [
-          GoRoute(
-            path: 'process',
-            name: 'sellProcess',
-            builder: (context, state) => const SellScreen(),
-          ),
-          GoRoute(
-            path: 'add-customer',
-            name: 'sellAddCustomer',
-            builder: (context, state) =>
-                const CustomerAddEditScreen(initialType: CustomerType.both),
-          ),
-        ],
-      ),
-
       // Sell Receipt (Full Screen)
       GoRoute(
         path: '${RouteNames.sellReceipt}/:id',
@@ -316,37 +350,6 @@ class AppRouter {
           final id = state.pathParameters['id']!;
           return SellReceiptScreen(transactionId: id);
         },
-      ),
-
-      // ==================== Customers Routes ====================
-      GoRoute(
-        path: RouteNames.customers,
-        name: 'customers',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const CustomersListScreen(),
-        routes: [
-          GoRoute(
-            path: 'add',
-            name: 'customerAdd',
-            builder: (context, state) => const CustomerAddEditScreen(),
-          ),
-          GoRoute(
-            path: 'detail/:id',
-            name: 'customerDetail',
-            builder: (context, state) {
-              final id = state.pathParameters['id']!;
-              return CustomerDetailScreen(customerId: id);
-            },
-          ),
-          GoRoute(
-            path: 'edit/:id',
-            name: 'customerEdit',
-            builder: (context, state) {
-              final id = state.pathParameters['id']!;
-              return CustomerAddEditScreen(customerId: id);
-            },
-          ),
-        ],
       ),
 
       // ==================== Admin Routes ====================
@@ -411,37 +414,6 @@ class AppRouter {
         parentNavigatorKey: _rootNavigatorKey,
         redirect: (context, state) => adminRedirect(context, state, _authGuard),
         builder: (context, state) => const AdminPriceListScreen(),
-      ),
-
-      // ==================== Settings Route ====================
-      GoRoute(
-        path: RouteNames.settings,
-        name: 'settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
-      ),
-
-      // ==================== Price Management Routes ====================
-      GoRoute(
-        path: '/prices',
-        name: 'prices',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ViewPricesByDistrictScreen(),
-      ),
-      GoRoute(
-        path: '/prices/add',
-        name: 'addPrice',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddPriceScreen(),
-      ),
-      GoRoute(
-        path: '/prices/district/:district',
-        name: 'pricesInDistrict',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final district = state.pathParameters['district'] ?? '';
-          return PricesInDistrictScreen(district: district);
-        },
       ),
     ],
   );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
 
 class ListingDetailPage extends StatelessWidget {
@@ -44,24 +45,10 @@ class ListingDetailPage extends StatelessWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       pinned: true,
-      backgroundColor: color,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.variety,
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(_categoryLabel(item.category), style: const TextStyle(color: Colors.white70, fontSize: 11)),
-        ],
-      ),
+      title: item.variety,
+      subtitle: _categoryLabel(item.category),
     );
   }
 

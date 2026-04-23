@@ -68,6 +68,8 @@ class _ReportsScreenState extends State<ReportsScreen>
               title: SiStrings.reports,
               subtitle: SiStrings.isSinhala ? 'Reports' : 'වාර්තා',
               showBack: false,
+              onRefresh: () =>
+                  context.read<ReportsCubit>().loadDashboardSummary(),
             ),
             body: RefreshIndicator(
               onRefresh: () =>

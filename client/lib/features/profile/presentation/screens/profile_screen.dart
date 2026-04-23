@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../core/constants/districts.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -111,31 +112,17 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildAppBar(ProfileState state) {
-    return SliverAppBar(
-      expandedHeight: 0,
+    return HSliverAppBar(
       pinned: true,
-      backgroundColor: Colors.white,
-      foregroundColor: const Color(0xFF1C1C2E),
-      surfaceTintColor: Colors.transparent,
-      shadowColor: Colors.black12,
-      scrolledUnderElevation: 1,
-      title: Text(
-        SiStrings.profileTitle,
-        style: const TextStyle(
-          color: Color(0xFF1C1C2E),
-          fontWeight: FontWeight.w800,
-          fontSize: 17,
-        ),
-      ),
-      centerTitle: false,
+      showBack: false,
+      onRefresh: () => context.read<ProfileCubit>().loadProfile(),
+      title: SiStrings.profileTitle,
+      subtitle: SiStrings.isSinhala ? 'Account & Settings' : 'ගිණුම සහ සැකසුම්',
       actions: [
         if (state.pendingSyncCount > 0)
           Badge(
             label: Text(state.pendingSyncCount.toString()),
-            child: IconButton(
-              icon: const Icon(Icons.sync, color: Color(0xFF1C1C2E)),
-              onPressed: () {},
-            ),
+            child: const Icon(Icons.sync, color: Colors.white),
           ),
       ],
     );

@@ -1,0 +1,147 @@
+{
+  "error": {
+    "message": "You have exhausted your capacity on this model. Your quota will reset after 11h55m6s.",
+    "stack": "TerminalQuotaError: You have exhausted your capacity on this model. Your quota will reset after 11h55m6s.\n    at classifyGoogleError (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:274494:18)\n    at retryWithBackoff (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:275105:31)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async GeminiChat.makeApiCallAndProcessStream (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:310999:28)\n    at async GeminiChat.streamWithRetries (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:310837:29)\n    at async Turn.run (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:311329:24)\n    at async GeminiClient.processTurn (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:315405:22)\n    at async GeminiClient.sendMessageStream (file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/chunk-IWSCP2GY.js:315518:14)\n    at async file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/interactiveCli-XAEPLVZH.js:43640:24\n    at async file:///home/isurulinux/.nvm/versions/node/v25.5.0/lib/node_modules/@google/gemini-cli/bundle/interactiveCli-XAEPLVZH.js:43815:38"
+  },
+  "context": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "<session_context>\nThis is the Gemini CLI. We are setting up the context for our chat.\nToday's date is Thursday, April 23, 2026 (formatted according to the user's locale).\nMy operating system is: linux\nThe project's temporary directory is: /home/isurulinux/.gemini/tmp/rice-app\n- **Workspace Directories:**\n  - /mnt/c/Users/isuru/Documents/project/company/rice_app\n- **Directory Structure:**\n\nShowing up to 200 items (files + folders). Folders or files indicated with ... contain more items not shown, were ignored, or the display limit (200 items) was reached.\n\n/mnt/c/Users/isuru/Documents/project/company/rice_app/\n├───.claudeignore\n├───.env\n├───.gitignore\n├───CLAUDE.md\n├───QUICK_REFERENCE.md\n├───README.md\n├───.claude/\n│   ├───settings.json\n│   └───settings.local.json\n├───.git/...\n├───.junie/\n│   └───memory/\n│       ├───errors.md\n│       ├───feedback.md\n│       ├───language.json\n│       ├───memory.version\n│       ├───tasks.md\n│       └───backups/\n│           ├───feedback_v1.0.md\n│           └───language_v1.0.json\n├───C:\\Users\\isuru\\AppData\\Local\\Temp/\n│   ├───gemini-client-error-Turn.run-sendMessageStream-2026-04-23T04-33-22-114Z.json\n│   └───node-compile-cache/\n│       └───v25.5.0-x64-392347a2-1000/\n│           ├───00da0e92\n│           ├───01087003\n│           ├───013f9c91\n│           ├───02207635\n│           ├───02f3b5f9\n│           ├───030591b0\n│           ├───0330d19b\n│           ├───0369e45f\n│           ├───03918ea6\n│           ├───04103294\n│           ├───0436afc2\n│           ├───056c64ea\n│           ├───057c3fee\n│           ├───058723aa\n│           ├───0619d569\n│           ├───075a85c9\n│           ├───0788e8c3\n│           ├───07b28486\n│           ├───07e30587\n│           ├───08a5d186\n│           ├───09cab795\n│           ├───0a089a12\n│           ├───0a08b705\n│           ├───0a8240c5\n│           ├───0bc573a4\n│           ├───0c01a9b7\n│           ├───0c5b64a0\n│           ├───0c9ff819\n│           ├───0cb0aa7c\n│           ├───0dbe36d3\n│           ├───0e9e5878\n│           ├───0f2fb3e6\n│           ├───1036f2bf\n│           ├───125929e9\n│           ├───126175d0\n│           ├───143192a2\n│           ├───1443c87a\n│           ├───155396c1\n│           ├───16237cf5\n│           ├───16411f10\n│           ├───16524609\n│           ├───166affe4\n│           ├───177cc06b\n│           ├───182742d5\n│           ├───1911a3e7\n│           ├───1a518808\n│           ├───1ad8baad\n│           ├───1b0765f6\n│           ├───1b15418c\n│           ├───1b2d4377\n│           ├───1b740fb9\n│           ├───1c1a2221\n│           ├───1cff55f8\n│           ├───1d7107e2\n│           ├───1eef53cd\n│           ├───1f755652\n│           ├───2065089c\n│           ├───2089d4f1\n│           ├───216786aa\n│           ├───21a1b61d\n│           ├───2267349f\n│           ├───2273b62b\n│           ├───237d92c1\n│           ├───2442421e\n│           ├───244e5a0d\n│           ├───2470662f\n│           ├───247bad93\n│           ├───24988ee9\n│           ├───24b69962\n│           ├───2534ce29\n│           ├───25740316\n│           ├───26069193\n│           └───260ad9b1\n│           └───...\n├───client/\n│   ├───.claudeignore\n│   ├───.gitignore\n│   ├───.metadata\n│   ├───analysis_options.yaml\n│   ├───analyze_output.txt\n│   ├───APK_BUILD_CHECKLIST.md\n│   ├───build_app.bat\n│   ├───devtools_options.yaml\n│   ├───flutter_launcher_icons.yaml\n│   ├───pubspec.lock\n│   ├───pubspec.yaml\n│   ├───README.md\n│   ├───setup_icons.bat\n│   ├───.claude/\n│   │   └───settings.json\n│   ├───.dart_tool/...\n│   ├───android/\n│   │   ├───.gitignore\n│   │   ├───build.gradle.kts\n│   │   ├───gradle.properties\n│   │   ├───key.properties.template\n│   │   ├───settings.gradle.kts\n│   │   ├───.gradle/...\n│   │   ├───.kotlin/\n│   │   ├───app/\n│   │   ├───build/\n│   │   └───gradle/\n│   ├───assets/\n│   │   ├───icons\" && cp C:UsersisuruDownloadsadd-price.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons\" && cp C:UsersisuruDownloadsbuy.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons\" && cp C:UsersisuruDownloadsdaily-report.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons\" && cp C:UsersisuruDownloadsprices.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons\" && cp C:UsersisuruDownloadssell.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons\" && cp C:UsersisuruDownloadstransactions.png C:UsersisuruDocumentsprojectcompanyrice_appclientassetsicons\"\n│   │   ├───icons/\n│   │   ├───images/\n│   │   └───videos/\n│   ├───build/...\n│   ├───ios/\n│   │   ├───.gitignore\n│   │   ├───Flutter/\n│   │   ├───Runner/\n│   │   ├───Runner.xcodeproj/\n│   │   ├───Runner.xcworkspace/\n│   │   └───RunnerTests/\n│   ├───lib/\n│   │   ├───app.dart\n│   │   ├───injection_container.dart\n│   │   ├───main.dart\n│   │   ├───core/\n│   │   ├───data/\n│   │   ├───domain/\n│   │   ├───features/\n│   │   └───routes/\n│   ├───linux/\n│   │   ├───.gitignore\n│   │   ├───CMakeLists.txt\n│   │   ├───flutter/\n│   │   └───runner/\n│   ├───macos/\n│   │   ├───.gitignore\n│   │   ├───Flutter/\n│   │   ├───Runner/\n│   │   ├───Runner.xcodeproj/\n│   │   ├───Runner.xcworkspace/\n│   │   └───RunnerTests/\n│   ├───test/\n│   │   └───widget_test.dart\n│   ├───web/\n│   │   ├───favicon.png\n│   │   ├───index.html\n│   │   ├───manifest.json\n│   │   └───icons/\n│   └───windows/\n│       ├───.gitignore\n│       ├───CMakeLists.txt\n│       ├───flutter/\n│       └───runner/\n└───server/\n    ├───.env.example\n    ├───.eslintrc.json\n    ├───.gitignore\n    ├───check-db.js\n    ├───fix-db.js\n    ├───fix-indexes.js\n    ├───package-lock.json\n    ├───package.json\n    ├───README.md\n    ├───server.js\n    ├───node_modules/...\n    └───src/\n        ├───app.js\n        ├───server.js\n        ├───config/\n        ├───controllers/\n        ├───middleware/\n        ├───models/\n        ├───routes/\n        ├───seeders/\n        ├───services/\n        ├───utils/\n        └───validators/\n\n\n</session_context>"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "in each page top isee defrent style some has gradient green colro back button refrehs button white text fro that page as name. so has few not all instead can get as compoenent or and consisitent in each page '/mnt/c/Users/isuru/Pictures/Screenshots/Screenshot 2026-04-23 095944.png'i like this way but problme is i want it as a compoent so i want to change style or colro it is easy and apply to all page in app. want for now liek this bactfo back button text refrsh button  refrehs button shoudl force refresh that page becope some time app not refrsh after  add or delelt eupdate so user confued it add or not thats why this button there"
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I will research the current implementation of app bars in the Flutter project to understand the existing styles and where to place the new reusable component."
+        },
+        {
+          "thoughtSignature": "CiQBjz1rXzISiyJfaAEWEwFDida2fb/vEbtSToXfX9aJTFcYFhMKcgGPPWtflzEuJlUzBiCRlWjsB3Hy3TvGXdS8YCG2eRNj2VMpRAUozORC97bPLP3gbUuJfXAezpSDe78xacfTKHYPH0f/Cih27K6lyfcaJziUk3rPoCS/sXyhnhuv21E7zq1PPpsgn/8pctPzO2AK2552pwqMAQGPPWtfnwf9ZtzFFajL3KwDWvPu0+PVINFTN22eLZYwsFkv5lgSLtFLdk4SfToSgLlg4s8N+q1EKpbx+eYumIqFPv0+Ye4MBMBjNhcDjsvtfGmZQ8YPt2e4TS9gaf95n/RsiUxKB+SekRNriGCRBjDAAHQ312kdHHOgkRwNFX7j1/i67lW/8L6dRLEyCnQBjz1rX6EeC32ZSl96jEXGBra6kT+wzGgiG1PbcKBqs7TNLQiw2ROt8VxRt59BVAivXjKgMoS3UGDTewu8eukXO9024YPjJXBBqLWuIEuBqflU2Qc4+PHoG9LDDmym0RQXtjZU2w6O0TcVrTO4WI7CgYED3wpxAY89a1+yzpzW4aipSxW5/iY0izEOcYNMCJwaysJAIDUoGA6b1axhJXe3AluylS/1jsFqKYp6eIqJJ+HMX5g3iOYlQA0duBy/6Y+EIIaMIr5dYbIuB7Mq1z3oVcf5EnfflrCVx9WxQKhe9298vw+dCgQKfgGPPWtfQQhcCxYoUIn/eQJJ4P3GvT8TXWNrb/uwD3qsyUqTk7aEdjDKIJCOlCb0tkRHXAryecLg2LG3gHQavwEaRLMcc2zx7qfcYipc5lPBpKJE3rs9SjFcsa1LmN8/NutOoEQJJxlf4/6HtsPTy/k4PdtTKQ9vg3Ua66sA3QqZAQGPPWtf9+L+ws5oVGx2O61AUz43sD+bhvV/tVD9isQCzsGA/feoVx9/Vwhp/8c1bKefAt28AhBUicdbak3/5v2PBsm3t8MT4OWUTo7wQsMD85azVm009qDasIMdqJwQOXVq5nS8dKMyOdiySlxOcFajHymLlB8KiNwzMKME3c1CxnvGaNOv0O9UDoR53xKO0SZLlJHq/rHDZAqOAQGPPWtfcOnr71MhnZfacQbIXbBuu0bdK8t+dJ5vqtx9efIw4IetaNnVgZfEReBpMDrc/jGweus1GMWVKm0rzu2NpfOfvTu2fo4y8SMcyyEAC2hGwzhu15uYoq0bZZ1r3MaFlKocEQCVlkHIxcPtuMvOpnAmKcEKzZZu9FeK0SKUyqGWJpUBuG2Q4dCmLHgKeAGPPWtfsOXUJqGMPETsrmEfqMCKGK+P+zT5a0sBwgkTIomZ+a8uUmu3WDxSWsOTUq4CGvsbT314sj6iSV2OqZ5HuYw0m7Nlkp5HMtroTGrU+7oT98v2J5dHQ7sSkD+JkJHL3/QWh5xTIkyj+fGPJt2sZ/48K3SlDwqAAQGPPWtfUA2fbSiU2Kvm6CRFNvPlxnjJnxmHUjWsUQvU2VFu+NfKwRzxw7clI8+g4enSUDYNYeYKxlP2fIpbNRWgg3M10fj4OXrw0bvhaAcg5U+JdsrNmNZ/QKubQYKmwJ5KavDeHrF8CKJkh9dSLoFDODikj3fvLPfPOlZW8lMECo4BAY89a1/xw9XJL4wZRPoO0d8d4ptFSvM0Ey7GM+Vj4Es6hzySgv30O3AeRRKZQ98TQhp8i6zdFp0UvfaQG9/GkVJQYdgpHuvccP9extATHcXBhliMQGnL9RaoVmgbBCTONbunPUWyIhwS1a+YC61F5RuXQqRVzJysdR1KbH5Ts9SnZNL/WYryJCypCj10RAqAAQGPPWtfwSywVk05Jbbv6d/24KT7o/8C0JgLO44qB3dGG9yBIm/cwLQ22d5cFMCq7ZbyRNupd5aboCe127cP2bYcN+iRuvOM2nOIYUDHqFkTThIjwDptnbHhkjM/SHENRPle10eEQLXVVjCw+UAptun7C/xd0uUluSoyBVydCyAn",
+          "functionCall": {
+            "name": "list_directory",
+            "args": {
+              "dir_path": "client/lib/core/widgets"
+            }
+          }
+        },
+        {
+          "functionCall": {
+            "name": "grep_search",
+            "args": {
+              "include_pattern": "client/lib/features/**/*.dart",
+              "pattern": "AppBar("
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "id": "list_directory_1776918921107_0",
+            "name": "list_directory",
+            "response": {
+              "error": "Error listing directory: ENOENT: no such file or directory, stat '/mnt/c/Users/isuru/Documents/project/company/rice_app/client/lib/core/widgets'"
+            }
+          }
+        },
+        {
+          "functionResponse": {
+            "id": "grep_search_1776918921131_1",
+            "name": "grep_search",
+            "response": {
+              "error": "Invalid regular expression pattern provided: AppBar(. Error: Invalid regular expression: /AppBar(/: Unterminated group"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "text": "I'll search for the `widgets` directory within the `client/lib` folder and search for `AppBar` usage with a corrected regular expression."
+        },
+        {
+          "thoughtSignature": "CiQBjz1rXxjvbrKHLD5KVW/hI6g6vP5lm5sHV3qHuduAFj7RG94KWAGPPWtfWRX8yaYxc9U1MV84YS/mqNk7cXezbx/6Zt4WXok4aDwjuV/rlokCSRwBHvKkGmo7Ue4yJgljvPNJVLv8Y5QMgt1f97RYcBGubSTx0juC0274uPkKkAEBjz1rXxbmHrNh21adpGlnPp8sp0UaVl0Uogij5EM1qgKz9di5jvmyrbONP/aks8yIMlp88fef97y7Nz8xUoTXkMMSBrSYvoTO+oZ8tjK+rDZZ6ODYr4r2/485mavVob9uBrxqoJmYEeLTR31EKEPw69bltLO7n4GGzOW2CCkDvdgsty19y9Yv/wJNSWqTPjkKNAGPPWtfmnl4dopzJGE6JJRrE9Uey4GErt/BjtmuAU1+TtMRQ264Xz646gzCtXOMZ7nD/Sc=",
+          "functionCall": {
+            "name": "run_shell_command",
+            "args": {
+              "command": "find client/lib -name \"*widgets*\" -type d",
+              "description": "Find directories named \"widgets\" in the client/lib directory."
+            }
+          }
+        },
+        {
+          "functionCall": {
+            "name": "grep_search",
+            "args": {
+              "pattern": "AppBar\\(",
+              "total_max_matches": 10,
+              "include_pattern": "client/lib/**/*.dart"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "id": "run_shell_command_1776918924626_0",
+            "name": "run_shell_command",
+            "response": {
+              "output": "Output: client/lib/core/shared_widgets\nclient/lib/features/auth/presentation/widgets\nclient/lib/features/buy/presentation/widgets\nclient/lib/features/customers/presentation/widgets\nclient/lib/features/debug/presentation/widgets\nclient/lib/features/home/presentation/widgets\nclient/lib/features/price_management/presentation/widgets\nclient/lib/features/profile/presentation/widgets\nclient/lib/features/reports/presentation/widgets\nclient/lib/features/sell/presentation/widgets\nclient/lib/features/stock/presentation/widgets\nclient/lib/features/super_admin/presentation/widgets\n/usr/bin/bash: line 3: C:UsersisuruAppDataLocalTemp/shell_pgrep_5124c8dea403.tmp: No such file or directory\nProcess Group PGID: 216437"
+            }
+          }
+        },
+        {
+          "functionResponse": {
+            "id": "grep_search_1776918924631_1",
+            "name": "grep_search",
+            "response": {
+              "output": "Found 10 matches for pattern \"AppBar\\(\" in path \".\" (filter: \"client/lib/**/*.dart\") (results limited to 10 matches for performance):\n---\nFile: client/lib/routes/app_router.dart\nL432:           AppBar(title: const Text('Error'), backgroundColor: AppColors.error),\nL463:       Scaffold(appBar: AppBar(title: Text('Stock Detail: $stockId')));\nL471:       Scaffold(appBar: AppBar(title: Text('Edit Stock: $stockId')));\nL479:       Scaffold(appBar: AppBar(title: const Text('Buy Receipt')));\nL487:       Scaffold(appBar: AppBar(title: const Text('Sell Receipt')));\nL495:       Scaffold(appBar: AppBar(title: const Text('Company Detail')));\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_settings_screen.dart\nL88:     return SliverAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/companies_screen.dart\nL154:     return SliverAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_price_list_screen.dart\nL51:       appBar: HAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_reports_screen.dart\nL110:     return SliverAppBar(\n---"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "id": "run_shell_command_1776918924626_0",
+            "name": "run_shell_command",
+            "response": {
+              "output": "Output: client/lib/core/shared_widgets\nclient/lib/features/auth/presentation/widgets\nclient/lib/features/buy/presentation/widgets\nclient/lib/features/customers/presentation/widgets\nclient/lib/features/debug/presentation/widgets\nclient/lib/features/home/presentation/widgets\nclient/lib/features/price_management/presentation/widgets\nclient/lib/features/profile/presentation/widgets\nclient/lib/features/reports/presentation/widgets\nclient/lib/features/sell/presentation/widgets\nclient/lib/features/stock/presentation/widgets\nclient/lib/features/super_admin/presentation/widgets\n/usr/bin/bash: line 3: C:UsersisuruAppDataLocalTemp/shell_pgrep_5124c8dea403.tmp: No such file or directory\nProcess Group PGID: 216437"
+            }
+          }
+        },
+        {
+          "functionResponse": {
+            "id": "grep_search_1776918924631_1",
+            "name": "grep_search",
+            "response": {
+              "output": "Found 10 matches for pattern \"AppBar\\(\" in path \".\" (filter: \"client/lib/**/*.dart\") (results limited to 10 matches for performance):\n---\nFile: client/lib/routes/app_router.dart\nL432:           AppBar(title: const Text('Error'), backgroundColor: AppColors.error),\nL463:       Scaffold(appBar: AppBar(title: Text('Stock Detail: $stockId')));\nL471:       Scaffold(appBar: AppBar(title: Text('Edit Stock: $stockId')));\nL479:       Scaffold(appBar: AppBar(title: const Text('Buy Receipt')));\nL487:       Scaffold(appBar: AppBar(title: const Text('Sell Receipt')));\nL495:       Scaffold(appBar: AppBar(title: const Text('Company Detail')));\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_settings_screen.dart\nL88:     return SliverAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/companies_screen.dart\nL154:     return SliverAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_price_list_screen.dart\nL51:       appBar: HAppBar(\n---\nFile: client/lib/features/super_admin/presentation/screens/admin_reports_screen.dart\nL110:     return SliverAppBar(\n---"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

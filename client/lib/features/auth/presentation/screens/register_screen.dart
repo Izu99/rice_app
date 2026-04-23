@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/loading_overlay.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/constants/districts.dart';
 import '../../../../core/constants/si_strings.dart';
 import '../../../../routes/route_names.dart';
@@ -153,33 +154,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
+    return HSliverAppBar(
       expandedHeight: 180.0,
-      floating: false,
       pinned: true,
-      elevation: 0,
-      backgroundColor: AppColors.primary,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => context.go(RouteNames.login),
-      ),
+      onBack: () => context.go(RouteNames.login),
+      title: SiStrings.registerCompany,
+      subtitle: 'Join our platform today',
       flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        title: Text(
-          SiStrings.registerCompany,
-          style: AppTextStyles.h3
-              .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
         background: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primaryLight,
-                AppColors.primary,
-              ],
-            ),
+            gradient: AppColors.primaryGradient,
           ),
           child: Stack(
             children: [
@@ -192,22 +176,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: Colors.white.withOpacity(0.1),
                 ),
               ),
-              Center(
+              const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
-                    const Icon(
+                    SizedBox(height: 20),
+                    Icon(
                       Icons.app_registration_rounded,
                       size: 48,
                       color: Colors.white,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Join our platform today',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white.withOpacity(0.8),
-                      ),
                     ),
                   ],
                 ),
