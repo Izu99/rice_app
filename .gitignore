@@ -1,2 +1,10 @@
 # Flutter/Dart build output for app
 client/app/build/
+
+# Node.js
+node_modules/
+*.log
+
+# Temp files created by Gemini CLI / Node compile cache (encoded Windows paths)
+C*/
+gemini-client-error-*.json
