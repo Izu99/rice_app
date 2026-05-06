@@ -15,7 +15,8 @@
       "Bash(grep -i -E \"\\\\.\\(png|jpg|jpeg|svg|ico|webp\\)$\")",
       "Bash(dart analyze:*)",
       "Bash(find:*)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(xargs cat *)"
     ]
   }
 }

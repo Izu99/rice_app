@@ -94,6 +94,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                     _buildSettingsSection(state),
                     const SizedBox(height: 24),
 
+                    // Legal Section
+                    _buildSectionTitle('Legal & Info', 'Terms, Privacy, About'),
+                    const SizedBox(height: 12),
+                    _buildLegalSection(),
+                    const SizedBox(height: 24),
+
                     // Logout Button
                     _buildLogoutButton(),
                     const SizedBox(height: 24),
@@ -302,6 +308,53 @@ class _ProfileScreenState extends State<ProfileScreen>
             title: SiStrings.changePassword,
             subtitle: SiStrings.changePasswordSubtitle,
             onTap: _showChangePasswordDialog,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegalSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ProfileMenuItem(
+            icon: Icons.description_outlined,
+            title: 'Terms & Conditions',
+            subtitle: 'Usage terms for this app',
+            onTap: () => context.push('/terms'),
+          ),
+          const Divider(height: 1),
+          ProfileMenuItem(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            subtitle: 'How we handle your data',
+            onTap: () => context.push('/privacy'),
+          ),
+          const Divider(height: 1),
+          ProfileMenuItem(
+            icon: Icons.info_outline,
+            title: 'About',
+            subtitle: 'App info and developer details',
+            onTap: () => context.push('/about'),
+          ),
+          const Divider(height: 1),
+          ProfileMenuItem(
+            icon: Icons.delete_forever_outlined,
+            title: 'Delete Account & Data',
+            subtitle: 'Permanently remove your account',
+            iconColor: AppColors.error,
+            onTap: () => context.push('/data-deletion'),
           ),
         ],
       ),

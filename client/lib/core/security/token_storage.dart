@@ -1,53 +1,41 @@
-// Token storage using SharedPreferences (no local DB)
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
 import '../../domain/entities/user_entity.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/company_model.dart';
 
 class TokenStorage {
+  final FlutterSecureStorage _secure;
   final SharedPreferences _prefs;
+
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userKey = 'cached_user';
   static const String _companyKey = 'cached_company';
 
-  TokenStorage(this._prefs);
+  static const _androidOptions = AndroidOptions(
+    encryptedSharedPreferences: true,
+  );
 
-  Future<void> saveToken(String token) {
-    debugPrint('TokenStorage: Saving token...');
-    return _prefs.setString(_tokenKey, token);
-  }
+  TokenStorage(this._prefs)
+      : _secure = const FlutterSecureStorage(
+          aOptions: _androidOptions,
+        );
 
-  Future<String?> getToken() async {
-    final token = _prefs.getString(_tokenKey);
-    debugPrint(
-        'TokenStorage: Retrieving token: ${token != null && token.isNotEmpty ? 'present' : 'absent'}');
-    return token;
-  }
+  Future<void> saveToken(String token) =>
+      _secure.write(key: _tokenKey, value: token);
 
-  Future<void> clearToken() async {
-    debugPrint('TokenStorage: Clearing token...');
-    await _prefs.remove(_tokenKey);
-  }
+  Future<String?> getToken() => _secure.read(key: _tokenKey);
 
-  Future<void> saveRefreshToken(String refreshToken) {
-    debugPrint('TokenStorage: Saving refresh token...');
-    return _prefs.setString(_refreshTokenKey, refreshToken);
-  }
+  Future<void> clearToken() => _secure.delete(key: _tokenKey);
 
-  Future<String?> getRefreshToken() async {
-    final token = _prefs.getString(_refreshTokenKey);
-    debugPrint(
-        'TokenStorage: Retrieving refresh token: ${token != null && token.isNotEmpty ? 'present' : 'absent'}');
-    return token;
-  }
+  Future<void> saveRefreshToken(String refreshToken) =>
+      _secure.write(key: _refreshTokenKey, value: refreshToken);
 
-  Future<void> clearRefreshToken() async {
-    debugPrint('TokenStorage: Clearing refresh token...');
-    await _prefs.remove(_refreshTokenKey);
-  }
+  Future<String?> getRefreshToken() => _secure.read(key: _refreshTokenKey);
+
+  Future<void> clearRefreshToken() => _secure.delete(key: _refreshTokenKey);
 
   Future<void> saveUser(UserEntity user) async {
     final model = UserModel.fromEntity(user);
@@ -58,16 +46,13 @@ class TokenStorage {
     final jsonStr = _prefs.getString(_userKey);
     if (jsonStr == null) return null;
     try {
-      final map = jsonDecode(jsonStr);
-      return UserModel.fromJson(map).toEntity();
-    } catch (e) {
+      return UserModel.fromJson(jsonDecode(jsonStr)).toEntity();
+    } catch (_) {
       return null;
     }
   }
 
-  Future<void> clearUser() async {
-    await _prefs.remove(_userKey);
-  }
+  Future<void> clearUser() => _prefs.remove(_userKey);
 
   Future<void> saveCompany(CompanyModel company) async {
     await _prefs.setString(_companyKey, jsonEncode(company.toJson()));
@@ -77,21 +62,20 @@ class TokenStorage {
     final jsonStr = _prefs.getString(_companyKey);
     if (jsonStr == null) return null;
     try {
-      final map = jsonDecode(jsonStr);
-      return CompanyModel.fromJson(map);
-    } catch (e) {
+      return CompanyModel.fromJson(jsonDecode(jsonStr));
+    } catch (_) {
       return null;
     }
   }
 
-  Future<void> clearCompany() async {
-    await _prefs.remove(_companyKey);
-  }
+  Future<void> clearCompany() => _prefs.remove(_companyKey);
 
   Future<void> clearAll() async {
-    await clearToken();
-    await clearRefreshToken();
-    await clearUser();
-    await clearCompany();
+    await Future.wait([
+      clearToken(),
+      clearRefreshToken(),
+      clearUser(),
+      clearCompany(),
+    ]);
   }
 }

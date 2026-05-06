@@ -68,6 +68,12 @@ class RouteNames {
   static const String adminReports = '/admin/reports';
   static const String adminSettings = '/admin/settings';
 
+  // ==================== Legal Routes ====================
+  static const String termsConditions = '/terms';
+  static const String privacyPolicy = '/privacy';
+  static const String about = '/about';
+  static const String dataDeletion = '/data-deletion';
+
   // ==================== Error Routes ====================
   static const String notFound = '/404';
   static const String error = '/error';

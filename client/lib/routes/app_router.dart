@@ -50,6 +50,12 @@ import '../features/expenses/presentation/screens/expense_add_edit_screen.dart';
 // Features - Profile
 import '../features/profile/presentation/screens/profile_screen.dart';
 
+// Features - Legal
+import '../features/legal/presentation/screens/terms_screen.dart';
+import '../features/legal/presentation/screens/privacy_screen.dart';
+import '../features/legal/presentation/screens/about_screen.dart';
+import '../features/legal/presentation/screens/data_deletion_screen.dart';
+
 // Features - Price Management
 import '../features/price_management/presentation/screens/add_price_screen.dart';
 import '../features/price_management/presentation/screens/view_prices_by_district_screen.dart';
@@ -414,6 +420,32 @@ class AppRouter {
         parentNavigatorKey: _rootNavigatorKey,
         redirect: (context, state) => adminRedirect(context, state, _authGuard),
         builder: (context, state) => const AdminPriceListScreen(),
+      ),
+
+      // ==================== Legal Routes ====================
+      GoRoute(
+        path: RouteNames.termsConditions,
+        name: 'terms',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TermsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.privacyPolicy,
+        name: 'privacy',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.about,
+        name: 'about',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.dataDeletion,
+        name: 'dataDeletion',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const DataDeletionScreen(),
       ),
     ],
   );
