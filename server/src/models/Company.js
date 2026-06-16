@@ -57,9 +57,34 @@ const CompanySchema = new mongoose.Schema(
 			trim: true,
 			maxlength: [50, "Registration number cannot exceed 50 characters"],
 		},
+		secondaryPhone: {
+			type: String,
+			trim: true,
+			validate: {
+				validator: function (v) {
+					if (!v) return true;
+					return /^\+?[\d\s-()]+$/.test(v);
+				},
+				message: "Please enter a valid secondary phone number",
+			},
+		},
+		taxNumber: {
+			type: String,
+			trim: true,
+			maxlength: [50, "Tax number cannot exceed 50 characters"],
+		},
+		website: {
+			type: String,
+			trim: true,
+			maxlength: [200, "Website URL cannot exceed 200 characters"],
+		},
 		logoUrl: {
 			type: String,
 			trim: true,
+		},
+		isActive: {
+			type: Boolean,
+			default: true,
 		},
 		status: {
 			type: String,

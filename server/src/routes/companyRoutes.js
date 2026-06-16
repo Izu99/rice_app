@@ -9,6 +9,8 @@ const { errorResponse, successResponse } = require('../utils/responseHandler')
 const Company = require('../models/Company')
 const User = require('../models/User')
 const Transaction = require('../models/Transaction')
+const Customer = require('../models/Customer')
+const StockItem = require('../models/StockItem')
 
 // Import validators (to be implemented)
 const {
@@ -49,9 +51,10 @@ router.get('/profile', async (req, res) => {
         logoUrl: company.logoUrl || null,
         status: company.status,
         plan: company.subscription?.plan || 'free',
+        subscriptionExpiresAt: company.subscription?.endDate || null,
         maxUsers: company.maxUsers,
         currentUsers: company.currentUsers,
-        isActive: company.isActive !== false,
+        isActive: company.isActive,
         isEmailVerified: company.isEmailVerified || false,
         settings: company.settings || null,
         createdAt: company.createdAt,
@@ -116,9 +119,10 @@ router.put('/profile', validateCompanyUpdate, async (req, res) => {
         logoUrl: company.logoUrl || null,
         status: company.status,
         plan: company.subscription?.plan || 'free',
+        subscriptionExpiresAt: company.subscription?.endDate || null,
         maxUsers: company.maxUsers,
         currentUsers: company.currentUsers,
-        isActive: company.isActive !== false,
+        isActive: company.isActive,
         isEmailVerified: company.isEmailVerified || false,
         settings: company.settings || null,
         createdAt: company.createdAt,
@@ -194,6 +198,12 @@ router.get('/statistics', async (req, res) => {
       { $group: { _id: null, total: { $sum: '$balance' } } }
     ])
 
+    const [customerCount, stockCount, userCount] = await Promise.all([
+      Customer.countDocuments({ companyId: req.companyId }),
+      StockItem.countDocuments({ companyId: req.companyId, isActive: true }),
+      User.countDocuments({ companyId: req.companyId }),
+    ])
+
     const data = {
       transactions: {
         totalBuyTransactions: buyStats.count,
@@ -202,7 +212,13 @@ router.get('/statistics', async (req, res) => {
         totalSellAmount: sellStats.totalAmount,
         totalRevenue: sellStats.totalAmount,
         totalExpenses: buyStats.totalAmount,
-        pendingPayments: pendingAmount[0]?.total || 0
+        pendingPayments: pendingAmount[0]?.total || 0,
+        netProfit: sellStats.totalAmount - buyStats.totalAmount,
+      },
+      summary: {
+        totalCustomers: customerCount,
+        totalStockItems: stockCount,
+        totalUsers: userCount,
       }
     }
 
@@ -233,7 +249,7 @@ router.put('/change-password', validatePasswordChange, async (req, res) => {
     const { currentPassword, newPassword } = req.body
 
     // Verify current password
-    const user = await User.findById(req.user.id)
+    const user = await User.findById(req.user.id).select('+password')
     const isMatch = await user.comparePassword(currentPassword)
 
     if (!isMatch) {
