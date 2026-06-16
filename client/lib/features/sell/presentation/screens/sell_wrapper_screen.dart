@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../core/shared_widgets/sync_status_indicator.dart';
 import '../../../../core/sync/sync_status.dart';
 import '../cubit/sell_cubit.dart';
@@ -108,10 +109,6 @@ class _SellWrapperScreenState extends State<SellWrapperScreen>
       },
     );
   }
-
-import '../../../../core/shared_widgets/h_app_bar.dart';
-
-// ... (in _SellWrapperScreenState)
 
   PreferredSizeWidget _buildAppBar(BuildContext context, SellState state) {
     return HAppBar(

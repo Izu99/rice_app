@@ -26,10 +26,7 @@ class ProfileState extends Equatable {
   final CompanyModel? company;
   final String? errorMessage;
   final String? successMessage;
-  final bool isDarkMode;
   final String language;
-  final bool notificationsEnabled;
-  final bool biometricEnabled;
   final DateTime? lastSyncTime;
   final int pendingSyncCount;
   final String appVersion;
@@ -41,10 +38,7 @@ class ProfileState extends Equatable {
     this.company,
     this.errorMessage,
     this.successMessage,
-    this.isDarkMode = false,
     this.language = 'si',
-    this.notificationsEnabled = true,
-    this.biometricEnabled = false,
     this.lastSyncTime,
     this.pendingSyncCount = 0,
     this.appVersion = '1.0.0',
@@ -74,10 +68,7 @@ class ProfileState extends Equatable {
     CompanyModel? company,
     String? errorMessage,
     String? successMessage,
-    bool? isDarkMode,
     String? language,
-    bool? notificationsEnabled,
-    bool? biometricEnabled,
     DateTime? lastSyncTime,
     int? pendingSyncCount,
     String? appVersion,
@@ -91,10 +82,7 @@ class ProfileState extends Equatable {
       company: clearUser ? null : (company ?? this.company),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       successMessage: successMessage,
-      isDarkMode: isDarkMode ?? this.isDarkMode,
       language: language ?? this.language,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      biometricEnabled: biometricEnabled ?? this.biometricEnabled,
       lastSyncTime: lastSyncTime ?? this.lastSyncTime,
       pendingSyncCount: pendingSyncCount ?? this.pendingSyncCount,
       appVersion: appVersion ?? this.appVersion,
@@ -109,10 +97,7 @@ class ProfileState extends Equatable {
         company,
         errorMessage,
         successMessage,
-        isDarkMode,
         language,
-        notificationsEnabled,
-        biometricEnabled,
         lastSyncTime,
         pendingSyncCount,
         appVersion,
