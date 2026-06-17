@@ -40,9 +40,6 @@ import '../features/reports/presentation/screens/daily_report_screen.dart';
 import '../features/reports/presentation/screens/stock_report_screen.dart';
 import '../features/reports/presentation/screens/customer_report_screen.dart';
 
-// Features - Transactions
-import '../features/transactions/presentation/screens/transaction_detail_screen.dart';
-
 // Features - Expenses
 import '../features/expenses/presentation/screens/expenses_list_screen.dart';
 import '../features/expenses/presentation/screens/expense_add_edit_screen.dart';
@@ -78,14 +75,6 @@ import 'route_guards.dart';
 /// Global navigator key
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
-final GlobalKey<NavigatorState> _shellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'shell');
-final GlobalKey<NavigatorState> _buyShellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'buyShell');
-final GlobalKey<NavigatorState> _sellShellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'sellShell');
-final GlobalKey<NavigatorState> _adminShellNavigatorKey =
-    GlobalKey<NavigatorState>(debugLabel: 'adminShell');
 
 /// App Router configuration
 class AppRouter {
