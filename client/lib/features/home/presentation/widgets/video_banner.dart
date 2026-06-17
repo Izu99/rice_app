@@ -1,12 +1,7 @@
 // lib/features/home/presentation/widgets/video_banner.dart
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoBanner extends StatefulWidget {
   final String assetPath;
@@ -25,77 +20,34 @@ class VideoBanner extends StatefulWidget {
 }
 
 class _VideoBannerState extends State<VideoBanner> {
-  late final Player _player;
-  late final VideoController _controller;
+  late final VideoPlayerController _controller;
   bool _ready = false;
 
   @override
   void initState() {
     super.initState();
-    _player = Player();
-    _controller = VideoController(_player);
+    _controller = VideoPlayerController.asset(widget.assetPath);
     _initVideo();
   }
 
   Future<void> _initVideo() async {
     try {
-      debugPrint('VideoBanner: Initializing with path ${widget.assetPath}');
-      Media media;
-
-      // On desktop Windows/Linux, extract asset to a cached temp file so
-      // libmpv can read it from the filesystem.
-      if (!_isWebOrMobile) {
-        debugPrint('VideoBanner: Extracting asset for desktop...');
-        final path = await _extractAsset(widget.assetPath);
-        media = Media(path);
-      } else {
-        // Android / iOS / Web: media_kit handles asset:// natively.
-        debugPrint('VideoBanner: Loading asset for mobile/web...');
-        media = Media('asset:///${widget.assetPath}');
-      }
-
-      debugPrint('VideoBanner: Opening media...');
-      await _player.open(media, play: false);
-      await _player.setVolume(0);
-      await _player.setPlaylistMode(PlaylistMode.loop);
-      debugPrint('VideoBanner: Starting playback...');
-      await _player.play();
+      await _controller.initialize();
+      await _controller.setVolume(0);
+      await _controller.setLooping(true);
+      await _controller.play();
 
       if (mounted) {
-        debugPrint('VideoBanner: Video ready.');
         setState(() => _ready = true);
       }
-    } catch (e, stack) {
+    } catch (e) {
       debugPrint('VideoBanner error: $e');
-      debugPrint('VideoBanner stack: $stack');
     }
-  }
-
-  bool get _isWebOrMobile {
-    try {
-      return Platform.isAndroid || Platform.isIOS;
-    } catch (_) {
-      // kIsWeb throws on Platform access — means we're on web
-      return true;
-    }
-  }
-
-  /// Extracts a Flutter asset to the app support directory and returns its path.
-  /// Cached on disk so extraction only happens once.
-  Future<String> _extractAsset(String assetPath) async {
-    final dir = await getApplicationSupportDirectory();
-    final fileName = assetPath.replaceAll('/', '_').replaceAll(' ', '_');
-    final file = File('${dir.path}/$fileName');
-    if (!await file.exists()) {
-      final data = await rootBundle.load(assetPath);
-      await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
-    }
-    return file.path;
   }
 
   @override
   void dispose() {
-    _player.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -110,11 +62,15 @@ class _VideoBannerState extends State<VideoBanner> {
           fit: StackFit.expand,
           children: [
             // Video surface — renders black until first frame, then plays
-            Video(
-              controller: _controller,
-              controls: NoVideoControls,
-              fit: BoxFit.cover,
-            ),
+            if (_ready)
+              FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
+                ),
+              ),
             // Subtle gradient overlay for polish
             if (_ready)
               IgnorePointer(

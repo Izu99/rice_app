@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:media_kit/media_kit.dart';
 
 import 'app.dart';
 import 'core/constants/si_strings.dart';
@@ -16,7 +15,6 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      MediaKit.ensureInitialized();
 
       // Show ALL Flutter errors on screen (not just in console)
       FlutterError.onError = (FlutterErrorDetails details) {
