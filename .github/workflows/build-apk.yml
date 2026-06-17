@@ -57,7 +57,7 @@ jobs:
           storePassword=$STORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=app/release.jks
+          storeFile=release.jks
           EOF
 
       - name: Build release APK (signed)
