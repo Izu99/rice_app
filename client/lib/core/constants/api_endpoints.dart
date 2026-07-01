@@ -8,7 +8,7 @@ class ApiEndpoints {
   static const String prodBaseUrl = 'https://api.ricemill.example.com/api/v1';
 
   /// Development base URL
-  static const String devBaseUrl = 'http://localhost:5000/api';
+  static const String devBaseUrl = 'http://127.0.0.1:5000/api';
 
   /// VPS base URL
   static const String vpsBaseUrl = 'http://4.1.8.2/rice/api';
