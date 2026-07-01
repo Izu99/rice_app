@@ -68,12 +68,13 @@ class CustomerModel extends Equatable {
       address: json['address']?.toString(),
       city: json['city']?.toString(),
       nicNumber: json['nic_number']?.toString() ?? json['nic']?.toString(),
-      companyId: json['company_id']?.toString() ?? '',
+      companyId: json['company_id']?.toString() ?? json['companyId']?.toString() ?? '',
       totalPurchases:
           _parseDouble(json['total_purchases'] ?? json['totalBuyAmount']),
       totalSales: _parseDouble(json['total_sales'] ?? json['totalSellAmount']),
       balance: _parseDouble(json['balance']),
-      customerType: CustomerType.fromString(json['customer_type'] ?? 'both'),
+      customerType: CustomerType.fromString(
+          json['customer_type'] ?? json['customerType'] ?? 'seller'),
       notes: json['notes']?.toString(),
       isActive: json['is_active'] == true ||
           json['is_active'] == 1 ||
