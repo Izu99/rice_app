@@ -17,6 +17,12 @@ class AppTextStyles {
   /// Sinhala font family
   static const String fontFamilySinhala = 'NotoSansSinhala';
 
+  /// Fallback fonts for scripts Poppins doesn't cover (e.g. Sinhala).
+  /// Applied app-wide via ThemeData.fontFamilyFallback so Sinhala text
+  /// renders identically on every device instead of relying on whatever
+  /// Sinhala font each Android OEM/version happens to ship.
+  static const List<String> fontFamilyFallback = [fontFamilySinhala];
+
   // ==================== FONT WEIGHTS ====================
 
   static const FontWeight weightThin = FontWeight.w100;
@@ -34,6 +40,7 @@ class AppTextStyles {
   /// Display Large - 57sp
   static const TextStyle displayLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 57,
     fontWeight: weightRegular,
     letterSpacing: -0.25,
@@ -44,6 +51,7 @@ class AppTextStyles {
   /// Display Medium - 45sp
   static const TextStyle displayMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 45,
     fontWeight: weightRegular,
     letterSpacing: 0,
@@ -54,6 +62,7 @@ class AppTextStyles {
   /// Display Small - 36sp
   static const TextStyle displaySmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 36,
     fontWeight: weightRegular,
     letterSpacing: 0,
@@ -66,6 +75,7 @@ class AppTextStyles {
   /// Headline Large - 32sp
   static const TextStyle headlineLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 32,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -76,6 +86,7 @@ class AppTextStyles {
   /// Headline Medium - 28sp
   static const TextStyle headlineMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 28,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -86,6 +97,7 @@ class AppTextStyles {
   /// Headline Small - 24sp
   static const TextStyle headlineSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 24,
     fontWeight: weightSemiBold,
     letterSpacing: 0,
@@ -98,6 +110,7 @@ class AppTextStyles {
   /// H1 - 32sp Bold
   static const TextStyle h1 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 32,
     fontWeight: weightBold,
     letterSpacing: -0.5,
@@ -108,6 +121,7 @@ class AppTextStyles {
   /// H2 - 28sp Bold
   static const TextStyle h2 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 28,
     fontWeight: weightBold,
     letterSpacing: -0.25,
@@ -118,6 +132,7 @@ class AppTextStyles {
   /// H3 - 24sp SemiBold
   static const TextStyle h3 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 24,
     fontWeight: weightSemiBold,
     letterSpacing: 0,
@@ -128,6 +143,7 @@ class AppTextStyles {
   /// H4 - 20sp SemiBold
   static const TextStyle h4 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 20,
     fontWeight: weightSemiBold,
     letterSpacing: 0.15,
@@ -138,6 +154,7 @@ class AppTextStyles {
   /// H5 - 18sp SemiBold
   static const TextStyle h5 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 18,
     fontWeight: weightSemiBold,
     letterSpacing: 0.15,
@@ -148,6 +165,7 @@ class AppTextStyles {
   /// H6 - 16sp SemiBold
   static const TextStyle h6 = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightSemiBold,
     letterSpacing: 0.15,
@@ -160,6 +178,7 @@ class AppTextStyles {
   /// Title Large - 20sp
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 20,
     fontWeight: weightMedium,
     letterSpacing: 0,
@@ -170,6 +189,7 @@ class AppTextStyles {
   /// Title Medium - 14sp
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
     letterSpacing: 0.15,
@@ -180,6 +200,7 @@ class AppTextStyles {
   /// Title Small - 12sp
   static const TextStyle titleSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
     letterSpacing: 0.1,
@@ -192,6 +213,7 @@ class AppTextStyles {
   /// Body Large - 14sp
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightRegular,
     letterSpacing: 0.5,
@@ -202,6 +224,7 @@ class AppTextStyles {
   /// Body Medium - 12sp (Default body text)
   static const TextStyle bodyMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
     letterSpacing: 0.25,
@@ -212,6 +235,7 @@ class AppTextStyles {
   /// Body Small - 10sp
   static const TextStyle bodySmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightRegular,
     letterSpacing: 0.4,
@@ -224,6 +248,7 @@ class AppTextStyles {
   /// Label Large - 12sp Medium
   static const TextStyle labelLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
     letterSpacing: 0.1,
@@ -234,6 +259,7 @@ class AppTextStyles {
   /// Label Medium - 10sp Medium
   static const TextStyle labelMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightMedium,
     letterSpacing: 0.5,
@@ -244,6 +270,7 @@ class AppTextStyles {
   /// Label Small - 8sp Medium
   static const TextStyle labelSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 8,
     fontWeight: weightMedium,
     letterSpacing: 0.5,
@@ -256,6 +283,7 @@ class AppTextStyles {
   /// Button text style
   static const TextStyle button = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightSemiBold,
     letterSpacing: 0.5,
@@ -266,6 +294,7 @@ class AppTextStyles {
   /// Button small text style
   static const TextStyle buttonSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightSemiBold,
     letterSpacing: 0.5,
@@ -276,6 +305,7 @@ class AppTextStyles {
   /// Button large text style
   static const TextStyle buttonLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightSemiBold,
     letterSpacing: 0.5,
@@ -288,6 +318,7 @@ class AppTextStyles {
   /// Caption - 12sp
   static const TextStyle caption = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
     letterSpacing: 0.4,
@@ -298,6 +329,7 @@ class AppTextStyles {
   /// Overline - 10sp
   static const TextStyle overline = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightMedium,
     letterSpacing: 1.5,
@@ -310,6 +342,7 @@ class AppTextStyles {
   /// Number large - For keyboard display
   static const TextStyle numberLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 36,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -320,6 +353,7 @@ class AppTextStyles {
   /// Number extra large
   static const TextStyle numberXL = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 48,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -330,6 +364,7 @@ class AppTextStyles {
   /// Number medium
   static const TextStyle numberMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 24,
     fontWeight: weightSemiBold,
     letterSpacing: 0,
@@ -340,6 +375,7 @@ class AppTextStyles {
   /// Number small
   static const TextStyle numberSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 18,
     fontWeight: weightMedium,
     letterSpacing: 0,
@@ -352,6 +388,7 @@ class AppTextStyles {
   /// Price large
   static const TextStyle priceLarge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 28,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -362,6 +399,7 @@ class AppTextStyles {
   /// Price medium
   static const TextStyle priceMedium = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 20,
     fontWeight: weightBold,
     letterSpacing: 0,
@@ -372,6 +410,7 @@ class AppTextStyles {
   /// Price small
   static const TextStyle priceSmall = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightSemiBold,
     letterSpacing: 0,
@@ -382,6 +421,7 @@ class AppTextStyles {
   /// Price strikethrough (original price)
   static const TextStyle priceStrike = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightRegular,
     letterSpacing: 0,
@@ -395,6 +435,7 @@ class AppTextStyles {
   /// Link text style
   static const TextStyle link = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
     letterSpacing: 0.25,
@@ -408,6 +449,7 @@ class AppTextStyles {
   /// Input text style
   static const TextStyle input = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightRegular,
     letterSpacing: 0.15,
@@ -418,6 +460,7 @@ class AppTextStyles {
   /// Input hint style
   static const TextStyle inputHint = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightRegular,
     letterSpacing: 0.15,
@@ -428,6 +471,7 @@ class AppTextStyles {
   /// Input label style
   static const TextStyle inputLabel = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
     letterSpacing: 0.4,
@@ -438,6 +482,7 @@ class AppTextStyles {
   /// Input error style
   static const TextStyle inputError = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
     letterSpacing: 0.4,
@@ -450,6 +495,7 @@ class AppTextStyles {
   /// Badge text style
   static const TextStyle badge = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightBold,
     letterSpacing: 0.5,
@@ -462,6 +508,7 @@ class AppTextStyles {
   /// App bar title style
   static const TextStyle appBarTitle = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 18,
     fontWeight: weightSemiBold,
     letterSpacing: 0.15,
@@ -474,6 +521,7 @@ class AppTextStyles {
   /// Tab label style
   static const TextStyle tabLabel = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
     letterSpacing: 0.5,
@@ -485,6 +533,7 @@ class AppTextStyles {
   /// Tooltip text style
   static const TextStyle tooltip = TextStyle(
     fontFamily: fontFamily,
+    fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
     letterSpacing: 0.4,

@@ -178,6 +178,15 @@ class SiStrings {
       _get('වත්මන් ලැයිස්තුවේ අයිතම', EnStrings.currentListItems);
   static String get unconfirmedWeights =>
       _get('තහවුරු නොකළ බර ප්‍රමාණයන්', EnStrings.unconfirmedWeights);
+  static String get unaddedItemTitle =>
+      _get('එකතු නොකළ අයිතමයක්', EnStrings.unaddedItemTitle);
+  static String get unaddedItemMessage => _get(
+      'ඔබ ඉහත ඇතුළත් කළ අයිතම විස්තර තවම ලැයිස්තුවට එකතු කර නැත. ඉදිරියට ගියහොත් එම දත්ත නැති වනු ඇත.',
+      EnStrings.unaddedItemMessage);
+  static String get unaddedItemConfirm =>
+      _get('ඉදිරියට යන්න', EnStrings.unaddedItemConfirm);
+  static String get unaddedItemCancel =>
+      _get('ආපසු යන්න', EnStrings.unaddedItemCancel);
   static String get buyPaddy => _get('වී මිලදී ගැනීම', EnStrings.buyPaddy);
   static String get sellRice => _get('සහල් විකිණීම', EnStrings.sellRice);
   static String get selectCustomer =>

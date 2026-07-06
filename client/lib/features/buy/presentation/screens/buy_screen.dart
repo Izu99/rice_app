@@ -452,7 +452,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: state.canAddBatch
-                    ? () => context.read<BuyCubit>().addBatchToSession()
+                    ? () => _confirmAndAddBatchToSession(context, state)
                     : null,
                 icon: const Icon(Icons.add_task),
                 label: Text(SiStrings.addBatchToList), // ADD BATCH TO SESSION
@@ -481,7 +481,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: state.canConfirmStock
-                    ? () => context.read<BuyCubit>().finalizeSessionToStock()
+                    ? () => _confirmAndFinalizeStock(context, state)
                     : null,
                 icon: const Icon(Icons.cloud_upload_outlined),
                 label: Text(SiStrings.addToStock), // FINALIZE & SAVE TO STOCK
@@ -1211,16 +1211,7 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
   Widget _buildReviewBottomBar(BuyState state) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
+      color: Colors.transparent,
       child: SafeArea(
         child: Row(
           children: [
@@ -1325,6 +1316,49 @@ class _BuyScreenState extends State<BuyScreen> with WidgetsBindingObserver {
         },
       ),
     );
+  }
+
+  Future<void> _confirmAndAddBatchToSession(
+      BuildContext context, BuyState state) async {
+    final hasUnaddedEntry = state.currentBags > 0 || state.currentWeight > 0;
+
+    if (hasUnaddedEntry) {
+      final confirmed = await ConfirmationDialog.show(
+        context,
+        title: SiStrings.unaddedItemTitle,
+        message: SiStrings.unaddedItemMessage,
+        confirmLabel: SiStrings.unaddedItemConfirm,
+        cancelLabel: SiStrings.unaddedItemCancel,
+        type: DialogType.warning,
+        isDangerous: true,
+      );
+
+      if (!confirmed || !context.mounted) return;
+    }
+
+    context.read<BuyCubit>().addBatchToSession();
+  }
+
+  Future<void> _confirmAndFinalizeStock(
+      BuildContext context, BuyState state) async {
+    final hasUnaddedEntry = state.currentBags > 0 || state.currentWeight > 0;
+    final hasUnlistedBatch = state.tempItems.isNotEmpty;
+
+    if (hasUnaddedEntry || hasUnlistedBatch) {
+      final confirmed = await ConfirmationDialog.show(
+        context,
+        title: SiStrings.unaddedItemTitle,
+        message: SiStrings.unaddedItemMessage,
+        confirmLabel: SiStrings.unaddedItemConfirm,
+        cancelLabel: SiStrings.unaddedItemCancel,
+        type: DialogType.warning,
+        isDangerous: true,
+      );
+
+      if (!confirmed || !context.mounted) return;
+    }
+
+    context.read<BuyCubit>().finalizeSessionToStock();
   }
 
   void _showClearConfirmation(BuildContext context) {

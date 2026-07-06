@@ -39,6 +39,17 @@ class AuthCubit extends Cubit<AuthState> {
     checkAuthStatus();
   }
 
+  // checkAuthStatus (and other methods here) await network/storage calls
+  // before emitting. If this cubit gets closed while one of those awaits is
+  // still pending (e.g. the widget tree is torn down mid-request), the
+  // eventual emit() would otherwise throw "Cannot emit new states after
+  // calling close". Guard it once here instead of at every call site.
+  @override
+  void emit(AuthState state) {
+    if (isClosed) return;
+    super.emit(state);
+  }
+
   /// Initialize Google Sign-In with required configuration
   Future<void> _initializeGoogleSignIn() async {
     // Google Sign-In is not supported on Windows/Linux desktop

@@ -49,37 +49,6 @@ router.post('/sync', syncStock)
 router.get('/', getStock)
 
 /**
- * @route   GET /api/stock/:id
- * @desc    Get single stock item with history
- * @access  Private (Company users)
- */
-router.get('/:id', async (req, res) => {
-  try {
-    const item = await StockItem.findOne({
-      _id: req.params.id,
-      ...req.companyFilter
-    })
-
-    if (!item) {
-      return errorResponse(res, 'Stock item not found', 404)
-    }
-
-    // Get item history (placeholder - implement actual history tracking)
-    const history = [] // TODO: Implement stock history tracking
-
-    const data = {
-      item,
-      history
-    }
-
-    return successResponse(res, 'Stock item retrieved successfully', data)
-  } catch (error) {
-    console.error('Get Stock Item Error:', error)
-    return errorResponse(res, 'Error retrieving stock item', 500, error.message)
-  }
-})
-
-/**
  * @route   GET /api/stock/summary
  * @desc    Get stock summary for dashboard
  * @access  Private (Company users)
@@ -336,11 +305,34 @@ router.get('/paddy-for-milling', async (req, res) => {
   }
 })
 
-// Since I switched to controller functions for some routes, I should update the existing ones to be consistent or keep them as is if they work.
-// Actually, the file was using inline functions for everything. I'll stick to the inline function pattern if that's what's already there,
-// OR I'll update all of them to use the controller.
-// Looking at the file, lines 29, 113, 145, 198, 246, 287, 339, 377 all use inline functions.
-// I will rewrite the sync route to be inline to match the existing style, or just keep the controller import and use it for sync.
-// To avoid complex refactoring, I'll just put the sync logic inline or call the controller function.
+/**
+ * @route   GET /api/stock/:id
+ * @desc    Get single stock item with history
+ * @access  Private (Company users)
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const item = await StockItem.findOne({
+      _id: req.params.id,
+      ...req.companyFilter
+    })
+
+    if (!item) {
+      return errorResponse(res, 'Stock item not found', 404)
+    }
+
+    const history = []
+
+    const data = {
+      item,
+      history
+    }
+
+    return successResponse(res, 'Stock item retrieved successfully', data)
+  } catch (error) {
+    console.error('Get Stock Item Error:', error)
+    return errorResponse(res, 'Error retrieving stock item', 500, error.message)
+  }
+})
 
 module.exports = router

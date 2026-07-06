@@ -100,6 +100,11 @@ class EnStrings {
   static const String addBatchToList = 'Add to List';
   static const String currentListItems = 'Current List Items';
   static const String unconfirmedWeights = 'Unconfirmed weights';
+  static const String unaddedItemTitle = 'Unadded Item';
+  static const String unaddedItemMessage =
+      'You have item details entered above that haven\'t been added to the list yet. If you continue, that data will be lost.';
+  static const String unaddedItemConfirm = 'Continue Anyway';
+  static const String unaddedItemCancel = 'Go Back';
   static const String buyPaddy = 'Buy Paddy';
   static const String sellRice = 'Sell Rice';
   static const String selectCustomer = 'Select Customer';

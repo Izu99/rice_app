@@ -34,8 +34,8 @@ class _BuyCustomerSelectionScreenState
       final cubit = context.read<CustomersCubit>();
       // Clear any existing filters first to ensure a clean state
       cubit.clearFilters();
-      await cubit.loadCustomers();
       cubit.filterByType(CustomerType.seller);
+      await cubit.loadCustomers();
     });
   }
 
@@ -49,7 +49,7 @@ class _BuyCustomerSelectionScreenState
   Widget build(BuildContext context) {
     return AppPageScaffold(
       title: SiStrings.selectCustomer,
-      subtitle: SiStrings.isSinhala ? 'Select Seller' : 'විකුණුම්කරු තෝරන්න',
+      subtitle: SiStrings.isSinhala ? 'විකුණුම්කරු තෝරන්න' : 'Select Seller',
       onRefresh: () => context.read<CustomersCubit>().loadCustomers(),
       body: Column(
         children: [

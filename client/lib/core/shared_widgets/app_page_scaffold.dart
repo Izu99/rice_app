@@ -265,8 +265,7 @@ class _PillButtonState extends State<_PillButton>
           width: 52,
           height: 52,
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
           ),
           child: Icon(

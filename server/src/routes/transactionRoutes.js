@@ -185,39 +185,4 @@ router.post('/:id/payment', validatePayment, async (req, res) => {
   }
 })
 
-/**
- * @route   GET /api/transactions/:id/receipt
- * @desc    Get receipt data for PDF generation
- * @access  Private (Company users)
- */
-router.get('/:id/receipt', async (req, res) => {
-  try {
-    const transaction = await Transaction.findOne({
-      _id: req.params.id,
-      ...req.companyFilter
-    }).populate('customerId', 'name phone address')
-
-    if (!transaction) {
-      return errorResponse(res, 'Transaction not found', 404)
-    }
-
-    // Get company details
-    const Company = require('../models/Company')
-    const company = await Company.findById(req.companyId)
-
-    const data = {
-      transaction,
-      company,
-      customer: transaction.customerId,
-      items: transaction.items,
-      receiptNumber: `REC-${transaction.transactionNumber}`
-    }
-
-    return successResponse(res, 'Receipt data retrieved successfully', data)
-  } catch (error) {
-    console.error('Get Receipt Error:', error)
-    return errorResponse(res, 'Error retrieving receipt data', 500, error.message)
-  }
-})
-
 module.exports = router

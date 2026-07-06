@@ -99,11 +99,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               context.read<CustomerCubit>().resetForm();
               context.go('/buy');
             },
-            bottomBar: AppSubBottomBar(
-              centerLabel: SiStrings.isSinhala ? 'සුරකින්න' : 'Save',
-              centerIcon: Icons.person_add_rounded,
-              onCenter: _onSubmit,
-            ),
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(AppDimensions.paddingMedium),
               child: Form(

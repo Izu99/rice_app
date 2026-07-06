@@ -168,44 +168,6 @@ router.get('/', async (req, res) => {
 })
 
 /**
- * @route   GET /api/purchases/:id
- * @desc    Get purchase by ID
- * @access  Private (Company users)
- */
-router.get('/:id', validateObjectId('id'), async (req, res) => {
-  try {
-    const purchase = await Purchase.findOne({
-      _id: req.params.id,
-      ...req.companyFilter
-    })
-      .populate('customerId', 'name phone email address')
-      .populate('paddyTypeId', 'name description qualityGrade averageYieldPercentage')
-      .populate('createdBy', 'name email')
-
-    if (!purchase) {
-      return res.status(404).json({
-        success: false,
-        message: 'Purchase not found'
-      })
-    }
-
-    res.json({
-      success: true,
-      data: {
-        purchase: purchase.getDetailedInfo()
-      }
-    })
-  } catch (error) {
-    console.error('Get Purchase Error:', error)
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving purchase',
-      error: error.message
-    })
-  }
-})
-
-/**
  * @route   GET /api/purchases/statistics/summary
  * @desc    Get purchase statistics
  * @access  Private (Company users)
@@ -328,6 +290,44 @@ router.get('/statistics/summary', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error retrieving purchase statistics',
+      error: error.message
+    })
+  }
+})
+
+/**
+ * @route   GET /api/purchases/:id
+ * @desc    Get purchase by ID
+ * @access  Private (Company users)
+ */
+router.get('/:id', validateObjectId('id'), async (req, res) => {
+  try {
+    const purchase = await Purchase.findOne({
+      _id: req.params.id,
+      ...req.companyFilter
+    })
+      .populate('customerId', 'name phone email address')
+      .populate('paddyTypeId', 'name description qualityGrade averageYieldPercentage')
+      .populate('createdBy', 'name email')
+
+    if (!purchase) {
+      return res.status(404).json({
+        success: false,
+        message: 'Purchase not found'
+      })
+    }
+
+    res.json({
+      success: true,
+      data: {
+        purchase: purchase.getDetailedInfo()
+      }
+    })
+  } catch (error) {
+    console.error('Get Purchase Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving purchase',
       error: error.message
     })
   }
