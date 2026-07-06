@@ -196,40 +196,6 @@ router.get('/:id', async (req, res) => {
 })
 
 /**
- * @route   GET /api/customers/check-phone/:phone
- * @desc    Check if phone number exists for company
- * @access  Private (Company users)
- */
-router.get('/check-phone/:phone', async (req, res) => {
-  try {
-    const customer = await Customer.findOne({
-      phone: req.params.phone,
-      ...req.companyFilter
-    })
-
-    if (customer) {
-      return successResponse(res, 'Phone number exists', {
-        exists: true,
-        customer: {
-          id: customer._id,
-          name: customer.name,
-          phone: customer.phone,
-
-          isActive: customer.isActive
-        }
-      })
-    }
-
-    return successResponse(res, 'Phone number available', {
-      exists: false
-    })
-  } catch (error) {
-    console.error('Check Phone Error:', error)
-    return errorResponse(res, 'Error checking phone number', 500, error.message)
-  }
-})
-
-/**
  * @route   POST /api/customers
  * @desc    Create new customer
  * @access  Private (Company users)
@@ -248,8 +214,12 @@ router.post('/', validateCustomerCreation, async (req, res) => {
       address,
       nic,
       notes,
-      clientId
+      clientId,
+      customer_type,
+      customerType
     } = req.body
+
+    const resolvedCustomerType = customer_type || customerType || 'seller'
 
     // Check if phone already exists for this company
     const existingCustomer = await Customer.findOne({
@@ -276,6 +246,7 @@ router.post('/', validateCustomerCreation, async (req, res) => {
       nic,
       notes,
       clientId,
+      customerType: resolvedCustomerType,
       companyId: req.companyId
     })
 
@@ -298,6 +269,7 @@ router.post('/', validateCustomerCreation, async (req, res) => {
  * @access  Private (Company users)
  */
 router.post('/sync', async (req, res) => {
+
   try {
     const { customers } = req.body
     if (!customers || !Array.isArray(customers)) {

@@ -39,7 +39,7 @@ class CustomersCubit extends Cubit<CustomersState> {
         emit(state.copyWith(
           status: CustomersStatus.loaded,
           customers: sortedCustomers,
-          filteredCustomers: sortedCustomers,
+          filteredCustomers: _applyFilters(sortedCustomers),
           totalCustomers: customers.length,
         ));
       },

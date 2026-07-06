@@ -54,7 +54,13 @@ class TempItemsTable extends StatelessWidget {
                             .copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center)),
                 Expanded(
-                    flex: 3,
+                    flex: 2,
+                    child: Text('මිල/kg',
+                        style: AppTextStyles.labelMedium
+                            .copyWith(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.right)),
+                Expanded(
+                    flex: 2,
                     child: Text('Weight',
                         style: AppTextStyles.labelMedium
                             .copyWith(fontWeight: FontWeight.bold),
@@ -102,7 +108,15 @@ class TempItemsTable extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     Expanded(
-                      flex: 3,
+                      flex: 2,
+                      child: Text(
+                          'Rs.${item.pricePerKg.toStringAsFixed(2)}',
+                          textAlign: TextAlign.right,
+                          style: AppTextStyles.labelMedium
+                              .copyWith(color: AppColors.textSecondary)),
+                    ),
+                    Expanded(
+                      flex: 2,
                       child: Text('${item.totalWeight.toStringAsFixed(2)} kg',
                           textAlign: TextAlign.right,
                           style: const TextStyle(

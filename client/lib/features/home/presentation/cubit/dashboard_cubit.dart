@@ -1,5 +1,6 @@
 // lib/features/home/presentation/cubit/dashboard_cubit.dart
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/enums.dart';
@@ -45,150 +46,156 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(state.copyWith(status: DashboardStatus.loading, clearError: true));
 
     try {
-      // Fetch main dashboard summary from backend which includes weekly trend
-      // We'll use ReportRepository for this as it maps to /api/reports/dashboard
-      final dashboardResult = await _reportRepository.getDashboardSummary();
-
-      dashboardResult.fold(
-        (failure) {
-          emit(state.copyWith(
-            status: DashboardStatus.error,
-            errorMessage: 'Failed to load dashboard: ${failure.message}',
-          ));
-        },
-        (summary) {
-          // Parse Weekly Trend from backend response
-          final List<dynamic> trendList = summary['weeklyTrend'] ?? [];
-          final List<Map<String, dynamic>> weeklyTrend =
-              List<Map<String, dynamic>>.from(trendList);
-
-          // Map to chart format (0-6 index)
-          final Map<int, Map<String, double>> weeklyActivity = {};
-          for (int i = 0; i < weeklyTrend.length; i++) {
-            final day = weeklyTrend[i];
-            weeklyActivity[i] = {
-              'buy': (day['buy'] as num?)?.toDouble() ?? 0.0,
-              'sell': (day['sell'] as num?)?.toDouble() ?? 0.0,
-            };
-          }
-
-          // Parse other summaries if available in the same response to avoid parallel calls
-          // The backend returns: { today: {...}, thisMonth: {...}, stock: {...}, ... }
-
-          final today = summary['today'] ?? {};
-          final thisMonth = summary['thisMonth'] ?? {};
-          final stock = summary['stock'] ?? {};
-          final perf = summary['performance'] ?? {};
-          final recentList = summary['recentTransactions'] ??
-              summary['recent_transactions'] ??
-              [];
-          final recentExpenseList = summary['recentExpenses'] ?? [];
-
-          // Map recent transactions from summary
-          final List<TransactionModel> recentTransactions = [];
-          for (final txnJson in recentList) {
-            try {
-              // Handle potential population of customerId
-              final dynamic customerData =
-                  txnJson['customerId'] ?? txnJson['customer_id'];
-              String customerId = '';
-              String? customerName;
-
-              if (customerData is Map) {
-                customerId = customerData['_id']?.toString() ??
-                    customerData['id']?.toString() ??
-                    '';
-                customerName = customerData['name']?.toString();
-              } else {
-                customerId = customerData?.toString() ?? '';
-                customerName = txnJson['customer_name']?.toString() ??
-                    txnJson['customerName']?.toString();
-              }
-
-              recentTransactions.add(TransactionModel.fromJson({
-                ...txnJson as Map<String, dynamic>,
-                'customer_id': customerId,
-                'customer_name': customerName,
-              }));
-            } catch (e) {
-              debugPrint('⚠️ Error parsing recent transaction: $e');
-            }
-          }
-
-          // Map recent expenses from summary
-          final List<ExpenseModel> recentExpenses = [];
-          for (final expenseJson in recentExpenseList) {
-            try {
-              recentExpenses.add(ExpenseModel.fromJson(expenseJson));
-            } catch (e) {
-              debugPrint('⚠️ Error parsing recent expense: $e');
-            }
-          }
-
-          emit(state.copyWith(
-            // Today
-            todayPurchases: (today['buyAmount'] as num?)?.toDouble() ?? 0,
-            todaySales: (today['sellAmount'] as num?)?.toDouble() ?? 0,
-            todayExpenses:
-                (today['operatingExpenses'] as num?)?.toDouble() ?? 0,
-            todayProfit: (today['netAmount'] as num?)?.toDouble() ?? 0,
-            todayBuyCount: today['buyTransactions'] as int? ?? 0,
-            todaySellCount: today['sellTransactions'] as int? ?? 0,
-
-            // Month
-            monthlyPurchases: (thisMonth['buyAmount'] as num?)?.toDouble() ?? 0,
-            monthlySales: (thisMonth['sellAmount'] as num?)?.toDouble() ?? 0,
-            monthlyExpenses:
-                (thisMonth['operatingExpenses'] as num?)?.toDouble() ?? 0,
-            monthlyProfit: (thisMonth['profit'] as num?)?.toDouble() ?? 0,
-            monthlyBuyCount: thisMonth['buyTransactions'] as int? ?? 0,
-            monthlySellCount: thisMonth['sellTransactions'] as int? ?? 0,
-
-            // Stock - Will be updated from local source below for consistency
-            totalPaddyStock: (stock['totalPaddyKg'] as num?)?.toDouble() ?? 0,
-            totalRiceStock: (stock['totalRiceKg'] as num?)?.toDouble() ?? 0,
-            lowStockCount: stock['lowStockItems'] as int? ?? 0,
-
-            // Performance
-            totalPaddyBoughtKg:
-                (perf['totalPaddyBoughtKg'] as num?)?.toDouble() ?? 0,
-            totalRiceSoldKg: (perf['totalRiceSoldKg'] as num?)?.toDouble() ?? 0,
-
-            // Recent Transactions & Expenses
-            recentTransactions: recentTransactions.isNotEmpty
-                ? recentTransactions
-                : state.recentTransactions,
-            recentExpenses: recentExpenses.isNotEmpty
-                ? recentExpenses
-                : state.recentExpenses,
-
-            // Charts
-            weeklyTrend: weeklyTrend,
-            weeklyActivity: weeklyActivity,
-
-            // Customer summary from dashboard summary if available
-            totalCustomers:
-                summary['totalCustomers'] as int? ?? state.totalCustomers,
-          ));
-        },
+      await _fetchDashboardData().timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException(
+            'Dashboard load timed out. Please check your connection.'),
       );
-
-      // Load other local data if needed (Sync status, etc)
-      // We skip _loadRecentTransactions if we already got them from backend
-      await Future.wait([
-        _loadCustomerSummary(),
-        _loadSyncStatus(),
-        _loadLocalStockData(), // Override with local stock data
-        _loadLocalActivityData(), // Override stats with local data
-      ]);
-
-      emit(state.copyWith(status: DashboardStatus.loaded));
     } catch (e) {
       emit(state.copyWith(
         status: DashboardStatus.error,
         errorMessage: 'Failed to load dashboard: ${e.toString()}',
       ));
     }
+  }
+
+  Future<void> _fetchDashboardData() async {
+    // Fetch main dashboard summary from backend which includes weekly trend
+    // We'll use ReportRepository for this as it maps to /api/reports/dashboard
+    final dashboardResult = await _reportRepository.getDashboardSummary();
+
+    dashboardResult.fold(
+      (failure) {
+        emit(state.copyWith(
+          status: DashboardStatus.error,
+          errorMessage: 'Failed to load dashboard: ${failure.message}',
+        ));
+      },
+      (summary) {
+        // Parse Weekly Trend from backend response
+        final List<dynamic> trendList = summary['weeklyTrend'] ?? [];
+        final List<Map<String, dynamic>> weeklyTrend =
+            List<Map<String, dynamic>>.from(trendList);
+
+        // Map to chart format (0-6 index)
+        final Map<int, Map<String, double>> weeklyActivity = {};
+        for (int i = 0; i < weeklyTrend.length; i++) {
+          final day = weeklyTrend[i];
+          weeklyActivity[i] = {
+            'buy': (day['buy'] as num?)?.toDouble() ?? 0.0,
+            'sell': (day['sell'] as num?)?.toDouble() ?? 0.0,
+          };
+        }
+
+        // Parse other summaries if available in the same response to avoid parallel calls
+        // The backend returns: { today: {...}, thisMonth: {...}, stock: {...}, ... }
+
+        final today = summary['today'] ?? {};
+        final thisMonth = summary['thisMonth'] ?? {};
+        final stock = summary['stock'] ?? {};
+        final perf = summary['performance'] ?? {};
+        final recentList = summary['recentTransactions'] ??
+            summary['recent_transactions'] ??
+            [];
+        final recentExpenseList = summary['recentExpenses'] ?? [];
+
+        // Map recent transactions from summary
+        final List<TransactionModel> recentTransactions = [];
+        for (final txnJson in recentList) {
+          try {
+            // Handle potential population of customerId
+            final dynamic customerData =
+                txnJson['customerId'] ?? txnJson['customer_id'];
+            String customerId = '';
+            String? customerName;
+
+            if (customerData is Map) {
+              customerId = customerData['_id']?.toString() ??
+                  customerData['id']?.toString() ??
+                  '';
+              customerName = customerData['name']?.toString();
+            } else {
+              customerId = customerData?.toString() ?? '';
+              customerName = txnJson['customer_name']?.toString() ??
+                  txnJson['customerName']?.toString();
+            }
+
+            recentTransactions.add(TransactionModel.fromJson({
+              ...txnJson as Map<String, dynamic>,
+              'customer_id': customerId,
+              'customer_name': customerName,
+            }));
+          } catch (e) {
+            debugPrint('⚠️ Error parsing recent transaction: $e');
+          }
+        }
+
+        // Map recent expenses from summary
+        final List<ExpenseModel> recentExpenses = [];
+        for (final expenseJson in recentExpenseList) {
+          try {
+            recentExpenses.add(ExpenseModel.fromJson(expenseJson));
+          } catch (e) {
+            debugPrint('⚠️ Error parsing recent expense: $e');
+          }
+        }
+
+        emit(state.copyWith(
+          // Today
+          todayPurchases: (today['buyAmount'] as num?)?.toDouble() ?? 0,
+          todaySales: (today['sellAmount'] as num?)?.toDouble() ?? 0,
+          todayExpenses: (today['operatingExpenses'] as num?)?.toDouble() ?? 0,
+          todayProfit: (today['netAmount'] as num?)?.toDouble() ?? 0,
+          todayBuyCount: today['buyTransactions'] as int? ?? 0,
+          todaySellCount: today['sellTransactions'] as int? ?? 0,
+
+          // Month
+          monthlyPurchases: (thisMonth['buyAmount'] as num?)?.toDouble() ?? 0,
+          monthlySales: (thisMonth['sellAmount'] as num?)?.toDouble() ?? 0,
+          monthlyExpenses:
+              (thisMonth['operatingExpenses'] as num?)?.toDouble() ?? 0,
+          monthlyProfit: (thisMonth['profit'] as num?)?.toDouble() ?? 0,
+          monthlyBuyCount: thisMonth['buyTransactions'] as int? ?? 0,
+          monthlySellCount: thisMonth['sellTransactions'] as int? ?? 0,
+
+          // Stock - Will be updated from local source below for consistency
+          totalPaddyStock: (stock['totalPaddyKg'] as num?)?.toDouble() ?? 0,
+          totalRiceStock: (stock['totalRiceKg'] as num?)?.toDouble() ?? 0,
+          lowStockCount: stock['lowStockItems'] as int? ?? 0,
+
+          // Performance
+          totalPaddyBoughtKg:
+              (perf['totalPaddyBoughtKg'] as num?)?.toDouble() ?? 0,
+          totalRiceSoldKg: (perf['totalRiceSoldKg'] as num?)?.toDouble() ?? 0,
+
+          // Recent Transactions & Expenses
+          recentTransactions: recentTransactions.isNotEmpty
+              ? recentTransactions
+              : state.recentTransactions,
+          recentExpenses:
+              recentExpenses.isNotEmpty ? recentExpenses : state.recentExpenses,
+
+          // Charts
+          weeklyTrend: weeklyTrend,
+          weeklyActivity: weeklyActivity,
+
+          // Customer summary from dashboard summary if available
+          totalCustomers:
+              summary['totalCustomers'] as int? ?? state.totalCustomers,
+        ));
+      },
+    );
+
+    // Load other local data if needed (Sync status, etc)
+    // We skip _loadRecentTransactions if we already got them from backend
+    await Future.wait([
+      _loadCustomerSummary(),
+      _loadSyncStatus(),
+      _loadLocalStockData(), // Override with local stock data
+      _loadLocalActivityData(), // Override stats with local data
+    ]);
+
+    emit(state.copyWith(status: DashboardStatus.loaded));
   }
 
   /// Refresh dashboard data - syncs data then loads

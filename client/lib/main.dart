@@ -12,6 +12,14 @@ import 'injection_container.dart' as di;
 import 'core/utils/bloc_observer.dart';
 
 void main() {
+  // Tracks whether runApp() has already succeeded once. Once the real app
+  // is running, a later unhandled async error must not call runApp() again
+  // to show the debug crash screen: that would tear down the live widget
+  // tree (closing BlocProviders like AuthCubit mid-request, itself throwing
+  // "Cannot emit after close") and re-enter runApp() from a different zone
+  // than bindings were initialized in, tripping Flutter's zone-mismatch check.
+  var appStarted = false;
+
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
@@ -53,12 +61,18 @@ void main() {
 
       print('=== STARTUP: runApp ===');
       runApp(const RiceMillApp());
+      appStarted = true;
     },
     (Object error, StackTrace stack) {
       // This catches ALL unhandled async errors
       print('=== UNHANDLED ERROR: $error ===');
       print('TYPE: ${error.runtimeType}');
       print('STACK: $stack');
+
+      // Once the app is up, don't tear it down over a later async error —
+      // just log it. Only show the fatal crash screen if startup itself
+      // never made it to runApp().
+      if (appStarted) return;
 
       // Show a visible error screen
       runApp(

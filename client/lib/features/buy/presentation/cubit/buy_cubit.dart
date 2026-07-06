@@ -375,19 +375,13 @@ class BuyCubit extends Cubit<BuyState> {
     _updateStateWithNewTotals(updatedItems);
   }
 
-  // Set price per kg
+  // Set price per kg for the item currently being entered.
+  // Must not touch state.tempItems — those items were already added via
+  // addToTempList() with their own locked-in pricePerKg/totalPrice, and
+  // rewriting them here silently corrupts previously entered items'
+  // totals whenever the user types a price for the next item.
   void setPricePerKg(double price) {
-    // Update all current temp items with this price if needed, or just set for next
-    final updatedItems = state.tempItems.map((item) {
-      return item.copyWith(
-        pricePerKg: price,
-        totalPrice: item.totalWeight * price,
-        isPriceSet: price > 0,
-      );
-    }).toList();
-
     emit(state.copyWith(pricePerKg: price));
-    _updateStateWithNewTotals(updatedItems);
   }
 
   // Clear for next variety but keep customer

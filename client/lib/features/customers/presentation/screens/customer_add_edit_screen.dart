@@ -192,7 +192,7 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
           children: [
             Icon(Icons.info_outline, color: AppColors.primary),
             SizedBox(width: 10),
-            Text('දැනට සිටින ගනුදෙනුකරුවෙක්'),
+            Expanded(child: Text('දැනට සිටින ගනුදෙනුකරුවෙක්')),
           ],
         ),
         content: Column(
@@ -376,13 +376,6 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
                     ? 'ගනුදෙනුකරු යාවත්කාලීන කිරීම'
                     : 'Update customer')
                 : (SiStrings.isSinhala ? 'නව ගනුදෙනුකරු' : 'New customer'),
-            bottomBar: AppSubBottomBar(
-              centerLabel: _isEditing
-                  ? (SiStrings.isSinhala ? 'යාවත්කාලීන කරන්න' : 'Update')
-                  : (SiStrings.isSinhala ? 'සුරකින්න' : 'Save'),
-              centerIcon: Icons.save_rounded,
-              onCenter: _submit,
-            ),
             body: Column(
               children: [
                 Container(

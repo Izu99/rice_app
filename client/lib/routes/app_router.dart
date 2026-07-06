@@ -215,8 +215,8 @@ class AppRouter {
                   GoRoute(
                     path: 'add-customer',
                     name: 'buyAddCustomer',
-                    builder: (context, state) =>
-                        const CustomerAddEditScreen(initialType: CustomerType.both),
+                    builder: (context, state) => const CustomerAddEditScreen(
+                        initialType: CustomerType.seller),
                   ),
                 ],
               ),
@@ -235,8 +235,8 @@ class AppRouter {
                   GoRoute(
                     path: 'add-customer',
                     name: 'sellAddCustomer',
-                    builder: (context, state) =>
-                        const CustomerAddEditScreen(initialType: CustomerType.both),
+                    builder: (context, state) => const CustomerAddEditScreen(
+                        initialType: CustomerType.buyer),
                   ),
                 ],
               ),

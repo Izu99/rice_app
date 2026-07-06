@@ -16,6 +16,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       fontFamily: AppTextStyles.fontFamily,
+      fontFamilyFallback: AppTextStyles.fontFamilyFallback,
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -600,6 +601,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       fontFamily: AppTextStyles.fontFamily,
+      fontFamilyFallback: AppTextStyles.fontFamilyFallback,
 
       // Color Scheme
       colorScheme: const ColorScheme.dark(
