@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -60,7 +61,7 @@ class LandingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Manage your rice mill efficiently with our modern management system.',
+                    SiStrings.landingTagline,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.white.withOpacity(0.8),
@@ -72,42 +73,42 @@ class LandingScreen extends StatelessWidget {
                   _buildNavButton(
                     context,
                     icon: Icons.shopping_cart_outlined,
-                    label: 'Buy',
+                    label: SiStrings.buy,
                     route: RouteNames.buy,
                   ),
                   const SizedBox(height: 16),
                   _buildNavButton(
                     context,
                     icon: Icons.sell_outlined,
-                    label: 'Sell',
+                    label: SiStrings.sell,
                     route: RouteNames.sell,
                   ),
                   const SizedBox(height: 16),
                   _buildNavButton(
                     context,
                     icon: Icons.inventory_2_outlined,
-                    label: 'Stock',
+                    label: SiStrings.stock,
                     route: RouteNames.stock,
                   ),
                   const SizedBox(height: 16),
                   _buildNavButton(
                     context,
                     icon: Icons.analytics_outlined,
-                    label: 'Detailed Dashboard',
+                    label: SiStrings.detailedDashboard,
                     route: RouteNames.detailedDashboard,
                   ),
                   const SizedBox(height: 16),
                   _buildNavButton(
                     context,
                     icon: Icons.dashboard_outlined,
-                    label: 'Go to Summary',
+                    label: SiStrings.goToSummary,
                     route: RouteNames.home,
                   ),
                   const SizedBox(height: 16),
                   _buildNavButton(
                     context,
                     icon: Icons.bar_chart_outlined,
-                    label: 'Reports',
+                    label: SiStrings.reports,
                     route: RouteNames.reports,
                   ),
 

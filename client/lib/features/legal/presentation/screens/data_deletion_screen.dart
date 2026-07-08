@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/si_strings.dart';
 
 class DataDeletionScreen extends StatelessWidget {
   const DataDeletionScreen({super.key});
@@ -6,12 +7,12 @@ class DataDeletionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Data Deletion')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      appBar: AppBar(title: Text(SiStrings.dataDeletionTitle)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Text(
-          'Data deletion request instructions will appear here.',
-          style: TextStyle(fontSize: 14, height: 1.6),
+          SiStrings.dataDeletionBody,
+          style: const TextStyle(fontSize: 14, height: 1.6),
         ),
       ),
     );

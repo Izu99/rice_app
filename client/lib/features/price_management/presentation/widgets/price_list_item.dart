@@ -1,6 +1,7 @@
 // lib/features/price_management/presentation/widgets/price_list_item.dart
 
 import 'package:flutter/material.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../domain/entities/paddy_rice_price_entity.dart';
@@ -194,10 +195,10 @@ class PriceListItem extends StatelessWidget {
 
   String _formatRelativeTime(DateTime dateTime) {
     final diff = DateTime.now().difference(dateTime);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return SiStrings.justNowLower;
+    if (diff.inMinutes < 60) return SiStrings.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return SiStrings.hoursAgo(diff.inHours);
+    return SiStrings.shortDaysAgo(diff.inDays);
   }
 
   String _formatDate(DateTime date) {

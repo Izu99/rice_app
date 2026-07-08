@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
@@ -90,13 +91,13 @@ class _StoreHomeBody extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.storefront_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.storefront_rounded, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
                   Text(
-                    'Live Marketplace',
-                    style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
+                    SiStrings.liveMarketplace,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -105,11 +106,11 @@ class _StoreHomeBody extends StatelessWidget {
                   ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
                   : Row(
                       children: [
-                        _buildStatPill(Icons.inventory_2_rounded, '$total', 'Listings'),
+                        _buildStatPill(Icons.inventory_2_rounded, '$total', SiStrings.listingsWord),
                         const SizedBox(width: 10),
-                        _buildStatPill(Icons.business_rounded, '$companies', 'Companies'),
+                        _buildStatPill(Icons.business_rounded, '$companies', SiStrings.companiesWord),
                         const SizedBox(width: 10),
-                        _buildStatPill(Icons.location_on_rounded, '$districts', 'Districts'),
+                        _buildStatPill(Icons.location_on_rounded, '$districts', SiStrings.districtsWord),
                       ],
                     ),
             ],
@@ -302,18 +303,18 @@ class _StoreHomeBody extends StatelessWidget {
               child: const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ඔබගේ නිෂ්පාදන ලැයිස්තු කරන්න',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark, fontSize: 13),
+                    SiStrings.listYourProductsTitle,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark, fontSize: 13),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'List your rice & paddy products for other companies to see.',
-                    style: TextStyle(color: Colors.black54, fontSize: 11),
+                    SiStrings.listYourProductsSubtitle,
+                    style: const TextStyle(color: Colors.black54, fontSize: 11),
                   ),
                 ],
               ),

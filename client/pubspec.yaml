@@ -91,5 +91,9 @@ flutter:
     - family: NotoSansSinhala
       fonts:
         - asset: assets/fonts/NotoSansSinhala-Regular.ttf
+        - asset: assets/fonts/NotoSansSinhala-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/NotoSansSinhala-SemiBold.ttf
+          weight: 600
         - asset: assets/fonts/NotoSansSinhala-Bold.ttf
           weight: 700

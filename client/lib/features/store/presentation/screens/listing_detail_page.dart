@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
@@ -54,7 +55,7 @@ class ListingDetailPage extends StatelessWidget {
 
   Widget _buildCompanyCard() {
     final daysSince = DateTime.now().difference(item.postedDate).inDays;
-    final timeLabel = daysSince == 0 ? 'Posted today' : daysSince == 1 ? 'Posted yesterday' : 'Posted $daysSince days ago';
+    final timeLabel = SiStrings.postedDaysAgo(daysSince);
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -99,7 +100,7 @@ class ListingDetailPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-              child: const Text('My Listing', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
+              child: Text(SiStrings.myListing, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
             ),
         ],
       ),
@@ -120,18 +121,18 @@ class ListingDetailPage extends StatelessWidget {
           Text(item.variety, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
           const SizedBox(height: 16),
           if (item.pricePerKg > 0) ...[
-            _buildDetailRow(icon: Icons.attach_money_rounded, label: 'Price per kg', value: 'Rs. ${item.pricePerKg.toStringAsFixed(2)}', valueColor: const Color(0xFF2E7D32)),
+            _buildDetailRow(icon: Icons.attach_money_rounded, label: SiStrings.pricePerKg, value: 'Rs. ${item.pricePerKg.toStringAsFixed(2)}', valueColor: const Color(0xFF2E7D32)),
             const SizedBox(height: 12),
           ],
           if (item.quantityKg > 0) ...[
-            _buildDetailRow(icon: Icons.scale_rounded, label: 'Available quantity', value: '${item.quantityKg.toStringAsFixed(0)} kg', valueColor: const Color(0xFF1565C0)),
+            _buildDetailRow(icon: Icons.scale_rounded, label: SiStrings.availableQuantity, value: '${item.quantityKg.toStringAsFixed(0)} kg', valueColor: const Color(0xFF1565C0)),
             const SizedBox(height: 12),
           ],
           if (item.pricePerKg > 0 && item.quantityKg > 0) ...[
-            _buildDetailRow(icon: Icons.calculate_rounded, label: 'Total value', value: 'Rs. ${(item.pricePerKg * item.quantityKg).toStringAsFixed(0)}', valueColor: Colors.black87),
+            _buildDetailRow(icon: Icons.calculate_rounded, label: SiStrings.totalValue, value: 'Rs. ${(item.pricePerKg * item.quantityKg).toStringAsFixed(0)}', valueColor: Colors.black87),
             const SizedBox(height: 12),
           ],
-          _buildDetailRow(icon: Icons.location_on_rounded, label: 'District', value: item.district, valueColor: Colors.black87),
+          _buildDetailRow(icon: Icons.location_on_rounded, label: SiStrings.districtLabel, value: item.district, valueColor: Colors.black87),
         ],
       ),
     );
@@ -170,11 +171,11 @@ class ListingDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.description_outlined, size: 18, color: Colors.black54),
-              SizedBox(width: 8),
-              Text('Description', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+              const Icon(Icons.description_outlined, size: 18, color: Colors.black54),
+              const SizedBox(width: 8),
+              Text(SiStrings.description, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
             ],
           ),
           const SizedBox(height: 10),
@@ -199,7 +200,7 @@ class ListingDetailPage extends StatelessWidget {
             children: [
               Icon(Icons.phone_rounded, color: color, size: 18),
               const SizedBox(width: 8),
-              const Text('Contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
+              Text(SiStrings.contact, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87)),
             ],
           ),
           const SizedBox(height: 12),
@@ -212,18 +213,18 @@ class ListingDetailPage extends StatelessWidget {
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: item.contactPhone));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Phone number copied!'), duration: Duration(seconds: 2)),
+                    SnackBar(content: Text(SiStrings.phoneCopied), duration: const Duration(seconds: 2)),
                   );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.copy_rounded, color: Colors.white, size: 16),
-                      SizedBox(width: 6),
-                      Text('Copy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                      const Icon(Icons.copy_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 6),
+                      Text(SiStrings.copy, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -238,13 +239,13 @@ class ListingDetailPage extends StatelessWidget {
   String _categoryLabel(StoreCategory cat) {
     switch (cat) {
       case StoreCategory.paddy:
-        return 'Paddy';
+        return SiStrings.paddyLabel;
       case StoreCategory.rice:
-        return 'Rice';
+        return SiStrings.riceLabel;
       case StoreCategory.riceMeal:
-        return 'Rice Bran / Flour';
+        return SiStrings.riceBranFlour;
       case StoreCategory.other:
-        return 'Other';
+        return SiStrings.otherCategory;
     }
   }
 }

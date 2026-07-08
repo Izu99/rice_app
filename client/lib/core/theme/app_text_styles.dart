@@ -8,8 +8,18 @@ class AppTextStyles {
 
   // ==================== FONT FAMILY ====================
 
-  /// Primary font family
-  static const String fontFamily = 'Poppins';
+  /// Primary font family.
+  ///
+  /// NotoSansSinhala is listed FIRST so Sinhala glyphs always come from the
+  /// bundled font — never from the device's system font, whose Sinhala
+  /// support varies by Android version/OEM (missing glyphs, broken shaping).
+  /// The bundled NotoSansSinhala files are Sinhala-subset builds with NO
+  /// Latin letters (A-Z/a-z), so English text falls through to Poppins and
+  /// keeps its current look.
+  static const String fontFamily = 'NotoSansSinhala';
+
+  /// Latin font family (English letters render with this via fallback)
+  static const String fontFamilyLatin = 'Poppins';
 
   /// Secondary font family (for numbers)
   static const String fontFamilyMono = 'RobotoMono';
@@ -17,11 +27,8 @@ class AppTextStyles {
   /// Sinhala font family
   static const String fontFamilySinhala = 'NotoSansSinhala';
 
-  /// Fallback fonts for scripts Poppins doesn't cover (e.g. Sinhala).
-  /// Applied app-wide via ThemeData.fontFamilyFallback so Sinhala text
-  /// renders identically on every device instead of relying on whatever
-  /// Sinhala font each Android OEM/version happens to ship.
-  static const List<String> fontFamilyFallback = [fontFamilySinhala];
+  /// Fallback for glyphs NotoSansSinhala doesn't cover (Latin letters).
+  static const List<String> fontFamilyFallback = [fontFamilyLatin];
 
   // ==================== FONT WEIGHTS ====================
 
@@ -43,8 +50,8 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 57,
     fontWeight: weightRegular,
-    letterSpacing: -0.25,
-    height: 1.12,
+    letterSpacing: 0,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -55,7 +62,7 @@ class AppTextStyles {
     fontSize: 45,
     fontWeight: weightRegular,
     letterSpacing: 0,
-    height: 1.16,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -66,7 +73,7 @@ class AppTextStyles {
     fontSize: 36,
     fontWeight: weightRegular,
     letterSpacing: 0,
-    height: 1.22,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -79,7 +86,7 @@ class AppTextStyles {
     fontSize: 32,
     fontWeight: weightBold,
     letterSpacing: 0,
-    height: 1.25,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -90,7 +97,7 @@ class AppTextStyles {
     fontSize: 28,
     fontWeight: weightBold,
     letterSpacing: 0,
-    height: 1.29,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -113,8 +120,8 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 32,
     fontWeight: weightBold,
-    letterSpacing: -0.5,
-    height: 1.2,
+    letterSpacing: 0,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -124,7 +131,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 28,
     fontWeight: weightBold,
-    letterSpacing: -0.25,
+    letterSpacing: 0,
     height: 1.3,
     color: AppColors.textPrimary,
   );
@@ -146,7 +153,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 20,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.4,
     color: AppColors.textPrimary,
   );
@@ -157,7 +164,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 18,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.4,
     color: AppColors.textPrimary,
   );
@@ -168,7 +175,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textPrimary,
   );
@@ -182,7 +189,7 @@ class AppTextStyles {
     fontSize: 20,
     fontWeight: weightMedium,
     letterSpacing: 0,
-    height: 1.27,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -192,7 +199,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textPrimary,
   );
@@ -203,7 +210,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
     height: 1.43,
     color: AppColors.textPrimary,
   );
@@ -216,7 +223,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightRegular,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textPrimary,
   );
@@ -227,7 +234,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
-    letterSpacing: 0.25,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textPrimary,
   );
@@ -238,7 +245,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightRegular,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textSecondary,
   );
@@ -251,7 +258,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
     height: 1.43,
     color: AppColors.textPrimary,
   );
@@ -262,7 +269,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightMedium,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.textPrimary,
   );
@@ -273,7 +280,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 8,
     fontWeight: weightMedium,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.6,
     color: AppColors.textSecondary,
   );
@@ -286,7 +293,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.43,
     color: AppColors.white,
   );
@@ -297,7 +304,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.white,
   );
@@ -308,7 +315,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.white,
   );
@@ -321,7 +328,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.textSecondary,
   );
@@ -332,7 +339,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightMedium,
-    letterSpacing: 1.5,
+    letterSpacing: 0,
     height: 1.6,
     color: AppColors.textSecondary,
   );
@@ -346,7 +353,7 @@ class AppTextStyles {
     fontSize: 36,
     fontWeight: weightBold,
     letterSpacing: 0,
-    height: 1.2,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -357,7 +364,7 @@ class AppTextStyles {
     fontSize: 48,
     fontWeight: weightBold,
     letterSpacing: 0,
-    height: 1.2,
+    height: 1.3,
     color: AppColors.textPrimary,
   );
 
@@ -392,7 +399,7 @@ class AppTextStyles {
     fontSize: 28,
     fontWeight: weightBold,
     letterSpacing: 0,
-    height: 1.2,
+    height: 1.3,
     color: AppColors.primary,
   );
 
@@ -438,7 +445,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
-    letterSpacing: 0.25,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textLink,
     decoration: TextDecoration.underline,
@@ -452,7 +459,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightRegular,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textPrimary,
   );
@@ -463,7 +470,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 16,
     fontWeight: weightRegular,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.5,
     color: AppColors.textHint,
   );
@@ -474,7 +481,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightMedium,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.textSecondary,
   );
@@ -485,7 +492,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.error,
   );
@@ -498,8 +505,8 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 10,
     fontWeight: weightBold,
-    letterSpacing: 0.5,
-    height: 1.0,
+    letterSpacing: 0,
+    height: 1.25,
     color: AppColors.white,
   );
 
@@ -511,7 +518,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 18,
     fontWeight: weightSemiBold,
-    letterSpacing: 0.15,
+    letterSpacing: 0,
     height: 1.4,
     color: AppColors.textPrimary,
   );
@@ -524,7 +531,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 14,
     fontWeight: weightMedium,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     height: 1.43,
   );
 
@@ -536,7 +543,7 @@ class AppTextStyles {
     fontFamilyFallback: fontFamilyFallback,
     fontSize: 12,
     fontWeight: weightRegular,
-    letterSpacing: 0.4,
+    letterSpacing: 0,
     height: 1.33,
     color: AppColors.white,
   );

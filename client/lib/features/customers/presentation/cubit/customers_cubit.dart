@@ -568,6 +568,53 @@ class CustomersCubit extends Cubit<CustomersState> {
     );
   }
 
+  /// Pay off every outstanding-balance transaction for the currently
+  /// selected customer. There's no bulk "settle balance" endpoint on the
+  /// server — only per-transaction payments — so this pays each unpaid
+  /// transaction in sequence and stops (surfacing the error) if one fails,
+  /// rather than silently paying only the first transaction like before.
+  Future<void> payAllOutstanding() async {
+    final customer = state.selectedCustomer;
+    if (customer == null) return;
+
+    final txnsWithBalance = state.customerTransactions
+        .where((t) => ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
+        .toList();
+
+    if (txnsWithBalance.isEmpty) return;
+
+    emit(state.copyWith(formStatus: CustomerFormStatus.submitting));
+
+    for (final txn in txnsWithBalance) {
+      final transactionId = txn['id'] ?? txn['_id'];
+      final balance = (txn['balance'] as num?)?.toDouble() ?? 0.0;
+      if (transactionId == null || balance <= 0) continue;
+
+      final result = await _transactionRepository.addPayment(
+        transactionId: transactionId,
+        amount: balance,
+        method: PaymentMethod.cash,
+        notes: null,
+      );
+
+      final failure = result.fold((l) => l, (r) => null);
+      if (failure != null) {
+        emit(state.copyWith(
+          formStatus: CustomerFormStatus.failure,
+          formErrorMessage: failure.message,
+        ));
+        await loadCustomerDetail(customer.id);
+        return;
+      }
+    }
+
+    await loadCustomerDetail(customer.id);
+    emit(state.copyWith(
+      formStatus: CustomerFormStatus.success,
+      formSuccessMessage: 'සියලුම හිඟ මුදල් ගෙවන ලදී', // All outstanding paid
+    ));
+  }
+
   /// Reset form status
   void resetFormStatus() {
     emit(state.copyWith(

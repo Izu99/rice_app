@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'en_strings.dart';
 
@@ -7,6 +8,12 @@ class SiStrings {
 
   static String _languageCode = 'si';
   static const String _langKey = 'app_language';
+
+  /// Bumped on every language change. Screens kept alive by go_router's
+  /// StatefulNavigationShell (the bottom-nav tabs) don't naturally rebuild
+  /// when SiStrings changes elsewhere, so app.dart listens to this to force
+  /// a full remount of the routed tree whenever the language is switched.
+  static final ValueNotifier<int> languageVersion = ValueNotifier<int>(0);
 
   /// Initialize language from shared preferences
   static Future<void> initialize() async {
@@ -19,6 +26,7 @@ class SiStrings {
     _languageCode = code;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_langKey, code);
+    languageVersion.value++;
   }
 
   /// Toggle between English and Sinhala
@@ -363,6 +371,152 @@ class SiStrings {
   static String get customerReport =>
       _get('ගනුදෙනුකරු වාර්තාව', EnStrings.customerReport);
   static String get stockReport => _get('තොග වාර්තාව', EnStrings.stockReport);
+
+  // ==================== LANDING SCREEN ====================
+  static String get landingTagline => _get(
+      'ඔබගේ සහල් මෝල නවීන කළමනාකරණ පද්ධතියක් සමඟ කාර්යක්ෂමව කළමනාකරණය කරන්න.',
+      'Manage your rice mill efficiently with our modern management system.');
+  static String get detailedDashboard =>
+      _get('විස්තරාත්මක උපකරණ පුවරුව', 'Detailed Dashboard');
+  static String get goToSummary => _get('සාරාංශයට යන්න', 'Go to Summary');
+
+  // ==================== PRICE MANAGEMENT ====================
+  static String get enterPriceDetails => _get('මිල ඇතුළත් කරන්න', 'Enter price details');
+  static String get yourDistrict => _get('ඔබගේ දිස්ත්‍රික්කය', 'Your District');
+  static String get notSet => _get('සකසා නැත', 'Not Set');
+  static String get commodityType => _get('භාණ්ඩ වර්ගය', 'Commodity Type');
+  static String get paddyLabel => _get('වී', 'Paddy');
+  static String get riceLabel => _get('සහල්', 'Rice');
+  static String get selectVariety => _get('ප්‍රභේදය තෝරන්න', 'Select variety');
+  static String get minimumPriceRs => _get('අවම මිල (රු.)', 'Minimum Price (Rs.)');
+  static String get maximumPriceOptionalRs =>
+      _get('උපරිම මිල (රු.) — විකල්පයි', 'Maximum Price (Rs.) — Optional');
+  static String get maxPriceHint =>
+      _get('උදා. 118 (තනි මිලක් නම් හිස්ව තබන්න)', 'e.g., 118 (leave blank for single price)');
+  static String get priceRequired => _get('මිල අවශ්‍යයි', 'Price is required');
+  static String get enterValidNumber => _get('වලංගු අංකයක් ඇතුළත් කරන්න', 'Enter a valid number');
+  static String get maxGreaterThanMin =>
+      _get('උපරිම මිල අවම මිලට වඩා වැඩි විය යුතුය', 'Max must be greater than min price');
+  static String get qualityGrade => _get('තත්ත්ව ශ්‍රේණිය', 'Quality Grade');
+  static String get premium => _get('උසස්', 'Premium');
+  static String get standard => _get('සාමාන්‍ය', 'Standard');
+  static String get basic => _get('මූලික', 'Basic');
+  static String get notesOptional => _get('සටහන් (විකල්පයි)', 'Notes (Optional)');
+  static String get notesHint =>
+      _get('මෙම මිල පිළිබඳ අමතර විස්තර', 'Any additional details about this price');
+  static String get validMinPriceRequired =>
+      _get('කරුණාකර වලංගු අවම මිලක් ඇතුළත් කරන්න', 'Please enter a valid minimum price');
+  static String get failedToAddPrice => _get('මිල එකතු කිරීම අසාර්ථකයි', 'Failed to add price');
+  static String get failedToLoadPrices => _get('මිල පූරණය අසාර්ථකයි', 'Failed to load prices');
+  static String get addingPrice => _get('මිල එකතු කරමින්...', 'Adding price...');
+  static String get marketPrices => _get('වෙළඳපොළ මිල', 'Market Prices');
+  static String get districtOverview => _get('දිස්ත්‍රික් දළ විශ්ලේෂණය', 'District Overview');
+  static String get selectDistrictToView =>
+      _get('විස්තරාත්මක මිල බැලීමට දිස්ත්‍රික්කයක් තෝරන්න', 'Select a district to view detailed prices');
+  static String get searchDistrictHint => _get('දිස්ත්‍රික්කය සොයන්න...', 'Search district...');
+  static String get noDistrictsFound => _get('දිස්ත්‍රික්ක හමු නොවීය', 'No districts found');
+  static String get noMarketPricesYet => _get(
+      'දැනට වෙළඳපොළ මිල නොමැත. පසුව නැවත පරීක්ෂා කරන්න.',
+      'There are no market prices available at the moment. Please check back later.');
+  static String get noPricesListed => _get('මිල ලැයිස්තු කර නොමැත', 'No prices listed');
+  static String get totalVarieties => _get('මුළු ප්‍රභේද', 'Total Varieties');
+  static String get removePriceTitle => _get('මිල ඉවත් කරන්නද?', 'Remove Price?');
+  static String get removePriceContent => _get(
+      'මෙය ඔබගේ මිල ලැයිස්තුව ඉවත් කරයි. අනෙක් පරිශීලකයින්ට එය තවදුරටත් නොපෙනේ. ඕනෑම වේලාවක යාවත්කාලීන මිලක් නැවත එකතු කළ හැක.',
+      'This will remove your price listing. Other users will no longer see it. You can add a new updated price anytime.');
+  static String get remove => _get('ඉවත් කරන්න', 'Remove');
+
+  static String priceAddedMessage(String formattedPrice) =>
+      _get('මිල එකතු කරන ලදී: $formattedPrice', 'Price added: $formattedPrice');
+  static String displayingPricesIn(int count, String district) => _get(
+      '$district හි මිල ලැයිස්තු $count ක් පෙන්වමින්', 'Displaying $count price listings in $district');
+  static String noPricesInDistrictYet(String district) => _get(
+      '$district සඳහා කිසිදු සමාගමක් මිල එකතු කර නොමැත. යාවත්කාලීන සඳහා පසුව නැවත පරීක්ෂා කරන්න.',
+      'No companies have added prices for $district yet. Check back soon for updates.');
+  static String noDistrictsMatching(String query) => _get(
+      '"$query" ට ගැලපෙන දිස්ත්‍රික්කයක් හමු නොවීය. වෙනත් නමක් උත්සාහ කරන්න.',
+      'We couldn\'t find any districts matching "$query". Try a different name.');
+  static String listingsCount(int count) => _get('ලැයිස්තු $count', '$count Listings');
+  static String updatedTimeAgo(String timeAgo) => _get('$timeAgo පෙර යාවත්කාලීන විය', 'Updated $timeAgo');
+  static String get justNowLower => _get('දැන් පමණි', 'just now');
+  static String minutesAgo(int m) => _get('මිනිත්තු $m කට පෙර', '${m}m ago');
+  static String hoursAgo(int h) => _get('පැය $h කට පෙර', '${h}h ago');
+  static String shortDaysAgo(int d) => _get('දින $d කට පෙර', '${d}d ago');
+  static String pricesInDistrictTitle(String district) => _get('$district හි මිල', 'Prices in $district');
+  static String pricesAvailableCount(int count) =>
+      _get('මිල $count ක් තිබේ', '$count price${count == 1 ? '' : 's'} available');
+  static String noPricesFoundIn(String district) => _get('$district හි මිල හමු නොවීය', 'No prices found in $district');
+
+  // ==================== STORE ====================
+  static String get liveMarketplace => _get('සජීවී වෙළඳපොළ', 'Live Marketplace');
+  static String get listingsWord => _get('ලැයිස්තු', 'Listings');
+  static String get companiesWord => _get('සමාගම්', 'Companies');
+  static String get districtsWord => _get('දිස්ත්‍රික්ක', 'Districts');
+  static String get listYourProductsTitle =>
+      _get('ඔබගේ නිෂ්පාදන ලැයිස්තු කරන්න', 'List your products');
+  static String get listYourProductsSubtitle => _get(
+      'අනෙක් සමාගම්වලට බැලීමට ඔබගේ සහල් සහ වී නිෂ්පාදන ලැයිස්තු කරන්න.',
+      'List your rice & paddy products for other companies to see.');
+  static String get addListing => _get('ලැයිස්තුවක් එකතු කරන්න', 'Add Listing');
+  static String get editListing => _get('ලැයිස්තුව සංස්කරණය', 'Edit Listing');
+  static String get addNewListing => _get('නව ලැයිස්තුවක්', 'Add New Listing');
+  static String get updateListing => _get('ලැයිස්තුව යාවත්කාලීන කරන්න', 'Update Listing');
+  static String get postListing => _get('ලැයිස්තුව පළ කරන්න', 'Post Listing');
+  static String get listingUpdated => _get('ලැයිස්තුව යාවත්කාලීන විය!', 'Listing updated!');
+  static String get listingAddedSuccess => _get('ලැයිස්තුව සාර්ථකව එකතු විය!', 'Listing added successfully!');
+  static String get failedToUpdate => _get('යාවත්කාලීන කිරීම අසාර්ථකයි', 'Failed to update');
+  static String get failedToAddListing => _get('ලැයිස්තුව එකතු කිරීම අසාර්ථකයි', 'Failed to add listing');
+  static String get removeListingTitle => _get('ලැයිස්තුව ඉවත් කරන්නද?', 'Remove Listing?');
+  static String get removeListingContent => _get(
+      'මෙම ලැයිස්තුව ඉවත් කරනු ලැබේ. අනෙක් සමාගම්වලට එය තවදුරටත් නොපෙනේ. ඕනෑම වේලාවක නැවත එකතු කළ හැක.',
+      'This listing will be removed. Other companies will no longer see it. You can add a new one anytime.');
+  static String get myListing => _get('මගේ ලැයිස්තුව', 'My Listing');
+  static String get noListingsFound => _get('ලැයිස්තු හමු නොවීය', 'No listings found');
+  static String get beFirstToList => _get('පළමුව ලැයිස්තු කරන්න!', 'Be the first to add a listing!');
+  static String get searchListingHint =>
+      _get('ප්‍රභේදය, සමාගම, දිස්ත්‍රික්කය සොයන්න...', 'Search variety, company, district...');
+  static String get selectCategory => _get('කරුණාකර කාණ්ඩයක් තෝරන්න', 'Please select a category');
+  static String get selectDistrictErr => _get('කරුණාකර දිස්ත්‍රික්කයක් තෝරන්න', 'Please select a district');
+  static String get selectDistrict => _get('දිස්ත්‍රික්කය තෝරන්න', 'Select district');
+  static String get category => _get('කාණ්ඩය', 'Category');
+  static String get quantityKg => _get('ප්‍රමාණය (kg)', 'Quantity (kg)');
+  static String get pricePerKgRs => _get('මිල / kg (රු.)', 'Price / kg (Rs.)');
+  static String get districtLabel => _get('දිස්ත්‍රික්කය', 'District');
+  static String get contactPhone => _get('දුරකථනය', 'Contact Phone');
+  static String get descriptionOptional => _get('විස්තරය (විකල්පයි)', 'Description (Optional)');
+  static String get required => _get('අවශ්‍යයි', 'Required');
+  static String get enterValidPhone => _get('වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න', 'Enter valid phone number');
+  static String get cannotChange => _get('(වෙනස් කළ නොහැක)', '(cannot change)');
+  static String get pricePerKg => _get('kg එකකට මිල', 'Price per kg');
+  static String get availableQuantity => _get('තිබෙන ප්‍රමාණය', 'Available quantity');
+  static String get totalValue => _get('මුළු අගය', 'Total value');
+  static String get description => _get('විස්තරය', 'Description');
+  static String get contact => _get('සම්බන්ධතාව', 'Contact');
+  static String get copy => _get('පිටපත් කරන්න', 'Copy');
+  static String get phoneCopied => _get('දුරකථන අංකය පිටපත් විය!', 'Phone number copied!');
+  static String get today => _get('අද', 'Today');
+  static String get yesterday => _get('ඊයේ', 'Yesterday');
+  static String get riceBranFlour => _get('හාල් කුළු / පිටි', 'Rice Bran / Flour');
+  static String get otherCategory => _get('වෙනත්', 'Other');
+
+  static String daysAgo(int days) => _get('දින $days කට පෙර', '$days days ago');
+  static String postedDaysAgo(int days) => _get(
+      days == 0 ? 'අද පළ කරන ලදී' : days == 1 ? 'ඊයේ පළ කරන ලදී' : 'දින $days කට පෙර පළ කරන ලදී',
+      days == 0 ? 'Posted today' : days == 1 ? 'Posted yesterday' : 'Posted $days days ago');
+
+  // ==================== LEGAL ====================
+  static String get aboutTitle => _get('පිළිබඳව', 'About');
+  static String get aboutBody => _get('මෙම යෙදුම පිළිබඳව.', 'About this application.');
+  static String get privacyTitle => _get('පෞද්ගලිකත්ව ප්‍රතිපත්තිය', 'Privacy Policy');
+  static String get privacyBody =>
+      _get('පෞද්ගලිකත්ව ප්‍රතිපත්ති අන්තර්ගතය මෙහි දිස්වනු ඇත.', 'Privacy policy content will appear here.');
+  static String get termsTitle => _get('නියම සහ කොන්දේසි', 'Terms & Conditions');
+  static String get termsBody => _get(
+      'නියම සහ කොන්දේසි අන්තර්ගතය මෙහි දිස්වනු ඇත.', 'Terms and conditions content will appear here.');
+  static String get dataDeletionTitle => _get('දත්ත මකා දැමීම', 'Data Deletion');
+  static String get dataDeletionBody => _get(
+      'දත්ත මකා දැමීමේ ඉල්ලීම් උපදෙස් මෙහි දිස්වනු ඇත.',
+      'Data deletion request instructions will appear here.');
 
   // ==================== PARAMETERIZED ====================
   static String greetHello(String firstName) =>

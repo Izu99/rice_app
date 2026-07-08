@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../domain/entities/paddy_rice_price_entity.dart';
 import '../../../../data/models/paddy_rice_price_model.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -52,8 +53,8 @@ class _ViewPricesByDistrictScreenState
           body: CustomScrollView(
             slivers: [
               HSliverAppBar(
-                title: 'Market Prices',
-                subtitle: 'District Overview',
+                title: SiStrings.marketPrices,
+                subtitle: SiStrings.districtOverview,
                 onRefresh: () =>
                     context.read<PriceManagementCubit>().loadDistricts(),
               ),
@@ -80,7 +81,7 @@ class _ViewPricesByDistrictScreenState
             ],
           ),
           floatingActionButton: AppFab(
-            label: 'Add Price',
+            label: SiStrings.addPrice,
             onPressed: () => context.pushNamed('addPrice'),
           ),
         );
@@ -109,9 +110,9 @@ class _ViewPricesByDistrictScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'District Overview',
-            style: TextStyle(
+          Text(
+            SiStrings.districtOverview,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1A1A1A),
@@ -120,7 +121,7 @@ class _ViewPricesByDistrictScreenState
           ),
           const SizedBox(height: 4),
           Text(
-            'Select a district to view detailed prices',
+            SiStrings.selectDistrictToView,
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[600],
@@ -135,7 +136,7 @@ class _ViewPricesByDistrictScreenState
               });
             },
             decoration: InputDecoration(
-              hintText: 'Search district...',
+              hintText: SiStrings.searchDistrictHint,
               hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
               prefixIcon:
                   const Icon(Icons.search_rounded, color: AppColors.primary),
@@ -172,7 +173,7 @@ class _ViewPricesByDistrictScreenState
           ),
           const SizedBox(height: 24),
           Text(
-            'No districts found',
+            SiStrings.noDistrictsFound,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -184,8 +185,8 @@ class _ViewPricesByDistrictScreenState
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               _searchDistrict.isEmpty
-                  ? 'There are no market prices available at the moment. Please check back later.'
-                  : 'We couldn\'t find any districts matching "$_searchDistrict". Try a different name.',
+                  ? SiStrings.noMarketPricesYet
+                  : SiStrings.noDistrictsMatching(_searchDistrict),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -285,7 +286,7 @@ class _ViewPricesByDistrictScreenState
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '${district.priceCount} Listings',
+                              SiStrings.listingsCount(district.priceCount),
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
@@ -297,7 +298,8 @@ class _ViewPricesByDistrictScreenState
                           if (district.lastUpdated != null)
                             Expanded(
                               child: Text(
-                                'Updated ${_formatRelativeTime(district.lastUpdated!)}',
+                                SiStrings.updatedTimeAgo(
+                                    _formatRelativeTime(district.lastUpdated!)),
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey[500],
@@ -327,10 +329,10 @@ class _ViewPricesByDistrictScreenState
 
   String _formatRelativeTime(DateTime dateTime) {
     final diff = DateTime.now().difference(dateTime);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return SiStrings.justNowLower;
+    if (diff.inMinutes < 60) return SiStrings.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return SiStrings.hoursAgo(diff.inHours);
+    return SiStrings.shortDaysAgo(diff.inDays);
   }
 
   void _showPricesBottomSheet(BuildContext context, String district) {
@@ -376,13 +378,14 @@ class _ViewPricesByDistrictScreenState
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Prices in $district',
+                                      SiStrings.pricesInDistrictTitle(district),
                                       style: AppTextStyles.titleMedium.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Text(
-                                      '${prices.length} price${prices.length == 1 ? '' : 's'} available',
+                                      SiStrings.pricesAvailableCount(
+                                          prices.length),
                                       style: AppTextStyles.bodySmall.copyWith(
                                         color: AppColors.grey600,
                                       ),
@@ -410,7 +413,7 @@ class _ViewPricesByDistrictScreenState
                       Expanded(
                         child: Center(
                           child: Text(
-                            'No prices found in $district',
+                            SiStrings.noPricesFoundIn(district),
                             style: AppTextStyles.bodyMedium,
                           ),
                         ),
