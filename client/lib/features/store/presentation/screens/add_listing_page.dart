@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
@@ -88,11 +89,11 @@ class _AddListingPageState extends State<AddListingPage> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(SiStrings.selectCategory)));
       return;
     }
     if (_selectedDistrict == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a district')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(SiStrings.selectDistrictErr)));
       return;
     }
 
@@ -126,7 +127,7 @@ class _AddListingPageState extends State<AddListingPage> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.isEditing ? 'Listing updated!' : 'Listing added successfully!'),
+          content: Text(widget.isEditing ? SiStrings.listingUpdated : SiStrings.listingAddedSuccess),
           backgroundColor: const Color(0xFF2E7D32),
         ),
       );
@@ -134,7 +135,7 @@ class _AddListingPageState extends State<AddListingPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(cubit.state.errorMessage ?? (widget.isEditing ? 'Failed to update' : 'Failed to add listing')),
+          content: Text(cubit.state.errorMessage ?? (widget.isEditing ? SiStrings.failedToUpdate : SiStrings.failedToAddListing)),
           backgroundColor: Colors.red,
         ),
       );
@@ -147,7 +148,7 @@ class _AddListingPageState extends State<AddListingPage> {
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: HAppBar(
         title: widget.isEditing ? 'සංස්කරණය කරන්න' : 'ලැයිස්තු කරන්න',
-        subtitle: widget.isEditing ? 'Edit Listing' : 'Add New Listing',
+        subtitle: widget.isEditing ? SiStrings.editListing : SiStrings.addNewListing,
       ),
       body: BlocBuilder<StoreCubit, StoreState>(
         builder: (context, state) {
@@ -158,7 +159,7 @@ class _AddListingPageState extends State<AddListingPage> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _buildSectionLabel('Category / කාණ්ඩය'),
+                _buildSectionLabel(SiStrings.category),
                 const SizedBox(height: 8),
                 // Category is locked in edit mode — changing it would require
                 // a different API and breaks stock type consistency
@@ -167,13 +168,13 @@ class _AddListingPageState extends State<AddListingPage> {
                 else
                   _buildCategorySelector(),
                 const SizedBox(height: 20),
-                _buildSectionLabel('Variety / ප්‍රභේදය'),
+                _buildSectionLabel(SiStrings.variety),
                 const SizedBox(height: 8),
                 _buildTextField(
                   controller: _varietyCtrl,
                   hint: 'e.g. සම්බා, BG 252, Rice Bran...',
                   icon: Icons.grain_rounded,
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? SiStrings.required : null,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -182,7 +183,7 @@ class _AddListingPageState extends State<AddListingPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionLabel('Quantity (kg)'),
+                          _buildSectionLabel(SiStrings.quantityKg),
                           const SizedBox(height: 8),
                           _buildTextField(
                             controller: _quantityCtrl,
@@ -199,7 +200,7 @@ class _AddListingPageState extends State<AddListingPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionLabel('Price / kg (Rs.)'),
+                          _buildSectionLabel(SiStrings.pricePerKgRs),
                           const SizedBox(height: 8),
                           _buildTextField(
                             controller: _priceCtrl,
@@ -214,11 +215,11 @@ class _AddListingPageState extends State<AddListingPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildSectionLabel('District / දිස්ත්‍රික්කය'),
+                _buildSectionLabel(SiStrings.districtLabel),
                 const SizedBox(height: 8),
                 _buildDistrictDropdown(),
                 const SizedBox(height: 16),
-                _buildSectionLabel('Contact Phone / දුරකථනය'),
+                _buildSectionLabel(SiStrings.contactPhone),
                 const SizedBox(height: 8),
                 _buildTextField(
                   controller: _phoneCtrl,
@@ -227,13 +228,13 @@ class _AddListingPageState extends State<AddListingPage> {
                   keyboardType: TextInputType.phone,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Required';
-                    if (v.length < 9) return 'Enter valid phone number';
+                    if (v == null || v.trim().isEmpty) return SiStrings.required;
+                    if (v.length < 9) return SiStrings.enterValidPhone;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildSectionLabel('Description / විස්තරය (Optional)'),
+                _buildSectionLabel(SiStrings.descriptionOptional),
                 const SizedBox(height: 8),
                 _buildTextField(
                   controller: _descriptionCtrl,
@@ -254,7 +255,7 @@ class _AddListingPageState extends State<AddListingPage> {
                     child: isSaving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : Text(
-                            widget.isEditing ? 'Update Listing' : 'Post Listing',
+                            widget.isEditing ? SiStrings.updateListing : SiStrings.postListing,
                             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
@@ -293,7 +294,7 @@ class _AddListingPageState extends State<AddListingPage> {
                   fontWeight: FontWeight.w600,
                   fontSize: 12)),
           const SizedBox(width: 8),
-          Text('(cannot change)',
+          Text(SiStrings.cannotChange,
               style: TextStyle(color: Colors.grey[500], fontSize: 11)),
         ],
       ),
@@ -366,7 +367,7 @@ class _AddListingPageState extends State<AddListingPage> {
   Widget _buildDistrictDropdown() {
     return DropdownButtonFormField<String>(
       value: _selectedDistrict,
-      hint: const Text('Select district', style: TextStyle(fontSize: 13, color: Colors.black38)),
+      hint: Text(SiStrings.selectDistrict, style: const TextStyle(fontSize: 13, color: Colors.black38)),
       onChanged: (v) => setState(() => _selectedDistrict = v),
       items: _districts.map((d) => DropdownMenuItem(value: d, child: Text(d, style: const TextStyle(fontSize: 13)))).toList(),
       decoration: InputDecoration(

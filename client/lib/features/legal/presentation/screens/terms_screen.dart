@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/si_strings.dart';
 
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});
@@ -6,12 +7,12 @@ class TermsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Terms & Conditions')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      appBar: AppBar(title: Text(SiStrings.termsTitle)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Text(
-          'Terms and conditions content will appear here.',
-          style: TextStyle(fontSize: 14, height: 1.6),
+          SiStrings.termsBody,
+          style: const TextStyle(fontSize: 14, height: 1.6),
         ),
       ),
     );

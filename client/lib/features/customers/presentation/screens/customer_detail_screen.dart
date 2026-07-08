@@ -228,22 +228,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                     : Icons.move_to_inbox_rounded,
                 color: const Color(
                     0xFF4CAF50), // Green for Pay money (any direction)
-                onTap: () {
-                  final cubit = context.read<CustomersCubit>();
-                  final txnsWithBalance = cubit.state.customerTransactions
-                      .where((t) =>
-                          ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
-                      .toList();
-
-                  if (txnsWithBalance.isNotEmpty) {
-                    _showPaymentDialog(context, txnsWithBalance.first);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')),
-                    );
-                  }
-                },
+                onTap: () => _handlePayAll(context),
               ),
             ],
           ],
@@ -750,24 +735,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                     ? Icons.payments_rounded
                     : Icons.move_to_inbox_rounded,
                 color: hasPayableBalance ? AppColors.error : AppColors.success,
-                onTap: () {
-                  final txnsWithBalance = context
-                      .read<CustomersCubit>()
-                      .state
-                      .customerTransactions
-                      .where((t) =>
-                          ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
-                      .toList();
-                  if (txnsWithBalance.isNotEmpty) {
-                    _showPaymentDialog(context, txnsWithBalance.first);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                              Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')),
-                    );
-                  }
-                },
+                onTap: () => _handlePayAll(context),
               ),
               const SizedBox(height: 8),
             ],
@@ -798,6 +766,56 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             const SizedBox(height: 8),
           ],
         ),
+      ),
+    );
+  }
+
+  void _handlePayAll(BuildContext context) {
+    final cubit = context.read<CustomersCubit>();
+    final txnsWithBalance = cubit.state.customerTransactions
+        .where((t) => ((t['balance'] as num?)?.toDouble() ?? 0.0) > 0)
+        .toList();
+
+    if (txnsWithBalance.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ගෙවීමට හිඟ ගනුදෙනු කිසිවක් නැත')),
+      );
+      return;
+    }
+
+    final totalBalance = txnsWithBalance.fold<double>(
+        0.0, (sum, t) => sum + ((t['balance'] as num?)?.toDouble() ?? 0.0));
+    final isBuy =
+        (txnsWithBalance.first['type']?.toString().toLowerCase() ?? 'buy') ==
+            'buy';
+    final formattedTotal =
+        'Rs. ${totalBalance.toStringAsFixed(2).replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',')}';
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(isBuy ? 'සියලුම හිඟ මුදල් ගෙවන්න' : 'සියලුම හිඟ මුදල් ලබාගන්න'),
+        content: Text(
+          '${txnsWithBalance.length} ගනුදෙනු සඳහා $formattedTotal ${isBuy ? 'ගෙවීමට' : 'ලබාගැනීමට'} සූදානම්ද?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('නැත'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              cubit.payAllOutstanding();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.success,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('ඔව්, ගෙවන්න'),
+          ),
+        ],
       ),
     );
   }

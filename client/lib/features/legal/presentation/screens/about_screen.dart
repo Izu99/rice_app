@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/si_strings.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -6,12 +7,12 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('About')),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      appBar: AppBar(title: Text(SiStrings.aboutTitle)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Text(
-          'About this application.',
-          style: TextStyle(fontSize: 14, height: 1.6),
+          SiStrings.aboutBody,
+          style: const TextStyle(fontSize: 14, height: 1.6),
         ),
       ),
     );

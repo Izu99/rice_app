@@ -743,7 +743,7 @@ class _HomeScreenState extends State<HomeScreen>
           assetImage: 'assets/icons/milling.png',
           label: SiStrings.milling,
           color: const Color(0xFF795548),
-          onTap: () => context.push('/stock'),
+          onTap: () => context.push(RouteNames.milling),
         ),
         _GridItem(
           icon: Icons.local_offer_rounded,

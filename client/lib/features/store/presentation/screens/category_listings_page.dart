@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/shared_widgets/h_app_bar.dart';
 import '../../../../domain/entities/store_listing_entity.dart';
@@ -103,14 +104,14 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
                                 ),
                                 alignment: Alignment.centerRight,
                                 padding: const EdgeInsets.only(right: 24),
-                                child: const Column(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.delete_rounded,
+                                    const Icon(Icons.delete_rounded,
                                         color: Colors.white, size: 26),
-                                    SizedBox(height: 4),
-                                    Text('Remove',
-                                        style: TextStyle(
+                                    const SizedBox(height: 4),
+                                    Text(SiStrings.remove,
+                                        style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w600)),
@@ -132,7 +133,7 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
               ],
             ),
             floatingActionButton: AppFab(
-              label: 'Add Listing',
+              label: SiStrings.addListing,
               color: widget.color,
               onPressed: () async {
                 final added = await Navigator.push<bool>(
@@ -163,7 +164,7 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
       pinned: true,
       onRefresh: () => _cubit.refreshCategory(),
       title: widget.siLabel,
-      subtitle: '${widget.enLabel} • $count listings',
+      subtitle: '${widget.enLabel} • $count ${SiStrings.listingsWord}',
     );
   }
 
@@ -187,18 +188,17 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
       showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Remove Listing?'),
-          content: const Text(
-              'This listing will be removed. Other companies will no longer see it. You can add a new one anytime.'),
+          title: Text(SiStrings.removeListingTitle),
+          content: Text(SiStrings.removeListingContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(SiStrings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Remove'),
+              child: Text(SiStrings.remove),
             ),
           ],
         ),
@@ -211,7 +211,7 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
         controller: _searchCtrl,
         onChanged: (v) => setState(() => _searchQuery = v),
         decoration: InputDecoration(
-          hintText: 'Search variety, company, district...',
+          hintText: SiStrings.searchListingHint,
           hintStyle: const TextStyle(fontSize: 13),
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchQuery.isNotEmpty
@@ -244,7 +244,7 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (ctx, i) {
           if (i == 0) {
-            return _buildFilterChip('සියල්ල / All', _selectedDistrict == null, () => setState(() => _selectedDistrict = null));
+            return _buildFilterChip(SiStrings.all, _selectedDistrict == null, () => setState(() => _selectedDistrict = null));
           }
           final d = districts[i - 1];
           return _buildFilterChip(d, _selectedDistrict == d, () => setState(() => _selectedDistrict = d));
@@ -274,7 +274,11 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
 
   Widget _buildListingCard(BuildContext context, StoreListingEntity item) {
     final daysSince = DateTime.now().difference(item.postedDate).inDays;
-    final timeLabel = daysSince == 0 ? 'Today' : daysSince == 1 ? 'Yesterday' : '$daysSince days ago';
+    final timeLabel = daysSince == 0
+        ? SiStrings.today
+        : daysSince == 1
+            ? SiStrings.yesterday
+            : SiStrings.daysAgo(daysSince);
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -333,7 +337,7 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                          child: const Text('My Listing', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                          child: Text(SiStrings.myListing, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
                         ),
                         const SizedBox(width: 6),
                         GestureDetector(
@@ -403,9 +407,9 @@ class _CategoryListingsPageState extends State<CategoryListingsPage> {
         children: [
           Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
-          Text('No listings found', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey.shade500)),
+          Text(SiStrings.noListingsFound, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey.shade500)),
           const SizedBox(height: 8),
-          Text('Be the first to add a listing!', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
+          Text(SiStrings.beFirstToList, style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
         ],
       ),
     );

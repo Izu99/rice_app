@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -73,7 +74,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
 
     if (price == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid minimum price')),
+        SnackBar(content: Text(SiStrings.validMinPriceRequired)),
       );
       return;
     }
@@ -98,8 +99,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
             state.lastAddedPrice != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('Price added: ${state.lastAddedPrice!.formattedPrice}'),
+              content: Text(SiStrings.priceAddedMessage(
+                  state.lastAddedPrice!.formattedPrice)),
               backgroundColor: AppColors.success,
             ),
           );
@@ -107,7 +108,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
         } else if (state.status == PriceManagementStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage ?? 'Failed to add price'),
+              content: Text(state.errorMessage ?? SiStrings.failedToAddPrice),
               backgroundColor: AppColors.error,
             ),
           );
@@ -116,15 +117,15 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF4F6FA),
         appBar: HAppBar(
-          title: 'Add Price',
-          subtitle: 'මිල ඇතුළත් කරන්න',
+          title: SiStrings.addPrice,
+          subtitle: SiStrings.enterPriceDetails,
           onBack: () => context.pop(),
         ),
         body: BlocBuilder<PriceManagementCubit, PriceManagementState>(
           builder: (context, state) {
             return LoadingOverlay(
               isLoading: state.status == PriceManagementStatus.addingPrice,
-              message: 'Adding price...',
+              message: SiStrings.addingPrice,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(AppDimensions.paddingMedium),
                 child: Form(
@@ -136,7 +137,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       BlocBuilder<AuthCubit, AuthState>(
                         builder: (context, authState) {
                           final district =
-                              authState.company?.district ?? 'Not Set';
+                              authState.company?.district ?? SiStrings.notSet;
                           return Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -153,7 +154,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Your District',
+                                    Text(SiStrings.yourDistrict,
                                         style: AppTextStyles.bodySmall.copyWith(
                                             color: AppColors.textSecondary)),
                                     Text(district,
@@ -171,7 +172,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       const SizedBox(height: 20),
 
                       // Paddy / Rice toggle
-                      Text('Commodity Type',
+                      Text(SiStrings.commodityType,
                           style: AppTextStyles.labelMedium
                               .copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
@@ -179,7 +180,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                         children: [
                           Expanded(
                             child: _TypeButton(
-                              label: 'Paddy',
+                              label: SiStrings.paddyLabel,
                               icon: Icons.grass_rounded,
                               selected: _selectedPriceType == 'paddy',
                               color: const Color(0xFF8BC34A),
@@ -192,7 +193,7 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: _TypeButton(
-                              label: 'Rice',
+                              label: SiStrings.riceLabel,
                               icon: Icons.rice_bowl_rounded,
                               selected: _selectedPriceType == 'rice',
                               color: AppColors.primary,
@@ -207,13 +208,13 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       const SizedBox(height: 20),
 
                       // Variety dropdown
-                      Text('Variety',
+                      Text(SiStrings.variety,
                           style: AppTextStyles.labelMedium
                               .copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedVariety,
-                        hint: const Text('Select variety'),
+                        hint: Text(SiStrings.selectVariety),
                         items: _varieties
                             .map((v) => DropdownMenuItem(
                                   value: v,
@@ -235,17 +236,17 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       // Min Price
                       CustomTextField(
                         controller: _minPriceController,
-                        label: 'Minimum Price (Rs.)',
+                        label: SiStrings.minimumPriceRs,
                         hint: 'e.g., 115',
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         prefixIcon: Icons.currency_rupee,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Price is required';
+                            return SiStrings.priceRequired;
                           }
                           if (double.tryParse(value.trim()) == null) {
-                            return 'Enter a valid number';
+                            return SiStrings.enterValidNumber;
                           }
                           return null;
                         },
@@ -255,8 +256,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       // Max Price (optional)
                       CustomTextField(
                         controller: _maxPriceController,
-                        label: 'Maximum Price (Rs.) — Optional',
-                        hint: 'e.g., 118 (leave blank for single price)',
+                        label: SiStrings.maximumPriceOptionalRs,
+                        hint: SiStrings.maxPriceHint,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
                         prefixIcon: Icons.currency_rupee,
@@ -265,11 +266,11 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                             return null;
                           }
                           final max = double.tryParse(value.trim());
-                          if (max == null) return 'Enter a valid number';
+                          if (max == null) return SiStrings.enterValidNumber;
                           final min =
                               double.tryParse(_minPriceController.text.trim());
                           if (min != null && max <= min) {
-                            return 'Max must be greater than min price';
+                            return SiStrings.maxGreaterThanMin;
                           }
                           return null;
                         },
@@ -277,19 +278,20 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       const SizedBox(height: 20),
 
                       // Quality Grade
-                      Text('Quality Grade',
+                      Text(SiStrings.qualityGrade,
                           style: AppTextStyles.labelMedium
                               .copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: _selectedQualityGrade,
-                        items: const [
+                        items: [
                           DropdownMenuItem(
-                              value: 'premium', child: Text('Premium')),
+                              value: 'premium', child: Text(SiStrings.premium)),
                           DropdownMenuItem(
-                              value: 'standard', child: Text('Standard')),
+                              value: 'standard',
+                              child: Text(SiStrings.standard)),
                           DropdownMenuItem(
-                              value: 'basic', child: Text('Basic')),
+                              value: 'basic', child: Text(SiStrings.basic)),
                         ],
                         onChanged: (value) {
                           setState(() =>
@@ -307,8 +309,8 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                       // Notes
                       CustomTextField(
                         controller: _notesController,
-                        label: 'Notes (Optional)',
-                        hint: 'Any additional details about this price',
+                        label: SiStrings.notesOptional,
+                        hint: SiStrings.notesHint,
                         maxLines: 3,
                         maxLength: 200,
                         showCounter: true,
@@ -325,9 +327,9 @@ class _AddPriceScreenState extends State<AddPriceScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16)),
                           ),
-                          child: const Text(
-                            'මිල සුරකින්න',
-                            style: TextStyle(
+                          child: Text(
+                            SiStrings.save,
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 1.2),
                           ),

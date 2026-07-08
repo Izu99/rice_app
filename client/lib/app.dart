@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/constants/si_strings.dart';
 import 'core/theme/app_theme.dart';
 import 'injection_container.dart';
 import 'routes/app_router.dart';
@@ -95,6 +96,33 @@ class RiceMillApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
         routerConfig: sl<AppRouter>().router,
+        builder: (context, child) {
+          // Layouts are tuned for scale 1.0; Sinhala strings are longer than
+          // English, so devices with a large system font size overflow rows
+          // and buttons. Clamp instead of ignoring the setting entirely.
+          final scaled = MediaQuery.withClampedTextScaling(
+            minScaleFactor: 0.85,
+            maxScaleFactor: 1.15,
+            child: child!,
+          );
+
+          // Bottom-nav tabs are kept alive by go_router's
+          // StatefulNavigationShell, so they don't rebuild just because
+          // SiStrings changed elsewhere. Re-keying on languageVersion forces
+          // the whole routed tree (current route + kept-alive tabs) to
+          // remount with the new language, without touching GoRouter's own
+          // location state.
+          return ValueListenableBuilder<int>(
+            valueListenable: SiStrings.languageVersion,
+            builder: (context, version, routedTree) {
+              return KeyedSubtree(
+                key: ValueKey(version),
+                child: routedTree!,
+              );
+            },
+            child: scaled,
+          );
+        },
       ),
     );
   }

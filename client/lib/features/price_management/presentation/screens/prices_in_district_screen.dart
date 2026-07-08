@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/si_strings.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -40,7 +41,8 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
         if (state.status == PriceManagementStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.errorMessage ?? 'Failed to load prices'),
+              content:
+                  Text(state.errorMessage ?? SiStrings.failedToLoadPrices),
               backgroundColor: AppColors.error,
             ),
           );
@@ -54,7 +56,7 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
               slivers: [
                 HSliverAppBar(
                   title: widget.district,
-                  subtitle: 'Market Prices',
+                  subtitle: SiStrings.marketPrices,
                   onRefresh: () => context
                       .read<PriceManagementCubit>()
                       .loadPricesByDistrict(widget.district),
@@ -81,7 +83,8 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
                                   color: AppColors.primary.withValues(alpha: 0.7)),
                               const SizedBox(width: 8),
                               Text(
-                                'Displaying ${state.prices.length} price listings in ${widget.district}',
+                                SiStrings.displayingPricesIn(
+                                    state.prices.length, widget.district),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -125,14 +128,14 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
                                     ),
                                     alignment: Alignment.centerRight,
                                     padding: const EdgeInsets.only(right: 24),
-                                    child: const Column(
+                                    child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.delete_rounded,
+                                        const Icon(Icons.delete_rounded,
                                             color: Colors.white, size: 28),
-                                        SizedBox(height: 4),
-                                        Text('Remove',
-                                            style: TextStyle(
+                                        const SizedBox(height: 4),
+                                        Text(SiStrings.remove,
+                                            style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600)),
@@ -187,7 +190,7 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
                   size: 18, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                'Total Varieties: $count',
+                '${SiStrings.totalVarieties}: $count',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
@@ -229,7 +232,7 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'No prices listed',
+            SiStrings.noPricesListed,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -240,7 +243,7 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'No companies have added prices for ${widget.district} yet. Check back soon for updates.',
+              SiStrings.noPricesInDistrictYet(widget.district),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -285,7 +288,7 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
                 ),
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 24),
-                child: const Column(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.delete_rounded, color: Colors.white, size: 28),
@@ -314,18 +317,17 @@ class _PricesInDistrictScreenState extends State<PricesInDistrictScreen> {
   Future<bool?> _confirmRemove(BuildContext context) => showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Remove Price?'),
-          content: const Text(
-              'This will remove your price listing. Other users will no longer see it. You can add a new updated price anytime.'),
+          title: Text(SiStrings.removePriceTitle),
+          content: Text(SiStrings.removePriceContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(SiStrings.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Remove'),
+              child: Text(SiStrings.remove),
             ),
           ],
         ),
