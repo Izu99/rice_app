@@ -6,6 +6,7 @@ const companyGuard = require('../middleware/companyGuard')
 const roleGuard = require('../middleware/roleGuard')
 const { validationResult } = require('express-validator')
 const { errorResponse, successResponse } = require('../utils/responseHandler')
+const { normalizePhone } = require('../utils/phone')
 
 // Import models
 const Customer = require('../models/Customer')
@@ -94,8 +95,9 @@ router.get('/', async (req, res) => {
  */
 router.get('/check-phone/:phone', async (req, res) => {
   try {
+    const phone = normalizePhone(req.params.phone)
     const customer = await Customer.findOne({
-      phone: req.params.phone,
+      phone,
       ...req.companyFilter
     })
 
@@ -128,10 +130,10 @@ router.get('/check-phone/:phone', async (req, res) => {
  */
 router.get('/phone', async (req, res) => {
   try {
-    const { phone } = req.query
-    if (!phone) {
+    if (!req.query.phone) {
       return errorResponse(res, 'Phone number is required', 400)
     }
+    const phone = normalizePhone(req.query.phone)
 
     const customer = await Customer.findOne({
       phone,
@@ -209,7 +211,6 @@ router.post('/', validateCustomerCreation, async (req, res) => {
 
     const {
       name,
-      phone,
       email,
       address,
       nic,
@@ -219,6 +220,7 @@ router.post('/', validateCustomerCreation, async (req, res) => {
       customerType
     } = req.body
 
+    const phone = normalizePhone(req.body.phone)
     const resolvedCustomerType = customer_type || customerType || 'seller'
 
     // Check if phone already exists for this company
@@ -279,7 +281,8 @@ router.post('/sync', async (req, res) => {
     const synced = []
     for (const customerData of customers) {
       /* eslint-disable camelcase */
-      const { local_id, phone, name, address, city, nic_number, email, notes } = customerData
+      const { local_id, name, address, city, nic_number, email, notes } = customerData
+      const phone = normalizePhone(customerData.phone)
 
       // Try to find existing customer by phone or client_id (local_id)
       let customer = await Customer.findOne({
@@ -343,8 +346,8 @@ router.put('/:id', validateCustomerUpdate, async (req, res) => {
     }
 
     const allowedUpdates = [
-      'name', 'phone', 'email', 'address', 'nic',
-      'notes', 'isActive'
+      'name', 'phone', 'email', 'address', 'city', 'nic',
+      'notes', 'isActive', 'customerType'
     ]
 
     const updates = {}
@@ -353,6 +356,15 @@ router.put('/:id', validateCustomerUpdate, async (req, res) => {
         updates[field] = req.body[field]
       }
     })
+
+    // Client sends the field as `customer_type` (snake_case)
+    if (req.body.customer_type !== undefined) {
+      updates.customerType = req.body.customer_type
+    }
+
+    if (updates.phone) {
+      updates.phone = normalizePhone(updates.phone)
+    }
 
     // Prevent phone number conflicts within company
     if (updates.phone) {

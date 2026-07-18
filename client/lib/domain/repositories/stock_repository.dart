@@ -169,6 +169,7 @@ abstract class StockRepository {
     int? outputRiceBags,
     String? outputRiceName,
     String? status,
+    String? clientId,
   });
 
   /// Complete milling operation

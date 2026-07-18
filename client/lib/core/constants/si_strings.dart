@@ -264,6 +264,8 @@ class SiStrings {
 
   // ==================== PROFILE ====================
   static String get profileTitle => _get('ගිණුම', EnStrings.profileTitle);
+  static String get accountSettingsSubtitle =>
+      _get('ගිණුම සහ සැකසුම්', EnStrings.accountSettingsSubtitle);
   static String get editProfile =>
       _get('ගිණුම යාවත්කාලීන කරන්න', EnStrings.editProfile);
   static String get editProfileSubtitle =>
@@ -328,6 +330,24 @@ class SiStrings {
   static String get todayProfit => _get('අද දිනයේ ලාභය', EnStrings.todayProfit);
   static String get erpVersion =>
       _get('රයිස් මිල් ERP v1.0', EnStrings.erpVersion);
+  static String get profit => _get('ලාභය', EnStrings.profit);
+  static String get reportPeriod =>
+      _get('වාර්තා කාල පරිමාණය', EnStrings.reportPeriod);
+  static String get startDate => _get('ආරම්භ දිනය', EnStrings.startDate);
+  static String get endDate => _get('අවසාන දිනය', EnStrings.endDate);
+  static String get selectDate => _get('තෝරන්න', EnStrings.selectDate);
+  static String get periodSummary =>
+      _get('කාල පරිමාණ සාරාංශය', EnStrings.periodSummary);
+  static String get totalCount => _get('මුළු ගණන', EnStrings.totalCount);
+  static String get totalAmount => _get('මුළු මුදල', EnStrings.totalAmount);
+  static String get printingReport =>
+      _get('වාර්තා මුද්‍රණය', EnStrings.printingReport);
+  static String get downloadingPdf =>
+      _get('PDF බාගත කරමින්', EnStrings.downloadingPdf);
+  static String get downloadingExcel =>
+      _get('Excel බාගත කරමින්', EnStrings.downloadingExcel);
+  static String get fromDateToDate => _get('සිට', EnStrings.fromDateToDate);
+  static String get toDate => _get('දක්වා', EnStrings.toDate);
 
   // ==================== STOCK ====================
   static String get liveStock => _get('වත්මන් තොග', EnStrings.liveStock);
@@ -341,6 +361,15 @@ class SiStrings {
       _get('වියදමක් එක් කරන්න', EnStrings.addExpense);
   static String get operationalExpenses =>
       _get('මෙහෙයුම් වියදම්', EnStrings.operationalExpenses);
+  static String get totalMonthlyExpenses =>
+      _get('මෙම මාසයේ මුළු වියදම', EnStrings.totalMonthlyExpenses);
+  static String get hasNote => _get('සටහනක් ඇත', EnStrings.hasNote);
+  static String get noExpensesFound =>
+      _get('වියදම් කිසිවක් හමු නොවීය', EnStrings.noExpensesFound);
+  static String get deleteExpenseConfirm =>
+      _get('වියදම මකා දමන්නද?', EnStrings.deleteExpenseConfirm);
+  static String get expenseRecord =>
+      _get('වියදම් වාර්තාව', EnStrings.expenseRecord);
 
   // ==================== TRANSACTIONS ====================
   static String get transactionDetails =>
@@ -360,6 +389,47 @@ class SiStrings {
   static String get editCustomer =>
       _get('ගනුදෙනුකරු සංස්කරණය', EnStrings.editCustomer);
   static String get newCustomer => _get('නව ගනුදෙනුකරු', EnStrings.newCustomer);
+  static String get customersAll => _get('සියල්ල', EnStrings.customersAll);
+  static String get customersSellers =>
+      _get('සැපයුම්කරුවන්', EnStrings.customersSellers);
+  static String get customersBuyers =>
+      _get('ගැනුම්කරුවන්', EnStrings.customersBuyers);
+  static String get sortByLabel => _get('අනුපිළිවෙල', EnStrings.sortByLabel);
+  static String get filterLabel => _get('පෙරහන', EnStrings.filterLabel);
+  static String get sortByTitle =>
+      _get('පිළිවෙල සකසන්න', EnStrings.sortByTitle);
+  static String get sortByDateAdded =>
+      _get('එක් කළ දිනය අනුව', EnStrings.sortByDateAdded);
+  static String get sortByBalanceLabel =>
+      _get('ශේෂය අනුව', EnStrings.sortByBalanceLabel);
+  static String get sortByNameLabel =>
+      _get('නම අනුව', EnStrings.sortByNameLabel);
+  static String get filtersTitle => _get('පෙරහන්', EnStrings.filtersTitle);
+  static String get balanceLabel => _get('ශේෂය', EnStrings.balanceLabel);
+  static String get withBalance =>
+      _get('ශේෂයක් සහිත', EnStrings.withBalance);
+  static String get receivable => _get('ලැබිය යුතු', EnStrings.receivable);
+  static String get payable => _get('ගෙවිය යුතු', EnStrings.payable);
+  static String get customerRole =>
+      _get('ගනුදෙනුකරුගේ භූමිකාව', EnStrings.customerRole);
+  static String get buyerLabel => _get('ගැනුම්කරු', EnStrings.buyerLabel);
+  static String get sellerLabel => _get('විකුණුම්කරු', EnStrings.sellerLabel);
+  static String get applyFilters =>
+      _get('තහවුරු කරන්න', EnStrings.applyFilters);
+  static String get errorLoadingCustomers =>
+      _get('දෝෂයක් සිදු විය', EnStrings.errorLoadingCustomers);
+  static String get tryAgain => _get('නැවත උත්සාහ කරන්න', EnStrings.tryAgain);
+  static String get noResultsFound =>
+      _get('ප්‍රතිඵල නැත', EnStrings.noResultsFound);
+  static String get tryDifferentSearch =>
+      _get('සෙවුම් පද වෙනස් කර නැවත උත්සාහ කරන්න',
+          EnStrings.tryDifferentSearch);
+  static String get clearFiltersAction =>
+      _get('පෙරහන් ඉවත් කරන්න', EnStrings.clearFiltersAction);
+  static String get noCustomersYet =>
+      _get('ගනුදෙනුකරුවන් නැත', EnStrings.noCustomersYet);
+  static String get addFirstCustomer =>
+      _get('පළමු ගනුදෙනුකරු එක් කර ආරම්භ කරන්න', EnStrings.addFirstCustomer);
 
   // ==================== REPORTS ====================
   static String get dateRange => _get('දිනය පරාසය', EnStrings.dateRange);
@@ -517,6 +587,20 @@ class SiStrings {
   static String get dataDeletionBody => _get(
       'දත්ත මකා දැමීමේ ඉල්ලීම් උපදෙස් මෙහි දිස්වනු ඇත.',
       'Data deletion request instructions will appear here.');
+  static String get legalInfoTitle =>
+      _get('නීතිමය තොරතුරු', EnStrings.legalInfoTitle);
+  static String get legalInfoSubtitle =>
+      _get('නියම, පෞද්ගලිකත්වය, පිළිබඳව', EnStrings.legalInfoSubtitle);
+  static String get termsUsageSubtitle =>
+      _get('මෙම යෙදුම සඳහා භාවිත කොන්දේසි', EnStrings.termsUsageSubtitle);
+  static String get privacyPolicySubtitle =>
+      _get('අපි ඔබේ දත්ත භාවිත කරන ආකාරය', EnStrings.privacyPolicySubtitle);
+  static String get aboutMenuSubtitle =>
+      _get('යෙදුම් තොරතුරු සහ සංවර්ධක විස්තර', EnStrings.aboutMenuSubtitle);
+  static String get deleteAccountTitle =>
+      _get('ගිණුම සහ දත්ත මකන්න', EnStrings.deleteAccountTitle);
+  static String get deleteAccountSubtitle =>
+      _get('ඔබේ ගිණුම ස්ථිරවම ඉවත් කරන්න', EnStrings.deleteAccountSubtitle);
 
   // ==================== PARAMETERIZED ====================
   static String greetHello(String firstName) =>

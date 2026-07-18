@@ -8,7 +8,6 @@ import 'milling_state.dart';
 
 class MillingCubit extends Cubit<MillingState> {
   final StockRepository _stockRepository;
-  // ignore: unused_field
   final _uuid = const Uuid();
 
   MillingCubit({required StockRepository stockRepository})
@@ -130,6 +129,8 @@ class MillingCubit extends Cubit<MillingState> {
 
   /// Start milling process (Step 1)
   Future<bool> startMilling({String? notes}) async {
+    if (state.status == MillingStatus.processing) return false;
+
     if (!state.canProcess) {
       emit(state.copyWith(
         status: MillingStatus.error,
@@ -276,6 +277,17 @@ class MillingCubit extends Cubit<MillingState> {
   /// Process full milling cycle (Start + Complete)
   Future<void> processMilling() async {
     Log.i('Starting processMilling', tag: 'MILLING');
+
+    // Guard against duplicate submissions (e.g. a double-tap on the confirm
+    // dialog firing onConfirm twice before the dialog is popped). Without
+    // this, two requests can each deduct the same input weight from stock,
+    // silently draining more than the user intended.
+    if (state.status == MillingStatus.processing) {
+      Log.w('processMilling already in progress, ignoring duplicate call',
+          tag: 'MILLING');
+      return;
+    }
+
     if (!state.canProcess) {
       Log.w('Validation failed: canProcess is false', tag: 'MILLING');
       emit(state.copyWith(
@@ -310,6 +322,10 @@ class MillingCubit extends Cubit<MillingState> {
         outputRiceBags: outputBags,
         outputRiceName: riceName,
         status: 'completed',
+        // Server dedups on this: if a retry or accidental duplicate tap
+        // still slips a second request through, it returns the original
+        // record instead of deducting stock a second time.
+        clientId: _uuid.v4(),
       )
           .timeout(
         const Duration(seconds: 30),

@@ -904,12 +904,11 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   }) async {
     try {
       final either = await apiService.post(
-        '${ApiEndpoints.transactions}/$transactionId/payments',
+        '${ApiEndpoints.transactions}/$transactionId/payment',
         data: {
           'amount': amount,
-          'payment_method': method.name,
-          'notes': notes,
-          'paid_at': DateTime.now().toIso8601String(),
+          'paymentMethod': method.value,
+          if (notes != null) 'notes': notes,
         },
       );
 
@@ -917,6 +916,11 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
         (failure) => throw _mapFailureToException(failure),
         (response) {
           if (response.success && response.data != null) {
+            final transactionJson = response.data['transaction'];
+            if (transactionJson != null) {
+              return TransactionModel.fromJson(
+                  transactionJson as Map<String, dynamic>);
+            }
             return TransactionModel.fromJson(response.data);
           }
 

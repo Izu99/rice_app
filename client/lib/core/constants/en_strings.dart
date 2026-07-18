@@ -161,6 +161,7 @@ class EnStrings {
 
   // ==================== PROFILE ====================
   static const String profileTitle = 'Profile';
+  static const String accountSettingsSubtitle = 'Account & Settings';
   static const String editProfile = 'Edit Profile';
   static const String editProfileSubtitle = 'Update name, email, photo';
   static const String changePassword = 'Change Password';
@@ -178,6 +179,13 @@ class EnStrings {
   static const String helpSubtitle = 'Get support';
   static const String termsPrivacy = 'Terms & Privacy';
   static const String termsSubtitle = 'Read our policies';
+  static const String legalInfoTitle = 'Legal & Info';
+  static const String legalInfoSubtitle = 'Terms, Privacy, About';
+  static const String termsUsageSubtitle = 'Usage terms for this app';
+  static const String privacyPolicySubtitle = 'How we handle your data';
+  static const String aboutMenuSubtitle = 'App info and developer details';
+  static const String deleteAccountTitle = 'Delete Account & Data';
+  static const String deleteAccountSubtitle = 'Permanently remove your account';
   static const String sendFeedback = 'Send Feedback';
   static const String feedbackSubtitle = 'Help us improve';
   static const String logoutSubtitle = 'Sign out of your account';
@@ -200,6 +208,19 @@ class EnStrings {
   static const String notEntered = 'Not entered';
   static const String todayProfit = "Today's profit";
   static const String erpVersion = 'Rice Mill ERP v1.0';
+  static const String profit = 'Profit';
+  static const String reportPeriod = 'Report Period';
+  static const String startDate = 'Start Date';
+  static const String endDate = 'End Date';
+  static const String selectDate = 'Select';
+  static const String periodSummary = 'Period Summary';
+  static const String totalCount = 'Total Count';
+  static const String totalAmount = 'Total Amount';
+  static const String printingReport = 'Printing report';
+  static const String downloadingPdf = 'Downloading PDF';
+  static const String downloadingExcel = 'Downloading Excel';
+  static const String fromDateToDate = 'from';
+  static const String toDate = 'to';
 
   // ==================== STOCK ====================
   static const String liveStock = 'Live Stock';
@@ -209,6 +230,11 @@ class EnStrings {
   // ==================== EXPENSES ====================
   static const String addExpense = 'Add Expense';
   static const String operationalExpenses = 'Operational Expenses';
+  static const String totalMonthlyExpenses = 'Total Monthly Expenses';
+  static const String hasNote = 'Has a note';
+  static const String noExpensesFound = 'No expenses found';
+  static const String deleteExpenseConfirm = 'Delete this expense?';
+  static const String expenseRecord = 'Expense record';
 
   // ==================== TRANSACTIONS ====================
   static const String transactionDetails = 'Transaction Details';
@@ -222,6 +248,32 @@ class EnStrings {
   static const String addCustomer = 'Add Customer';
   static const String editCustomer = 'Edit Customer';
   static const String newCustomer = 'New Customer';
+  static const String customersAll = 'All';
+  static const String customersSellers = 'Sellers';
+  static const String customersBuyers = 'Buyers';
+  static const String sortByLabel = 'Sort';
+  static const String filterLabel = 'Filter';
+  static const String sortByTitle = 'Sort By';
+  static const String sortByDateAdded = 'Date Added';
+  static const String sortByBalanceLabel = 'By Balance';
+  static const String sortByNameLabel = 'By Name';
+  static const String filtersTitle = 'Filters';
+  static const String balanceLabel = 'Balance';
+  static const String withBalance = 'With Balance';
+  static const String receivable = 'Receivable';
+  static const String payable = 'Payable';
+  static const String customerRole = 'Customer Role';
+  static const String buyerLabel = 'Buyer';
+  static const String sellerLabel = 'Seller';
+  static const String applyFilters = 'Apply Filters';
+  static const String errorLoadingCustomers = 'Error Loading Customers';
+  static const String tryAgain = 'Try Again';
+  static const String noResultsFound = 'No Results Found';
+  static const String tryDifferentSearch =
+      'Try a different search term or clear the filters';
+  static const String clearFiltersAction = 'Clear Filters';
+  static const String noCustomersYet = 'No Customers Yet';
+  static const String addFirstCustomer = 'Add your first customer to begin';
 
   // ==================== REPORTS ====================
   static const String dateRange = 'Date Range';

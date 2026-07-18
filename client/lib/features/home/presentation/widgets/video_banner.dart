@@ -19,13 +19,14 @@ class VideoBanner extends StatefulWidget {
   State<VideoBanner> createState() => _VideoBannerState();
 }
 
-class _VideoBannerState extends State<VideoBanner> {
-  late final VideoPlayerController _controller;
+class _VideoBannerState extends State<VideoBanner> with WidgetsBindingObserver {
+  late VideoPlayerController _controller;
   bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = VideoPlayerController.asset(widget.assetPath);
     _initVideo();
   }
@@ -46,7 +47,35 @@ class _VideoBannerState extends State<VideoBanner> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // video_player's native surface can be torn down while backgrounded on
+      // Android, so avoid leaving it in a playing state pointed at it.
+      if (_ready) _controller.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      _reinitialize();
+    }
+  }
+
+  Future<void> _reinitialize() async {
+    // The old controller's surface may be invalid after coming back from the
+    // background (e.g. after minimizing to share to WhatsApp), which is what
+    // produced the black screen. Rebuild the controller from scratch rather
+    // than trusting the existing one is still usable.
+    final oldController = _controller;
+    if (mounted) {
+      setState(() => _ready = false);
+    }
+    await oldController.dispose();
+
+    _controller = VideoPlayerController.asset(widget.assetPath);
+    await _initVideo();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../domain/entities/customer_entity.dart';
+import '../../../../domain/entities/transaction_entity.dart';
 import '../../../../domain/repositories/customer_repository.dart';
 import '../../../../domain/repositories/transaction_repository.dart';
 import '../../../../core/utils/logger_utils.dart';
@@ -84,7 +85,7 @@ class CustomersCubit extends Cubit<CustomersState> {
 
   /// Filter by customer type
   void filterByType(CustomerType? type) {
-    if (type == state.customerTypeFilter) {
+    if (type == null || type == state.customerTypeFilter) {
       emit(state.copyWith(clearCustomerTypeFilter: true));
     } else {
       emit(state.copyWith(customerTypeFilter: type));
@@ -527,6 +528,12 @@ class CustomersCubit extends Cubit<CustomersState> {
   /// Get customer by phone
   Future<CustomerEntity?> getCustomerByPhone(String phone) async {
     final result = await _customerRepository.getCustomerByPhone(phone);
+    return result.fold((l) => null, (r) => r);
+  }
+
+  /// Fetch full details (including line items) for a single transaction
+  Future<TransactionEntity?> getTransactionDetail(String transactionId) async {
+    final result = await _transactionRepository.getTransactionById(transactionId);
     return result.fold((l) => null, (r) => r);
   }
 

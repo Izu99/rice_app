@@ -83,6 +83,7 @@ abstract class StockRemoteDataSource {
     int? outputRiceBags,
     String? outputRiceName,
     String? status,
+    String? clientId,
   });
 
   /// Complete milling operation (receive rice from mill)
@@ -719,6 +720,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     int? outputRiceBags,
     String? outputRiceName,
     String? status,
+    String? clientId,
   }) async {
     try {
       final either = await apiService.post(
@@ -733,6 +735,7 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
           'outputRiceBags': outputRiceBags,
           'outputRiceName': outputRiceName,
           'status': status ?? 'completed',
+          if (clientId != null) 'clientId': clientId,
         },
       );
 

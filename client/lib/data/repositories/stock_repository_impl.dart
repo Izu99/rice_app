@@ -268,6 +268,7 @@ class StockRepositoryImpl implements StockRepository {
     int? outputRiceBags,
     String? outputRiceName,
     String? status,
+    String? clientId,
   }) async {
     try {
       final result = await remoteDataSource.startMilling(
@@ -280,6 +281,7 @@ class StockRepositoryImpl implements StockRepository {
         outputRiceBags: outputRiceBags,
         outputRiceName: outputRiceName,
         status: status,
+        clientId: clientId,
       );
 
       return Right({

@@ -14,6 +14,7 @@ import '../../../../core/shared_widgets/loading_overlay.dart';
 import '../../../../routes/route_names.dart';
 import '../../../../data/models/customer_model.dart';
 import '../../../../domain/entities/customer_entity.dart';
+import '../../../../domain/entities/transaction_entity.dart';
 import '../cubit/customers_cubit.dart';
 import '../cubit/customers_state.dart';
 import '../../../buy/presentation/cubit/buy_cubit.dart';
@@ -83,6 +84,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               behavior: SnackBarBehavior.floating,
             ),
           );
+        } else if (state.formStatus == CustomerFormStatus.failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.formErrorMessage ?? 'ගෙවීම අසාර්ථකයි'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
       builder: (context, state) {
@@ -129,6 +138,13 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         }
 
         final customer = state.selectedCustomer!;
+        // customer.balance is a lifetime goods-value snapshot (totalSell -
+        // totalBuy) that the server never adjusts when a payment is made, so
+        // it goes stale the moment a transaction is paid off. Derive the
+        // balance shown here from the actually-outstanding transaction dues
+        // instead, so it reaches zero once everything is paid.
+        final outstandingBalance =
+            _computeOutstandingBalance(state.customerTransactions);
 
         return LoadingOverlay(
           isLoading: state.formStatus == CustomerFormStatus.submitting,
@@ -137,7 +153,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             body: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 _buildAppBar(customer),
-                _buildQuickStats(customer),
+                _buildQuickStats(customer, outstandingBalance),
                 _buildTabBar(),
               ],
               body: TabBarView(
@@ -148,7 +164,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                 ],
               ),
             ),
-            bottomNavigationBar: _buildBottomActions(customer),
+            bottomNavigationBar:
+                _buildBottomActions(customer, outstandingBalance),
           ),
         );
       },
@@ -177,7 +194,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     );
   }
 
-  Widget _buildQuickStats(CustomerEntity customer) {
+  Widget _buildQuickStats(CustomerEntity customer, double balance) {
     return SliverToBoxAdapter(
       child: Container(
         margin: const EdgeInsets.all(16),
@@ -200,8 +217,10 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               child: _buildStatItem(
                 icon: Icons.account_balance_wallet_rounded,
                 label: 'ශේෂය (Balance)',
-                value: customer.formattedBalance,
-                valueColor: const Color(0xFFE53935), // Red color for Balance
+                value: _formatBalance(balance),
+                valueColor: balance == 0
+                    ? AppColors.success
+                    : const Color(0xFFE53935),
               ),
             ),
             const SizedBox(width: 8),
@@ -215,15 +234,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               child: _buildStatItem(
                 icon: Icons.insights_rounded,
                 label: 'තත්ත්වය (Status)',
-                value: _getSinhalaBalanceStatus(customer.balance),
-                valueColor: _getBalanceStatusColor(customer.balance),
+                value: _getSinhalaBalanceStatus(balance),
+                valueColor: _getBalanceStatusColor(balance),
               ),
             ),
-            if (customer.balance != 0) ...[
+            if (balance != 0) ...[
               const SizedBox(width: 12),
               _buildPayActionBtn(
-                label: customer.balance < 0 ? 'ගෙවන්න' : 'ලබාගන්න',
-                icon: customer.balance < 0
+                label: balance < 0 ? 'ගෙවන්න' : 'ලබාගන්න',
+                icon: balance < 0
                     ? Icons.payments_rounded
                     : Icons.move_to_inbox_rounded,
                 color: const Color(
@@ -583,6 +602,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           child: Column(
             children: [
               ListTile(
+                onTap: () => _showTransactionDetail(context, txn),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 leading: Container(
@@ -664,7 +684,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
                   'Rs. $totalAmount',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: color,
+                    color: hasBalance ? color : AppColors.success,
                     fontSize: 16,
                   ),
                 ),
@@ -672,32 +692,30 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               if (hasBalance)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: () => _showPaymentDialog(context, txn),
-                        icon: Icon(
-                            isBuy
-                                ? Icons.payments_rounded
-                                : Icons.move_to_inbox_rounded,
-                            size: 16),
-                        label:
-                            Text(isBuy ? 'ගෙවන්න' : 'ලබාගන්න'), // Pay / Receive
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor:
-                              isBuy ? AppColors.error : AppColors.success,
-                          side: BorderSide(
-                              color:
-                                  isBuy ? AppColors.error : AppColors.success),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 0),
-                          minimumSize: const Size(0, 32),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                        ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showPaymentDialog(context, txn),
+                      icon: Icon(
+                          isBuy
+                              ? Icons.payments_rounded
+                              : Icons.move_to_inbox_rounded,
+                          size: 16),
+                      label:
+                          Text(isBuy ? 'ගෙවන්න' : 'ලබාගන්න'), // Pay / Receive
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor:
+                            isBuy ? AppColors.error : AppColors.success,
+                        side: BorderSide(
+                            color:
+                                isBuy ? AppColors.error : AppColors.success),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        minimumSize: const Size(0, 40),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
-                    ],
+                    ),
                   ),
                 ),
             ],
@@ -707,9 +725,295 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     );
   }
 
-  Widget _buildBottomActions(CustomerEntity customer) {
-    final hasPayableBalance = customer.balance < 0;
-    final hasReceivableBalance = customer.balance > 0;
+  void _showTransactionDetail(BuildContext context, Map<String, dynamic> txn) {
+    final transactionId = (txn['id'] ?? txn['_id'])?.toString();
+    if (transactionId == null) return;
+
+    // Keep a reference to the screen's own (long-lived) context. The sheet's
+    // context gets deactivated the instant it's popped, so it can't be used
+    // afterwards to open the payment dialog or read the cubit.
+    final rootContext = context;
+    final cubit = context.read<CustomersCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.92,
+          expand: false,
+          builder: (context, scrollController) {
+            return FutureBuilder<TransactionEntity?>(
+              future: cubit.getTransactionDetail(transactionId),
+              builder: (context, snapshot) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: snapshot.connectionState == ConnectionState.waiting
+                      ? const Center(child: CircularProgressIndicator())
+                      : snapshot.data == null
+                          ? Center(
+                              child: Text(
+                                'ගනුදෙනු විස්තර හමු නොවීය',
+                                style: AppTextStyles.bodyLarge,
+                              ),
+                            )
+                          : _buildTransactionDetailContent(
+                              context,
+                              rootContext,
+                              scrollController,
+                              snapshot.data!,
+                            ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTransactionDetailContent(
+    BuildContext context,
+    BuildContext rootContext,
+    ScrollController scrollController,
+    TransactionEntity txn,
+  ) {
+    final isBuy = txn.isBuyTransaction;
+    final color = isBuy ? const Color(0xFFE53935) : const Color(0xFF4CAF50);
+    final hasBalance = txn.dueAmount > 0;
+
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 10),
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE0E0E0),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isBuy ? 'මිලදී ගැනීමේ විස්තර' : 'විකිණීමේ විස්තර',
+                  style: AppTextStyles.titleMedium
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text(
+                txn.transactionNumber,
+                style: const TextStyle(
+                  color: Color(0xFF8E8E93),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            children: [
+              Text(
+                txn.formattedDateTime,
+                style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE8E8EE)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF4F6FA),
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Expanded(
+                              flex: 3,
+                              child: Text('වර්ගය',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12))),
+                          Expanded(
+                              flex: 2,
+                              child: Text('බර',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12))),
+                          Expanded(
+                              flex: 2,
+                              child: Text('මිල',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12))),
+                          Expanded(
+                              flex: 3,
+                              child: Text('මුදල',
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12))),
+                        ],
+                      ),
+                    ),
+                    ...txn.items.map((item) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  flex: 3,
+                                  child: Text(item.displayName,
+                                      style: const TextStyle(fontSize: 13))),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Text(item.formattedWeight,
+                                        style: const TextStyle(fontSize: 13)),
+                                  )),
+                              Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 6),
+                                    child: Text(
+                                        'Rs. ${item.pricePerKg.toStringAsFixed(0)}',
+                                        style: const TextStyle(fontSize: 13)),
+                                  )),
+                              Expanded(
+                                  flex: 3,
+                                  child: Text(item.formattedTotalPrice,
+                                      textAlign: TextAlign.end,
+                                      style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold))),
+                            ],
+                          ),
+                        )),
+                    if (txn.items.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text('අයිතම හමු නොවීය',
+                            style: TextStyle(color: Color(0xFF8E8E93))),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F6FA),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _buildDetailRow('ගනුදෙනුකරු', txn.customerName),
+                    _buildDetailRow('මුළු බර', txn.formattedTotalWeight),
+                    _buildDetailRow('ගෙවූ මුදල', txn.formattedPaidAmount),
+                    const Divider(height: 20),
+                    _buildDetailRow(
+                      'මුළු මුදල',
+                      txn.formattedTotalAmount,
+                      valueStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: hasBalance ? color : AppColors.success),
+                    ),
+                    if (hasBalance)
+                      _buildDetailRow(
+                        'හිඟ මුදල',
+                        txn.formattedDueAmount,
+                        valueStyle: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: AppColors.error),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (hasBalance) {
+                    _showPaymentDialog(rootContext, {
+                      'id': txn.id,
+                      'balance': txn.dueAmount,
+                      'type': txn.type.name,
+                      'transactionNumber': txn.transactionNumber,
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      hasBalance ? AppColors.success : const Color(0xFF8E8E93),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(
+                  hasBalance
+                      ? (isBuy ? 'හිඟ මුදල ගෙවන්න' : 'හිඟ මුදල ලබාගන්න')
+                      : 'වසන්න',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {TextStyle? valueStyle}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 13)),
+          Text(value,
+              style: valueStyle ??
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomActions(CustomerEntity customer, double balance) {
+    final hasPayableBalance = balance < 0;
+    final hasReceivableBalance = balance > 0;
     final hasBalance = hasPayableBalance || hasReceivableBalance;
 
     return Container(
@@ -813,7 +1117,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
               backgroundColor: AppColors.success,
               foregroundColor: Colors.white,
             ),
-            child: const Text('ඔව්, ගෙවන්න'),
+            child: Text(isBuy ? 'ඔව්, ගෙවන්න' : 'ඔව්, ලබාගන්න'),
           ),
         ],
       ),
@@ -1021,6 +1325,25 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
     if (balance > 0) return AppColors.success;
     if (balance < 0) return AppColors.error;
     return AppColors.textSecondary;
+  }
+
+  /// Sum of unpaid amounts across the customer's transactions, signed so
+  /// negative means the mill owes the customer (buy) and positive means
+  /// the customer owes the mill (sell) — matches customer.balance's sign
+  /// convention but actually reaches zero once transactions are paid off.
+  double _computeOutstandingBalance(List<Map<String, dynamic>> transactions) {
+    double balance = 0;
+    for (final txn in transactions) {
+      final due = (txn['balance'] as num?)?.toDouble() ?? 0.0;
+      final isBuy = (txn['type']?.toString().toLowerCase() ?? 'buy') == 'buy';
+      balance += isBuy ? -due : due;
+    }
+    return balance;
+  }
+
+  String _formatBalance(double balance) {
+    final prefix = balance >= 0 ? '' : '-';
+    return '${prefix}Rs. ${balance.abs().toStringAsFixed(2)}';
   }
 
   void _callCustomer(String phone) {

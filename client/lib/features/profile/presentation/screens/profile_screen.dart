@@ -95,7 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                     const SizedBox(height: 24),
 
                     // Legal Section
-                    _buildSectionTitle('Legal & Info', 'Terms, Privacy, About'),
+                    _buildSectionTitle(
+                        SiStrings.legalInfoTitle, SiStrings.legalInfoSubtitle),
                     const SizedBox(height: 12),
                     _buildLegalSection(),
                     const SizedBox(height: 24),
@@ -123,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       showBack: false,
       onRefresh: () => context.read<ProfileCubit>().loadProfile(),
       title: SiStrings.profileTitle,
-      subtitle: SiStrings.isSinhala ? 'Account & Settings' : 'ගිණුම සහ සැකසුම්',
+      subtitle: SiStrings.accountSettingsSubtitle,
       actions: [
         if (state.pendingSyncCount > 0)
           Badge(
@@ -330,29 +331,29 @@ class _ProfileScreenState extends State<ProfileScreen>
         children: [
           ProfileMenuItem(
             icon: Icons.description_outlined,
-            title: 'Terms & Conditions',
-            subtitle: 'Usage terms for this app',
+            title: SiStrings.termsTitle,
+            subtitle: SiStrings.termsUsageSubtitle,
             onTap: () => context.push('/terms'),
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.privacy_tip_outlined,
-            title: 'Privacy Policy',
-            subtitle: 'How we handle your data',
+            title: SiStrings.privacyTitle,
+            subtitle: SiStrings.privacyPolicySubtitle,
             onTap: () => context.push('/privacy'),
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.info_outline,
-            title: 'About',
-            subtitle: 'App info and developer details',
+            title: SiStrings.aboutTitle,
+            subtitle: SiStrings.aboutMenuSubtitle,
             onTap: () => context.push('/about'),
           ),
           const Divider(height: 1),
           ProfileMenuItem(
             icon: Icons.delete_forever_outlined,
-            title: 'Delete Account & Data',
-            subtitle: 'Permanently remove your account',
+            title: SiStrings.deleteAccountTitle,
+            subtitle: SiStrings.deleteAccountSubtitle,
             iconColor: AppColors.error,
             onTap: () => context.push('/data-deletion'),
           ),
