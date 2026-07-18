@@ -9,6 +9,7 @@ import '../../../../core/shared_widgets/app_fab.dart';
 import '../../../../core/shared_widgets/confirmation_dialog.dart';
 import '../../../../core/constants/enums.dart';
 import '../../../../core/constants/si_strings.dart';
+import '../../../../routes/route_names.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../../domain/entities/expense_entity.dart';
 import '../cubit/expenses_cubit.dart';
@@ -36,7 +37,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
       appBar: HAppBar(
         title: SiStrings.expenses,
         subtitle: SiStrings.operationalExpenses,
-        showBack: false,
+        onBack: () => context.go(RouteNames.home),
         onRefresh: () => context.read<ExpensesCubit>().loadExpenses(),
       ),
       body: BlocBuilder<ExpensesCubit, ExpensesState>(
@@ -81,7 +82,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           _buildFilterChip(
-            label: 'සියල්ල',
+            label: SiStrings.all,
             isSelected: state.filterCategory == null,
             onSelected: () =>
                 context.read<ExpensesCubit>().filterByCategory(null),
@@ -156,7 +157,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('මෙම මාසයේ මුළු වියදම',
+              Text(SiStrings.totalMonthlyExpenses,
                   style: AppTextStyles.bodySmall
                       .copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: 4),
@@ -229,7 +230,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
                   ),
                   if (expense.notes != null && expense.notes!.isNotEmpty)
                     Text(
-                      'සටහනක් ඇත',
+                      SiStrings.hasNote,
                       style:
                           TextStyle(fontSize: 10, color: Colors.grey.shade400),
                     ),
@@ -250,9 +251,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
           Icon(Icons.receipt_long_outlined,
               size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
-          Text('වියදම් කිසිවක් හමු නොවීය',
-              style: AppTextStyles.bodyLarge
-                  .copyWith(color: Colors.grey)), // No expenses found
+          Text(SiStrings.noExpensesFound,
+              style: AppTextStyles.bodyLarge.copyWith(color: Colors.grey)),
         ],
       ),
     );
@@ -261,8 +261,8 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
   void _showDeleteConfirmation(String id) async {
     final confirmed = await ConfirmationDialog.showDelete(
       context,
-      title: 'වියදම මකා දමන්නද?',
-      itemName: 'වියදම් වාර්තාව',
+      title: SiStrings.deleteExpenseConfirm,
+      itemName: SiStrings.expenseRecord,
     );
     if (confirmed && mounted) {
       context.read<ExpensesCubit>().deleteExpense(id);

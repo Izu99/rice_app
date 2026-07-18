@@ -3,6 +3,7 @@ const Customer = require('../models/Customer')
 const Transaction = require('../models/Transaction')
 const { validationResult } = require('express-validator')
 const { errorResponse, successResponse } = require('../utils/responseHandler')
+const { normalizePhone } = require('../utils/phone')
 
 /**
  * @desc    Get all customers with filtering and pagination
@@ -139,7 +140,7 @@ exports.getCustomerById = async (req, res) => {
  */
 exports.checkPhone = async (req, res) => {
   try {
-    const phone = req.params.phone
+    const phone = normalizePhone(req.params.phone)
 
     const customer = await Customer.findOne({
       phone,
@@ -176,7 +177,6 @@ exports.createCustomer = async (req, res) => {
 
     const {
       name,
-      phone,
       email,
       address,
       city,
@@ -185,6 +185,8 @@ exports.createCustomer = async (req, res) => {
       notes,
       clientId
     } = req.body
+
+    const phone = normalizePhone(req.body.phone)
 
     // Check if customer with same phone already exists for this company
     const existingCustomer = await Customer.findOne({
@@ -267,6 +269,10 @@ exports.updateCustomer = async (req, res) => {
     // Map API customer_type to DB customerType
     if (req.body.customer_type !== undefined) {
       updates.customerType = req.body.customer_type
+    }
+
+    if (updates.phone) {
+      updates.phone = normalizePhone(updates.phone)
     }
 
     // Prevent phone number conflicts within company

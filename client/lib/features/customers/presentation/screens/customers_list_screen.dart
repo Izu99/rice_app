@@ -35,6 +35,11 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_handleTabSelection);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Tab starts at index 0 ("All") on every screen entry, but the cubit
+      // is a singleton and may still carry a customerTypeFilter left over
+      // from a previous visit (e.g. the Sellers tab). Clear it so the
+      // "All (N)" count always matches what's actually rendered.
+      context.read<CustomersCubit>().filterByType(null);
       context.read<CustomersCubit>().loadCustomers();
     });
   }
@@ -122,36 +127,11 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               ],
             ),
           ),
-          bottomNavigationBar: _buildBottomToolbar(state),
         );
       },
     );
   }
 
-
-  Widget _buildBottomToolbar(CustomersState state) {
-    return BottomAppBar(
-      height: 56,
-      color: Colors.white,
-      elevation: 8,
-      child: Row(
-        children: [
-          _buildToolbarAction(
-            icon: Icons.sort_rounded,
-            label: SiStrings.isSinhala ? 'අනුපිළිවෙල' : 'Sort',
-            onTap: () => _showSortOptions(context),
-          ),
-          const SizedBox(width: 8),
-          _buildToolbarAction(
-            icon: Icons.filter_list_rounded,
-            label: SiStrings.isSinhala ? 'පෙරහන' : 'Filter',
-            hasBadge: state.hasActiveFilters,
-            onTap: () => _showFilterOptions(context, state),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildToolbarAction({
     required IconData icon,
@@ -205,15 +185,61 @@ class _CustomersListScreenState extends State<CustomersListScreen>
   Widget _buildSearchAndFilter(CustomersState state) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
-        child: CustomerSearch(
-          initialQuery: state.searchQuery,
-          onSearch: (query) {
-            context.read<CustomersCubit>().searchCustomers(query);
-          },
-          onClear: () {
-            context.read<CustomersCubit>().searchCustomers('');
-          },
+        padding: const EdgeInsets.fromLTRB(
+          AppDimensions.paddingMedium,
+          AppDimensions.paddingMedium,
+          AppDimensions.paddingMedium,
+          0,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomerSearch(
+              initialQuery: state.searchQuery,
+              hintText: SiStrings.searchHint,
+              onSearch: (query) {
+                context.read<CustomersCubit>().searchCustomers(query);
+              },
+              onClear: () {
+                context.read<CustomersCubit>().searchCustomers('');
+              },
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x08000000),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildToolbarAction(
+                    icon: Icons.sort_rounded,
+                    label: SiStrings.sortByLabel,
+                    onTap: () => _showSortOptions(context),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 20,
+                    color: const Color(0xFFE5E5EA),
+                  ),
+                  _buildToolbarAction(
+                    icon: Icons.filter_list_rounded,
+                    label: SiStrings.filterLabel,
+                    hasBadge: state.hasActiveFilters,
+                    onTap: () => _showFilterOptions(context, state),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -250,18 +276,19 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               Tab(
                   child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text('සියල්ල (${state.customers.length})'),
-              )), // All
+                child:
+                    Text('${SiStrings.customersAll} (${state.customers.length})'),
+              )),
               Tab(
                   child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text('සැපයුම්කරුවන් ($sellerCount)'),
-              )), // Sellers
+                child: Text('${SiStrings.customersSellers} ($sellerCount)'),
+              )),
               Tab(
                   child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text('ගැනුම්කරුවන් ($buyerCount)'),
-              )), // Buyers
+                child: Text('${SiStrings.customersBuyers} ($buyerCount)'),
+              )),
             ],
           ),
         ),
@@ -293,9 +320,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       return Center(
         child: EmptyStateWidget(
           icon: Icons.error_outline,
-          title: 'දෝෂයක් සිදු විය', // Error Loading Customers
-          subtitle: state.errorMessage ?? 'නැවත උත්සාහ කරන්න',
-          actionLabel: 'නැවත උත්සාහ කරන්න',
+          title: SiStrings.errorLoadingCustomers,
+          subtitle: state.errorMessage ?? SiStrings.tryAgain,
+          actionLabel: SiStrings.tryAgain,
           onAction: () => context.read<CustomersCubit>().loadCustomers(),
         ),
       );
@@ -306,9 +333,9 @@ class _CustomersListScreenState extends State<CustomersListScreen>
         return Center(
           child: EmptyStateWidget(
             icon: Icons.search_off,
-            title: 'ප්‍රතිඵල නැත', // No Results Found
-            subtitle: 'සෙවුම් පද වෙනස් කර නැවත උත්සාහ කරන්න',
-            actionLabel: 'පෙරහන් ඉවත් කරන්න',
+            title: SiStrings.noResultsFound,
+            subtitle: SiStrings.tryDifferentSearch,
+            actionLabel: SiStrings.clearFiltersAction,
             onAction: () => context.read<CustomersCubit>().clearFilters(),
           ),
         );
@@ -317,8 +344,8 @@ class _CustomersListScreenState extends State<CustomersListScreen>
       return Center(
         child: EmptyStateWidget(
           icon: Icons.people_outline,
-          title: 'ගනුදෙනුකරුවන් නැත', // No Customers Yet
-          subtitle: 'පළමු ගනුදෙනුකරු එක් කර ආරම්භ කරන්න',
+          title: SiStrings.noCustomersYet,
+          subtitle: SiStrings.addFirstCustomer,
           actionLabel: SiStrings.addNewCustomer,
           onAction: () => context.pushNamed('customerAdd'),
         ),
@@ -354,53 +381,63 @@ class _CustomersListScreenState extends State<CustomersListScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
         decoration: const BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'පිළිවෙල සකසන්න', // Sort By
-              style: AppTextStyles.titleLarge.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  SiStrings.sortByTitle,
+                  style: AppTextStyles.titleLarge.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...CustomerSortBy.values.map((sortBy) {
+                  final isSelected = state.sortBy == sortBy;
+                  return ListTile(
+                    leading: Icon(
+                      sortBy.icon,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    title: Text(_getSortDisplayName(sortBy)),
+                    trailing: isSelected
+                        ? Icon(
+                            state.sortAscending
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
+                            color: AppColors.primary,
+                          )
+                        : null,
+                    selected: isSelected,
+                    selectedTileColor: AppColors.primaryLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onTap: () {
+                      cubit.sortCustomers(sortBy);
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+                const SizedBox(height: 16),
+              ],
             ),
-            const SizedBox(height: 16),
-            ...CustomerSortBy.values.map((sortBy) {
-              final isSelected = state.sortBy == sortBy;
-              return ListTile(
-                leading: Icon(
-                  sortBy.icon,
-                  color:
-                      isSelected ? AppColors.primary : AppColors.textSecondary,
-                ),
-                title: Text(_getSortDisplayName(sortBy)),
-                trailing: isSelected
-                    ? Icon(
-                        state.sortAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        color: AppColors.primary,
-                      )
-                    : null,
-                selected: isSelected,
-                selectedTileColor: AppColors.primaryLight,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onTap: () {
-                  cubit.sortCustomers(sortBy);
-                  Navigator.pop(context);
-                },
-              );
-            }),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
     );
@@ -409,13 +446,17 @@ class _CustomersListScreenState extends State<CustomersListScreen>
   String _getSortDisplayName(CustomerSortBy sortBy) {
     switch (sortBy) {
       case CustomerSortBy.name:
-        return 'නම අනුව';
+        return SiStrings.sortByNameLabel;
       case CustomerSortBy.balance:
-        return 'ශේෂය අනුව';
+        return SiStrings.sortByBalanceLabel;
       case CustomerSortBy.createdAt:
-        return 'එක් කළ දිනය අනුව';
-      default:
-        return sortBy.displayName;
+        return SiStrings.sortByDateAdded;
+      case CustomerSortBy.phone:
+        return SiStrings.isSinhala ? 'දුරකථන අංකය අනුව' : sortBy.displayName;
+      case CustomerSortBy.totalPurchases:
+        return SiStrings.isSinhala ? 'මුළු මිලදී ගැනීම් අනුව' : sortBy.displayName;
+      case CustomerSortBy.totalSales:
+        return SiStrings.isSinhala ? 'මුළු විකුණුම් අනුව' : sortBy.displayName;
     }
   }
 
@@ -438,7 +479,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'පෙරහන්', // Filters
+                  SiStrings.filtersTitle,
                   style: AppTextStyles.titleLarge.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -449,7 +490,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                       context.read<CustomersCubit>().clearFilters();
                       Navigator.pop(context);
                     },
-                    child: const Text('සියල්ල ඉවත් කරන්න'), // Clear All
+                    child: Text(SiStrings.clearAll),
                   ),
               ],
             ),
@@ -457,7 +498,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
             // Balance filters
             Text(
-              'ශේෂය', // Balance
+              SiStrings.balanceLabel,
               style: AppTextStyles.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -468,14 +509,14 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               runSpacing: 8,
               children: [
                 _FilterChip(
-                  label: 'ශේෂයක් සහිත', // With Balance
+                  label: SiStrings.withBalance,
                   isSelected: state.showOnlyWithBalance,
                   onTap: () {
                     context.read<CustomersCubit>().toggleShowOnlyWithBalance();
                   },
                 ),
                 _FilterChip(
-                  label: 'ලැබිය යුතු', // Receivable
+                  label: SiStrings.receivable,
                   isSelected: state.balanceFilter == BalanceType.receivable,
                   color: AppColors.success,
                   onTap: () {
@@ -485,7 +526,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   },
                 ),
                 _FilterChip(
-                  label: 'ගෙවිය යුතු', // Payable
+                  label: SiStrings.payable,
                   isSelected: state.balanceFilter == BalanceType.payable,
                   color: AppColors.error,
                   onTap: () {
@@ -500,7 +541,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
 
             // Customer type filters
             Text(
-              'ගනුදෙනුකරුගේ භූමිකාව', // Customer Role
+              SiStrings.customerRole,
               style: AppTextStyles.titleSmall.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -511,7 +552,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
               runSpacing: 8,
               children: [
                 _FilterChip(
-                  label: 'මිලදී ගන්නා (Buyer)',
+                  label: SiStrings.buyerLabel,
                   isSelected: state.customerTypeFilter == CustomerType.buyer,
                   onTap: () {
                     context
@@ -520,7 +561,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                   },
                 ),
                 _FilterChip(
-                  label: 'විකුණුම්කරු (Seller)',
+                  label: SiStrings.sellerLabel,
                   isSelected: state.customerTypeFilter == CustomerType.seller,
                   onTap: () {
                     context
@@ -543,7 +584,7 @@ class _CustomersListScreenState extends State<CustomersListScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('තහවුරු කරන්න'), // Apply Filters
+                child: Text(SiStrings.applyFilters),
               ),
             ),
             const SizedBox(height: 16),

@@ -70,7 +70,14 @@
       "Bash(wget -c https://dl.google.com/android/repository/sys-img/android/x86_64-30_r11.zip -O x86_64-30_r11.zip)",
       "Bash(echo \"WGET_EXIT=$?\")",
       "Bash(sed -i 's/hw.keyboard = no/hw.keyboard = yes/' ~/.android/avd/Sri_Lanka_Test.avd/config.ini)",
-      "Bash(kill 677503)"
+      "Bash(kill 677503)",
+      "Bash(timeout 100 flutter run -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:5000/api)",
+      "Bash(grep -rln \"customer\" client/lib/features/search)",
+      "Bash(grep -rn \"CustomerType.seller\\\\|type=seller\\\\|'seller'\" client/lib/features/buy client/lib/features/sell)",
+      "Bash(pkill -f \"flutter run\")",
+      "Bash(nohup flutter run -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:5000/api)",
+      "Bash(kill -9 95313 95316)",
+      "Bash(pkill -9 -f \"flutter run\")"
     ]
   }
 }

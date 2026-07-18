@@ -66,7 +66,7 @@ class _ReportsScreenState extends State<ReportsScreen>
             backgroundColor: AppColors.background,
             appBar: HAppBar(
               title: SiStrings.reports,
-              subtitle: SiStrings.isSinhala ? 'Reports' : 'වාර්තා',
+              subtitle: SiStrings.isSinhala ? 'වාර්තා' : 'Reports',
               showBack: false,
               onRefresh: () =>
                   context.read<ReportsCubit>().loadDashboardSummary(),
@@ -139,7 +139,7 @@ class _ReportsScreenState extends State<ReportsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'වාර්තා කාල පරිමාණය',
+            SiStrings.reportPeriod,
             style:
                 AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold),
           ),
@@ -148,7 +148,7 @@ class _ReportsScreenState extends State<ReportsScreen>
             children: [
               Expanded(
                 child: _buildDateField(
-                  label: 'ආරම්භ දිනය',
+                  label: SiStrings.startDate,
                   date: _startDate,
                   onTap: _selectStartDate,
                 ),
@@ -156,7 +156,7 @@ class _ReportsScreenState extends State<ReportsScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: _buildDateField(
-                  label: 'අවසාන දිනය',
+                  label: SiStrings.endDate,
                   date: _endDate,
                   onTap: _selectEndDate,
                 ),
@@ -193,7 +193,7 @@ class _ReportsScreenState extends State<ReportsScreen>
             Text(
               date != null
                   ? '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}'
-                  : 'තෝරන්න',
+                  : SiStrings.selectDate,
               style: AppTextStyles.bodyMedium
                   .copyWith(fontWeight: FontWeight.w600),
             ),
@@ -215,15 +215,15 @@ class _ReportsScreenState extends State<ReportsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'කාල පරිමාණ සාරාංශය',
+            SiStrings.periodSummary,
             style: AppTextStyles.titleMedium.copyWith(color: AppColors.white),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildRangeStat('මුළු ගණන', '$_rangeTransactions'),
-              _buildRangeStat('මුළු මුදල',
+              _buildRangeStat(SiStrings.totalCount, '$_rangeTransactions'),
+              _buildRangeStat(SiStrings.totalAmount,
                   'Rs. ${NumberFormatter.formatInteger(_rangeTotal.toDouble())}'),
             ],
           ),
@@ -325,7 +325,8 @@ class _ReportsScreenState extends State<ReportsScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('වාර්තා මුද්‍රණය: $startStr සිට $endStr දක්වා'),
+        content: Text(
+            '${SiStrings.printingReport}: ${SiStrings.fromDateToDate} $startStr ${SiStrings.toDate} $endStr'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -341,7 +342,8 @@ class _ReportsScreenState extends State<ReportsScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('PDF බාගත කරමින්: $startStr සිට $endStr දක්වා'),
+        content: Text(
+            '${SiStrings.downloadingPdf}: ${SiStrings.fromDateToDate} $startStr ${SiStrings.toDate} $endStr'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -357,7 +359,8 @@ class _ReportsScreenState extends State<ReportsScreen>
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Excel බාගත කරමින්: $startStr සිට $endStr දක්වා'),
+        content: Text(
+            '${SiStrings.downloadingExcel}: ${SiStrings.fromDateToDate} $startStr ${SiStrings.toDate} $endStr'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -385,12 +388,13 @@ class _ReportsScreenState extends State<ReportsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildStatItem(SiStrings.sell,
-                  'Rs. ${_format(today['totalSell'] ?? 0)}', Icons.trending_up),
+                  'Rs. ${_format(today['sellAmount'] ?? 0)}', Icons.trending_up),
               _buildStatItem(
                   SiStrings.buy,
-                  'Rs. ${_format(today['totalBuy'] ?? 0)}',
+                  'Rs. ${_format(today['buyAmount'] ?? 0)}',
                   Icons.trending_down),
-              _buildStatItem('ලාභය', 'Rs. ${_format(today['profit'] ?? 0)}',
+              _buildStatItem(SiStrings.profit,
+                  'Rs. ${_format(today['netAmount'] ?? 0)}',
                   Icons.account_balance_wallet),
             ],
           ),

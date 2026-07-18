@@ -155,6 +155,25 @@ exports.createMillingRecord = async (req, res) => {
       status = 'completed' // Default to completed for backward compatibility
     } = req.body
 
+    // Check for an existing record from the same client submission to
+    // prevent double-tap/retry duplicates from deducting stock twice.
+    if (clientId) {
+      const existing = await MillingRecord.findOne({
+        clientId,
+        ...req.companyFilter
+      }).session(session)
+
+      if (existing) {
+        await session.commitTransaction()
+        return successResponse(
+          res,
+          'Milling record already exists',
+          { millingRecord: existing, summary: existing.getSummary() },
+          200
+        )
+      }
+    }
+
     // Verify paddy item exists and has sufficient stock
     const paddyItem = await StockItem.findOne({
       _id: paddyItemId,

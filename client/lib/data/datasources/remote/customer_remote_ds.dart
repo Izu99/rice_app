@@ -170,18 +170,26 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     try {
       final cleanPhone = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
+      // `/customers/phone` isn't a real route — it used to fall through to
+      // `/customers/:id` (id="phone"), which validateObjectId rejects, so
+      // this always failed and the real-time duplicate check silently
+      // never found remote matches. Use the working check-phone endpoint.
       final either = await apiService.get(
-        ApiEndpoints.customerByPhone,
-        queryParameters: {'phone': cleanPhone},
+        '${ApiEndpoints.customerCheckPhone}/$cleanPhone',
       );
 
       return either.fold(
         (failure) => throw _mapFailureToException(failure),
         (response) {
-          if (response.success && response.data != null) {
-            // Check for nested 'customer' key for consistency
-            final customerJson = response.data['customer'] ?? response.data;
+          if (response.success &&
+              response.data != null &&
+              response.data['exists'] == true) {
+            final customerJson = response.data['customer'];
             return CustomerModel.fromJson(customerJson as Map<String, dynamic>);
+          }
+
+          if (response.success) {
+            return null;
           }
 
           if (response.statusCode == 404) {

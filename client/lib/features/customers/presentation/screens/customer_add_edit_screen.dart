@@ -77,22 +77,37 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     _phoneController.addListener(_onPhoneChanged);
   }
 
-  void _loadCustomerData() {
+  Future<void> _loadCustomerData() async {
     final cubit = context.read<CustomersCubit>();
-    final customer = cubit.state.customers.firstWhere(
-      (c) => c.id == _currentEditingId,
-      orElse: () => CustomerEntity.empty(),
-    );
 
-    if (customer.isNotEmpty) {
-      _nameController.text = customer.name;
-      _phoneController.text = customer.phone;
-      _originalPhone = customer.phone;
-      _secondaryPhoneController.text = customer.secondaryPhone ?? '';
-      _addressController.text = customer.address ?? '';
-      _cityController.text = customer.city ?? '';
-      _notesController.text = customer.notes ?? '';
-      _selectedType = customer.customerType;
+    // Prefer whatever's already in memory (the list, or a previously loaded
+    // detail) to avoid a network round-trip.
+    CustomerEntity? customer = cubit.state.customers
+        .where((c) => c.id == _currentEditingId)
+        .firstOrNull;
+    customer ??= cubit.state.selectedCustomer?.id == _currentEditingId
+        ? cubit.state.selectedCustomer
+        : null;
+
+    // Neither the list nor the detail cache had it (e.g. deep link, or the
+    // list hadn't finished loading yet) — fetch it directly so the form
+    // isn't left blank.
+    if (customer == null) {
+      await cubit.loadCustomerDetail(_currentEditingId!);
+      customer = cubit.state.selectedCustomer;
+    }
+
+    if (customer != null && customer.isNotEmpty && mounted) {
+      setState(() {
+        _nameController.text = customer!.name;
+        _phoneController.text = customer.phone;
+        _originalPhone = customer.phone;
+        _secondaryPhoneController.text = customer.secondaryPhone ?? '';
+        _addressController.text = customer.address ?? '';
+        _cityController.text = customer.city ?? '';
+        _notesController.text = customer.notes ?? '';
+        _selectedType = customer.customerType;
+      });
     }
   }
 
@@ -110,12 +125,29 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     super.dispose();
   }
 
+  /// Normalizes Sri Lankan phone numbers to a canonical "0XXXXXXXXX" form so
+  /// "0771234567", "771234567" and "+94771234567" all compare equal — mirrors
+  /// server/src/utils/phone.js. Without this, typing a number without the
+  /// leading zero silently misses an existing duplicate.
+  String _normalizePhone(String phone) {
+    var digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('94') && digits.length == 11) {
+      digits = '0${digits.substring(2)}';
+    } else if (digits.length == 9 && !digits.startsWith('0')) {
+      digits = '0$digits';
+    }
+    return digits;
+  }
+
   void _onPhoneChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
     final phone = _phoneController.text.trim();
 
-    if (phone.isEmpty || (_isEditing && phone == _originalPhone)) {
+    if (phone.isEmpty ||
+        (_isEditing &&
+            _originalPhone != null &&
+            _normalizePhone(phone) == _normalizePhone(_originalPhone!))) {
       setState(() {
         _isPhoneAvailable = true;
         _phoneStatusMessage = null;
@@ -144,8 +176,11 @@ class _CustomerAddEditScreenState extends State<CustomerAddEditScreen>
     _debounce = Timer(const Duration(milliseconds: 600), () async {
       final cubit = context.read<CustomersCubit>();
 
+      final normalizedPhone = _normalizePhone(phone);
       final existingLocally = cubit.state.customers
-          .where((c) => c.phone == phone && c.id != _currentEditingId)
+          .where((c) =>
+              _normalizePhone(c.phone) == normalizedPhone &&
+              c.id != _currentEditingId)
           .firstOrNull;
 
       if (existingLocally != null) {
