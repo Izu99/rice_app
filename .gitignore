@@ -1,10 +1,40 @@
-# Flutter/Dart build output for app
-client/app/build/
+# ---- Secrets / environment ----
+.env
+.env.*
+!.env.example
 
-# Node.js
+# ---- Node.js ----
 node_modules/
 *.log
+npm-debug.log*
 
-# Temp files created by Gemini CLI / Node compile cache (encoded Windows paths)
+# ---- Flutter / Dart build output ----
+client/build/
+client/app/build/
+client/.dart_tool/
+client/android/build/
+client/android/app/build/
+client/android/.gradle/
+client/ios/Pods/
+client/.flutter-plugins
+client/.flutter-plugins-dependencies
+
+# ---- Build artifacts (never commit these) ----
+*.apk
+*.aab
+*.ipa
+*.aar
+*.jks
+*.keystore
+
+# ---- Partial downloads ----
+*.aria2
+android-ndk-*.zip
+
+# ---- Tool output dumps ----
+analyze_output.txt
+**/reports/problems/problems-report.html
+
+# ---- Temp files from Gemini CLI / encoded Windows paths ----
 C*/
 gemini-client-error-*.json
