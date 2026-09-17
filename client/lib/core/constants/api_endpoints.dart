@@ -4,27 +4,23 @@ class ApiEndpoints {
 
   // ==================== BASE URL ====================
 
-  /// Production base URL
-  static const String prodBaseUrl = 'https://api.ricemill.example.com/api/v1';
+  /// Local dev server, reached from an Android phone on the same Wi-Fi.
+  /// 192.168.146.13 is this machine's LAN IP - re-check with `hostname -I`
+  /// if your router hands out a different address.
+  static const String lanBaseUrl = 'http://192.168.146.13:5000/api';
 
-  /// Development base URL
+  /// Local dev server, reached from the Android emulator.
+  static const String emulatorBaseUrl = 'http://10.0.2.2:5000/api';
+
+  /// Local dev server, reached from desktop / Chrome builds.
   static const String devBaseUrl = 'http://127.0.0.1:5000/api';
 
-  /// VPS base URL
-  static const String vpsBaseUrl = 'http://4.1.8.2/rice/api';
-
-  /// Staging base URL
-  static const String stagingBaseUrl =
-      'https://staging-api.ricemill.example.com/api/v1';
-
-  /// Production base URL (Live)
+  /// Production VPS. Currently stopped - do not point the app here.
   static const String liveBaseUrl = 'http://82.25.180.20/rice/api';
 
-  /// Current base URL (change based on environment)
-  // For production, we use the Live VPS IP.
-  // For local development, we use devBaseUrl.
-  // Note: For Android emulator, use 'http://10.0.2.2:5000/api'
-  static const String baseUrl = liveBaseUrl;
+  /// Current base URL.
+  /// Local-only setup: physical phone on the same Wi-Fi as this machine.
+  static const String baseUrl = lanBaseUrl;
 
   // ==================== AUTH ====================
 

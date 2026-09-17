@@ -10,7 +10,7 @@
     "test:watch": "jest --watch",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
-    "seed:admin": "node src/seeders/superAdminSeeder.js",
+    "seed:admin": "node src/seeders/adminSeeder.js",
     "db:seed": "npm run seed:admin",
     "build": "echo 'Building... No transpilation required for Node.js. Ready for deployment.'",
     "pm2:start": "pm2 start ecosystem.config.js",

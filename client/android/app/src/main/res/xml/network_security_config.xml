@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Allow cleartext only for local dev targets; production must use HTTPS -->
+    <!--
+      Cleartext HTTP is allowed only for local development targets.
+      Android blocks plain HTTP by default, so the dev server must be listed here
+      or every API call fails with a cleartext-not-permitted error.
+
+      192.168.146.13 is this machine's LAN IP, used when running on a physical
+      phone over Wi-Fi. If your router assigns a different address, update it here
+      AND in lib/core/constants/api_endpoints.dart.
+    -->
     <domain-config cleartextTrafficAllowed="true">
+        <domain includeSubdomains="true">192.168.146.13</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">localhost</domain>
     </domain-config>
 </network-security-config>
